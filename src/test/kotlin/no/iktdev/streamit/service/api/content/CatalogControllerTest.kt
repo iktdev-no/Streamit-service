@@ -1,8 +1,10 @@
 package no.iktdev.streamit.service.api.content
 
+import no.iktdev.streamit.library.db.tables.content.CatalogTable
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.shared.classes.Catalog
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -20,7 +22,15 @@ class CatalogControllerTest: TestBaseWithDatabase() {
 
     @BeforeAll
     fun insertCatalogContent() {
-
+        transaction {
+            CatalogTable.insertMovie(
+                title = "Potetmonsteret",
+                collection = "Potetmonsteret",
+                cover = "Potetmonsteret.jpg",
+                genres = null,
+                videoFile = "Potetmonsteret.mp4"
+            )
+        }
     }
 
     @Test
