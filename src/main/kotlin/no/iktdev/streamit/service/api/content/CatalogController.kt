@@ -3,7 +3,6 @@ package no.iktdev.streamit.service.api.content
 import mu.KotlinLogging
 import no.iktdev.streamit.library.db.tables.content.*
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.Env
 import no.iktdev.streamit.shared.classes.Catalog
 import no.iktdev.streamit.shared.classes.GenreCatalog
 import no.iktdev.streamit.shared.classes.Movie
@@ -14,11 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
-@RequestMapping("/catalog")
+@RequestMapping("/api/catalog")
 class CatalogController {
     val log = KotlinLogging.logger {}
 
-    @GetMapping("/")
+    @GetMapping
     fun all(): List<Catalog> {
         log.info { "Processing '/catalog'" }
         return CatalogTable.executeGetAll()

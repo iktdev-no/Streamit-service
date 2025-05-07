@@ -8,19 +8,18 @@ import no.iktdev.streamit.service.assertHttpOk
 import no.iktdev.streamit.service.assertJson
 import no.iktdev.streamit.service.simpleGet
 import no.iktdev.streamit.shared.classes.Catalog
-import no.iktdev.streamit.shared.classes.GenreCatalog
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.core.ParameterizedTypeReference
 
-class CatalogControllerTest: TestBaseWithDatabase() {
+class SearchControllerTest: TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
-
 
 
     @BeforeAll
@@ -64,8 +63,8 @@ class CatalogControllerTest: TestBaseWithDatabase() {
     }
 
     @Test
-    fun `Catalog should return a list of entries`() {
-        val response = restTemplate.simpleGet("/api/open/catalog",
+    fun `Search should return single item`() {
+        val response = restTemplate.simpleGet("/api/open/search/Potet",
             object : ParameterizedTypeReference<List<Catalog>>() {}
         )
         assertHttpOk(response)
@@ -80,61 +79,6 @@ class CatalogControllerTest: TestBaseWithDatabase() {
                         "cover": "Potetmonsteret.jpg"
                     }
                 ]
-        """.trimIndent(), response.body.first().asList())
+        """.trimIndent(), response.body)
     }
-
-    @Test
-    fun `Catalog should return a list of movies`() {
-        val response = restTemplate.simpleGet("/api/open/catalog/movie",
-            object : ParameterizedTypeReference<List<Catalog>>() {}
-        )
-        assertHttpOk(response)
-        assertJson(
-            //language=json
-            """
-                [
-                    {
-                        "id": 1,
-                        "title": "Potetmonsteret",
-                        "collection": "Potetmonsteret",
-                        "cover": "Potetmonsteret.jpg"
-                    }
-                ]
-        """.trimIndent(), response.body.first().asList())
-    }
-
-    @Test
-    fun `Catalog should return a list of genre grouped elements`() {
-        val response = restTemplate.simpleGet("/api/open/catalog/genred",
-            object : ParameterizedTypeReference<List<GenreCatalog>>() {}
-        )
-        assertHttpOk(response)
-        assertJson(
-            //language=json
-            """
-                [
-                  {
-                    "genre": {
-                      "id": 1,
-                      "genre": "Test"
-                    },
-                    "catalog": [
-                        {
-                            "id": 1,
-                            "title": "Potetmonsteret",
-                            "collection": "Potetmonsteret",
-                            "cover": "Potetmonsteret.jpg"
-                        } 
-                    ]
-                  }
-                ]
-        """.trimIndent(), response.body.map { it.apply {
-            val new = it.catalog.first()
-            this.catalog.clear()
-                this.catalog.add(new)
-            } })
-    }
-
-
-
 }

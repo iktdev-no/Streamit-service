@@ -2,6 +2,7 @@ package no.iktdev.streamit.service
 
 import mu.KotlinLogging
 import no.iktdev.streamit.shared.*
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
+@Order(1)
 class AuthorizationInterceptor: HandlerInterceptor, Authentication() {
     val log = KotlinLogging.logger {}
 
@@ -21,27 +23,27 @@ class AuthorizationInterceptor: HandlerInterceptor, Authentication() {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         val uri = request.requestURI;
-        val mode = if (uri.startsWith("/api")) uri.substringAfter("/api")
-            else if (uri.startsWith("/stream")) uri.substringAfter("/stream")
-        else run {
-            response.status = HttpStatus.UNPROCESSABLE_ENTITY.value()
-            log.warn { "Got no clue with what to do with $uri, does not match stream or api" }
-            return false
-        }
-        if (mode.startsWith("/open")) {
-            return true
-        } else {
-            val mode = getAuthenticationDefined(request, handler)
-            if (mode == Mode.None) return true
-            val token = request.getAuthorization() ?: run {
-                response.status = HttpStatus.UNAUTHORIZED.value()
+        val mode = request.getAttribute("internalAccessMode")
+        when (mode) {
+            "open" -> return true
+            "secure" -> run {
+                val mode = getAuthenticationDefined(request, handler)
+                if (mode == Mode.None) return true
+                val token = request.getAuthorization() ?: run {
+                    response.status = HttpStatus.UNAUTHORIZED.value()
+                    return false
+                }
+                if (!isTokenValid(token)) {
+                    response.status = HttpStatus.BAD_REQUEST.value()
+                    return false
+                }
+                return true
+            }
+            else -> run {
+                response.status = HttpStatus.UNPROCESSABLE_ENTITY.value()
+                log.warn { "Got no clue with what to do with $uri, does not match stream or api" }
                 return false
             }
-            if (!isTokenValid(token)) {
-                response.status = HttpStatus.BAD_REQUEST.value()
-                return false
-            }
-            return true
         }
     }
 

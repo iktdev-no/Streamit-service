@@ -1,6 +1,7 @@
 package no.iktdev.streamit.service
 
 import mu.KotlinLogging
+import javax.servlet.Filter
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.streamit.library.db.datasource.DataSource
 import no.iktdev.streamit.library.db.datasource.MySqlDataSource
@@ -31,10 +32,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerTypePredicate
+import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import javax.servlet.FilterChain
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletRequestWrapper
+import javax.servlet.http.HttpServletResponse
 
 val log = KotlinLogging.logger {}
 
@@ -104,6 +116,39 @@ class InterceptorConfiguration(
         super.configurePathMatch(configurer)
         configurer.addPathPrefix("/api/**", HandlerTypePredicate.forAnnotation(ApiRestController::class.java))
         configurer.addPathPrefix("/stream/**", HandlerTypePredicate.forAnnotation(ContentRestController::class.java))
+    }
+}
+
+@Component
+@Order(2)
+class PathDefiner : Filter {
+    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+        val httpRequest = request as HttpServletRequest
+        val uri = httpRequest.requestURI
+
+        val modePart = if (uri.startsWith("/api")) uri.substringAfter("/api")
+        else if (uri.startsWith("/stream")) uri.substringAfter("/stream") else uri
+        val mode = modePart.substringAfter("/").substringBefore("/")
+
+        request.removeAttribute("internalAccessMode")
+        request.setAttribute("internalAccessMode", mode)
+
+        val internalPath = if (uri.startsWith("/api")) {
+            val stripped = uri.removePrefix("/api").removePrefix("/secure").removePrefix("/open")
+            "/api$stripped"
+        } else if (uri.startsWith("/stream")) {
+            val stripped = uri.removePrefix("/stream").removePrefix("/secure").removePrefix("/open")
+            "/stream$stripped"
+        } else uri
+
+
+        // Opprett en ny request med den modifiserte pathen
+        val modifiedRequest = object : HttpServletRequestWrapper(httpRequest) {
+            override fun getRequestURI(): String {
+                return internalPath
+            }
+        }
+        chain.doFilter(modifiedRequest, response)
     }
 }
 

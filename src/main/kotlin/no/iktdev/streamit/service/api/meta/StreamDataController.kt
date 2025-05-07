@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
  *
  * **/
 
-@RestController
 class StreamDataController {
 
     @GetMapping("/data/stream/{file}")

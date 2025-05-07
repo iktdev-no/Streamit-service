@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ApiRestController
-@RequestMapping("/progress")
+@RequestMapping("/api/progress")
 class ViewProgressController {
 
     @RequiresAuthentication(Mode.Soft)
