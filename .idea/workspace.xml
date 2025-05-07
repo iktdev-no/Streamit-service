@@ -4,8 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="71432fc3-2352-41f6-93b6-cd2c8ae2b864" name="Changes" comment="Init">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="71432fc3-2352-41f6-93b6-cd2c8ae2b864" name="Changes" comment="DB Test">
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestUtils.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/GenreControllerTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/SearchControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/classes/Genre.kt" beforeDir="false" afterPath="$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/classes/Genre.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt" beforeDir="false" afterPath="$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/Application.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/CatalogController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/CatalogController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/GenreController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/GenreController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SubtitleController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SubtitleController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SummaryController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SummaryController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/ViewProgressController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/ViewProgressController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/CastErrorController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/CastErrorController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/DeviceRegistrationController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/DeviceRegistrationController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/NotificationController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/NotificationController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/StreamDataController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/meta/StreamDataController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/user/UserController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/user/UserController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestBase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestBase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestBaseWithDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestBaseWithDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationControllerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,8 +68,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
-        <option value="Kotlin File" />
         <option value="Kotlin Class" />
+        <option value="Kotlin File" />
         <option value="Kotlin JUnit5 Test Class" />
       </list>
     </option>
@@ -66,20 +90,30 @@
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Gradle.AuthenticationControllerTest.executor": "Run",
     "Gradle.AuthenticationControllerTest.open accessible endpoint should return OK.executor": "Debug",
-    "Gradle.AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT.executor": "Run",
+    "Gradle.AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT.executor": "Debug",
     "Gradle.AuthenticationControllerTest.secure accessible endpoint should return OK with valid JWT.executor": "Run",
     "Gradle.AuthenticationControllerTest.secure validate endpoint should return 401 without JWT.executor": "Run",
-    "Gradle.CatalogControllerTest.open accessible endpoint should return OK.executor": "Debug",
+    "Gradle.CatalogControllerTest.Catalog should return a list of entries.executor": "Run",
+    "Gradle.CatalogControllerTest.Catalog should return a list of genre grouped elements.executor": "Run",
+    "Gradle.CatalogControllerTest.Catalog should return a list of movies.executor": "Run",
+    "Gradle.CatalogControllerTest.executor": "Run",
+    "Gradle.CatalogControllerTest.open accessible endpoint should return OK.executor": "Run",
     "Gradle.Download Sources.executor": "Run",
+    "Gradle.GenreControllerTest.Genres should return a list of entries.executor": "Run",
+    "Gradle.GenreControllerTest.executor": "Run",
     "Gradle.MainControllerTest.executor": "Run",
     "Gradle.MainControllerTest.open heartbeat OK.executor": "Run",
     "Gradle.MainControllerTest.open index OK.executor": "Run",
     "Gradle.RestControllerBeanLoadTest.executor": "Run",
+    "Gradle.SearchControllerTest.Search should return single item.executor": "Debug",
+    "Gradle.SearchControllerTest.executor": "Debug",
     "Gradle.TestBase.executor": "Run",
     "Gradle.Tests in 'no.iktdev.streamit.service'.executor": "Run",
+    "Gradle.Tests in 'no.iktdev.streamit.service.api.content'.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
@@ -126,8 +160,8 @@
       <recent name="no.iktdev.streamit.shared.database" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.CatalogControllerTest.open accessible endpoint should return OK">
-    <configuration name="AuthenticationControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT">
+    <configuration name="AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -140,7 +174,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;no.iktdev.streamit.service.api.authentication.AuthenticationControllerTest&quot;" />
+            <option value="&quot;no.iktdev.streamit.service.api.authentication.AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -151,7 +185,7 @@
       <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="AuthenticationControllerTest.secure accessible endpoint should return OK with valid JWT" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="SearchControllerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -164,7 +198,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;no.iktdev.streamit.service.api.authentication.AuthenticationControllerTest.secure accessible endpoint should return OK with valid JWT&quot;" />
+            <option value="&quot;no.iktdev.streamit.service.api.content.SearchControllerTest&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -175,7 +209,7 @@
       <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="CatalogControllerTest.open accessible endpoint should return OK" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="SearchControllerTest.Search should return single item" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -188,31 +222,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;no.iktdev.streamit.service.api.content.CatalogControllerTest.open accessible endpoint should return OK&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="TestBase" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.streamit.service.TestBase&quot;" />
+            <option value="&quot;no.iktdev.streamit.service.api.content.SearchControllerTest.Search should return single item&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -247,13 +257,37 @@
       <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="Tests in 'no.iktdev.streamit.service.api.content'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;no.iktdev.streamit.service.api.content.*&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.CatalogControllerTest.open accessible endpoint should return OK" />
-        <item itemvalue="Gradle.AuthenticationControllerTest.secure accessible endpoint should return OK with valid JWT" />
-        <item itemvalue="Gradle.TestBase" />
+        <item itemvalue="Gradle.AuthenticationControllerTest.secure accessible endpoint should return BAD Request with invalid JWT" />
         <item itemvalue="Gradle.Tests in 'no.iktdev.streamit.service'" />
-        <item itemvalue="Gradle.AuthenticationControllerTest" />
+        <item itemvalue="Gradle.SearchControllerTest" />
+        <item itemvalue="Gradle.Tests in 'no.iktdev.streamit.service.api.content'" />
+        <item itemvalue="Gradle.SearchControllerTest.Search should return single item" />
       </list>
     </recent_temporary>
   </component>
@@ -274,12 +308,50 @@
       <option name="project" value="LOCAL" />
       <updated>1746573082874</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Init ignore">
+      <option name="closed" value="true" />
+      <created>1746573138200</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1746573138200</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Code init">
+      <option name="closed" value="true" />
+      <created>1746573149228</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1746573149228</updated>
+    </task>
+    <task id="LOCAL-00004" summary="DB Test">
+      <option name="closed" value="true" />
+      <created>1746575054416</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1746575054416</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Init" />
-    <option name="LAST_COMMIT_MESSAGE" value="Init" />
+    <MESSAGE value="Init ignore" />
+    <MESSAGE value="Code init" />
+    <MESSAGE value="DB Test" />
+    <option name="LAST_COMMIT_MESSAGE" value="DB Test" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -291,41 +363,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>22</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>31</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>33</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>48</line>
+          <line>50</line>
           <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>39</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>35</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>34</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/GeneralController.kt</url>
@@ -386,28 +425,13 @@
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt</url>
-          <line>17</line>
-          <option name="timeStamp" value="29" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt</url>
-          <line>23</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationControllerTest.kt</url>
           <line>49</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>30</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>57</line>
+          <line>69</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -417,11 +441,6 @@
           <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/authentication/AuthenticationControllerTest.kt</url>
           <line>43</line>
           <option name="timeStamp" value="34" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
-          <line>40</line>
-          <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/Authentication.kt</url>
@@ -463,21 +482,151 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt</url>
-          <line>38</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt</url>
-          <line>31</line>
+          <line>66</line>
           <option name="timeStamp" value="48" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestBaseWithDatabase.kt</url>
-          <line>25</line>
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt</url>
+          <line>110</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt</url>
+          <line>111</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt</url>
+          <line>17</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
-          <option name="timeStamp" value="51" />
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt</url>
+          <line>18</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt</url>
+          <line>19</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/libs/shared/src/main/kotlin/no/iktdev/streamit/shared/database/queries/Genres.kt</url>
+          <line>21</line>
+          <option name="timeStamp" value="60" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/CatalogControllerTest.kt</url>
+          <line>71</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestUtils.kt</url>
+          <line>34</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/TestUtils.kt</url>
+          <line>35</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/SearchControllerTest.kt</url>
+          <line>70</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt</url>
+          <line>23</line>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt</url>
+          <line>23</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt</url>
+          <line>22</line>
+          <option name="timeStamp" value="75" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/Application.kt</url>
+          <line>150</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/Application.kt</url>
+          <line>133</line>
+          <option name="timeStamp" value="86" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/GeneralController.kt</url>
+          <line>17</line>
+          <option name="timeStamp" value="87" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
+          <line>27</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="88" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt</url>
+          <line>28</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/test/kotlin/no/iktdev/streamit/service/api/content/SearchControllerTest.kt</url>
+          <line>69</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/Application.kt</url>
+          <line>145</line>
+          <option name="timeStamp" value="91" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/api/content/SearchController.kt</url>
+          <line>34</line>
+          <option name="timeStamp" value="92" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
+          <line>28</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="93" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
+          <line>31</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="94" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
+          <line>35</line>
+          <option name="timeStamp" value="95" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/no/iktdev/streamit/service/AuthorizationInterceptor.kt</url>
+          <line>36</line>
+          <option name="timeStamp" value="96" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

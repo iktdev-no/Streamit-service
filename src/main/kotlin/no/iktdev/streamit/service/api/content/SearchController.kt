@@ -14,24 +14,22 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ApiRestController
-@RequestMapping("/search")
+@RequestMapping("/api/search")
 class SearchController {
 
     @RequiresAuthentication(Mode.Soft)
     @GetMapping("/movie/{keyword}")
-    open fun movieSearch(@PathVariable keyword: String?): List<Catalog> {
+    fun movieSearch(@PathVariable keyword: String? = null): List<Catalog> {
         return if (!keyword.isNullOrEmpty())
             CatalogTable.executeSearchForMovie(keyword) else emptyList()
     }
 
-    @RequiresAuthentication(Mode.Soft)
     @GetMapping("/serie/{keyword}")
     open fun serieSearch(@PathVariable keyword: String?): List<Catalog> {
         return if (!keyword.isNullOrEmpty())
             CatalogTable.executeSearchForSerie(keyword) else emptyList()
     }
 
-    @RequiresAuthentication(Mode.Soft)
     @GetMapping("/{keyword}")
     open fun search(@PathVariable keyword: String?): List<Catalog> {
         return if (!keyword.isNullOrEmpty())

@@ -26,4 +26,5 @@ class TestBase {
         val baseUrl = URI("http://localhost:$port")
         return TestRestTemplate(RestTemplateBuilder().rootUri(baseUrl.toString()))
     }
+
 }

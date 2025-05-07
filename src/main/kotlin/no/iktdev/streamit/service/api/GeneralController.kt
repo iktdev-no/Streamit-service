@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletRequest
 
 @ApiRestController
-@RequestMapping(path = ["/"])
+@RequestMapping("/api")
 class GeneralController {
 
     @GetMapping("/heartbeat")
@@ -19,7 +19,7 @@ class GeneralController {
     }
 
     @RequiresAuthentication(Mode.Strict)
-    @GetMapping(value = ["/"])
+    @GetMapping()
     fun main(request: HttpServletRequest? = null): ResponseEntity<String> {
         return ResponseEntity.ok().body(null)
     }

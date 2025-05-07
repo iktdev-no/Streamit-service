@@ -3,15 +3,14 @@ package no.iktdev.streamit.shared.database.queries
 import no.iktdev.streamit.library.db.tables.content.CatalogTable
 import no.iktdev.streamit.shared.classes.Genre
 import no.iktdev.streamit.library.db.tables.content.GenreTable
-import no.iktdev.streamit.shared.classes.Catalog
 import no.iktdev.streamit.shared.classes.GenreCatalog
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun GenreTable.executeSelectAll(): List<Genre> {
+fun GenreTable.executeGetAll(): List<Genre> {
     return transaction {
-        this@executeSelectAll.selectAll().mapNotNull { Genre.fromRow(it) }
+        this@executeGetAll.selectAll().mapNotNull { Genre.fromRow(it) }
     }
 }
 
@@ -30,7 +29,7 @@ fun GenreTable.executeGetByIds(ids: List<Int>): List<Genre> {
 }
 
 fun GenreTable.executeGetCatalogGroupedByGenre(): List<GenreCatalog>  {
-    val genres = GenreTable.executeSelectAll().associate { it.id to GenreCatalog(it) }
+    val genres = GenreTable.executeGetAll().associate { it.id to GenreCatalog(it) }
     CatalogTable.executeFindWithGenres().forEach { catalog ->
         catalog.genres?.split(",")?.mapNotNull { gid -> gid.toIntOrNull() }?.forEach { genreId ->
             genres[genreId]?.catalog?.add(catalog)

@@ -74,7 +74,7 @@ class AuthenticationControllerTest: TestBase() {
         })
 
         val response = restTemplate.exchange(
-            "/api/secure/accessible", // 👈 bare path
+            "/api/secure/auth/accessible", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java

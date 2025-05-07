@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @ApiRestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 class UserController {
 
     @RequiresAuthentication(Mode.Soft)
