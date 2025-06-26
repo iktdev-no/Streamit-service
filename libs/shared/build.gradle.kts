@@ -9,6 +9,7 @@ group = "no.iktdev.streamit.shared"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = uri("https://reposilite.iktdev.no/releases")
@@ -18,7 +19,7 @@ repositories {
     }
 }
 
-val exposedVersion = "0.44.0"
+val exposedVersion = "0.61.0"
 
 
 dependencies {
@@ -45,7 +46,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:0.5.13-SNAPSHOT")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-internal3")
 
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

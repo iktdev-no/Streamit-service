@@ -5,10 +5,13 @@ import no.iktdev.streamit.shared.classes.Serie
 import no.iktdev.streamit.library.db.tables.content.ProgressTable
 import no.iktdev.streamit.library.db.tables.content.SerieTable
 import no.iktdev.streamit.shared.Env
+import no.iktdev.streamit.shared.classes.Catalog
+import no.iktdev.streamit.shared.classes.ContentType
 import no.iktdev.streamit.shared.classes.Episode
 import no.iktdev.streamit.shared.classes.ProgressTableDto
 import no.iktdev.streamit.shared.database.toEpochSeconds
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.transactions.transaction
 
 private fun ResultRow.isSerie(): Boolean {
@@ -20,57 +23,57 @@ private fun ResultRow.isMovie(): Boolean {
 }
 
 
-fun ProgressTable.executeGetAllOn(userId: String) = transaction {
+fun ProgressTable.executeGetAllOn(userId: String) =
     ProgressTable.selectRecords(userId)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetMoviesOn(userId: String) = transaction {
+
+fun ProgressTable.executeGetMoviesOn(userId: String) =
     ProgressTable.selectMovieRecords(userId)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetSeriesOn(userId: String) = transaction {
+
+fun ProgressTable.executeGetSeriesOn(userId: String) =
     ProgressTable.selectSerieRecords(userId)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetSeriesAfterOn(userId: String, time: Int) = transaction {
+
+fun ProgressTable.executeGetSeriesAfterOn(userId: String, time: Int) =
     ProgressTable.selectSerieRecordsAfter(userId, time)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetMoviesAfterOn(userId: String, time: Int) = transaction {
+
+fun ProgressTable.executeGetMoviesAfterOn(userId: String, time: Int) =
     ProgressTable.selectMovieRecordsAfter(userId, time)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetMovieWithTitleOn(userId: String, title: String) = transaction {
+
+fun ProgressTable.executeGetMovieWithTitleOn(userId: String, title: String) =
     ProgressTable.selectMovieRecordOnTitle(userId, title)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
+        .map { ProgressTableDto.fromTable(it) }
         .singleOrNull()
-}
 
-fun ProgressTable.executeGetSeriesWithCollectionOn(userId: String, collection: String) = transaction {
+
+fun ProgressTable.executeGetSeriesWithCollectionOn(userId: String, collection: String) =
     ProgressTable.selectSerieRecordOnCollection(userId, collection)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
+        .map { ProgressTableDto.fromTable(it) }
 
-fun ProgressTable.executeGetLastEpisodeOn(userId: String) = transaction {
-    ProgressTable.selectLastEpisode(userId, Env.continueWatch)
-        .mapNotNull { ProgressTableDto.fromRow(it) }
-}
 
 fun ProgressTable.executeUpsertMovieOn(userId: String, movie: Movie) = transaction {
-    ProgressTable.upsertMovieRecord(
-        userId = userId,
-        title = movie.title,
-        collection = movie.collection,
-        progress = movie.progress,
-        duration = movie.duration,
-        played = movie.played,
-        videoFile = movie.video
-    )
+    try {
+        ProgressTable.upsertMovieRecord(
+            userId = userId,
+            title = movie.title,
+            collection = movie.collection,
+            progress = movie.progress.toInt(),
+            duration = movie.duration.toInt(),
+            played = movie.played.toInt(),
+            videoFile = movie.video
+        )
+    } catch (e: Exception) {
+        e.printStackTrace()
+        throw e
+    }
 }
 
 fun ProgressTable.executeUpsertSerieOn(userId: String, serie: Serie) = transaction {
@@ -90,22 +93,46 @@ fun ProgressTable.executeUpsertSerieOn(userId: String, serie: Serie) = transacti
     }
 }
 
-fun ProgressTable.executeResumeOrNext(userId: String) = transaction {
-    ProgressTable.selectResumeOrNext(userId, Env.continueWatch)
-        .groupBy { it[SerieTable.collection] }
+fun ProgressTable.executeResumeOrNextEpisode(userId: String) = transaction {
+    val resume = ProgressTable.selectResumeEpisode(userId, Env.continueWatch, 10)
+        .groupBy { it -> it[SerieTable.collection] }
         .mapNotNull { it ->
-            Serie.basedOn(it.value.first()).apply {
-                episodes = it.value.map {
+            it.value.firstOrNull()?.let {
+                Episode(
+                    season =  it[SerieTable.season],
+                    episode = it[SerieTable.episode],
+                    title = it[SerieTable.title],
+                    video = it[SerieTable.video],
+                    progress = it[ProgressTable.progress],
+                    duration = it[ProgressTable.duration],
+                    played = it[ProgressTable.played]?.toEpochSeconds()?.toInt() ?: 0
+                )
+            }?.let { episode ->
+                Serie.basedOn(it.value.first()).apply {
+                    episodes = listOf(episode)
+                }
+            }
+        }
+
+    val completed = ProgressTable.selectCompletedEpisodes(userId, Env.continueWatch, 10)
+        .groupBy { it -> it[SerieTable.collection] }
+        .mapNotNull { it ->
+            val serie = Serie.basedOn(it.value.first())
+            val r = it.value.first()
+            val nextEpisode = ProgressTable.selectNextEpisode(serie.collection, r[SerieTable.season], r[SerieTable.episode])
+                .map { it ->
                     Episode(
                         season =  it[SerieTable.season],
                         episode = it[SerieTable.episode],
                         title = it[SerieTable.title],
-                        video = it[SerieTable.video],
-                        progress = it[ProgressTable.progress],
-                        duration = it[ProgressTable.duration],
-                        played = it[ProgressTable.played]?.toEpochSeconds()?.toInt() ?: 0
+                        video = it[SerieTable.video]
                     )
                 }
+
+            serie.apply {
+                this.episodes = nextEpisode
             }
         }
+
+    resume + completed
 }

@@ -6,6 +6,7 @@ import no.iktdev.streamit.shared.classes.AudioData
 import no.iktdev.streamit.shared.classes.StreamData
 import no.iktdev.streamit.shared.classes.VideoData
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -31,7 +32,7 @@ class StreamDataController {
         var audioData: AudioData? = null
         if (file.isNullOrEmpty()) return null
         transaction {
-            val data = DataAudioTable.select { DataAudioTable.file eq file }.singleOrNull()
+            val data = DataAudioTable.selectAll().where { DataAudioTable.file eq file }.singleOrNull()
             audioData = data?.let { AudioData.Companion.fromRow(it) }
         }
         return audioData
@@ -43,7 +44,7 @@ class StreamDataController {
         var videodata: VideoData? = null
         if (file.isNullOrEmpty()) return null
         transaction {
-            val data = DataVideoTable.select { DataVideoTable.file eq file }.singleOrNull()
+            val data = DataVideoTable.selectAll().where { DataVideoTable.file eq file }.singleOrNull()
             videodata = data?.let { VideoData.Companion.fromRow(it) }
         }
         return videodata

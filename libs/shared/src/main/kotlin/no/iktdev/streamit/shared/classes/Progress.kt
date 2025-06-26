@@ -1,5 +1,6 @@
 package no.iktdev.streamit.shared.classes
 
+import no.iktdev.streamit.library.db.objects.ProgressTableObject
 import no.iktdev.streamit.library.db.tables.content.ProgressTable
 import no.iktdev.streamit.shared.database.toEpochSeconds
 import org.jetbrains.exposed.sql.ResultRow
@@ -47,6 +48,20 @@ data class ProgressTableDto(
                 played = it.played
             )
         }
+
+        fun fromTable(item: ProgressTableObject) = ProgressTableDto(
+            id = item.id,
+            guid = item.guid,
+            type = item.type,
+            title = item.title,
+            collection = item.collection ?: item.title,
+            episode = item.episode,
+            season = item.season,
+            video = item.video,
+            progress = item.progress,
+            duration = item.duration,
+            played = item.played?.toEpochSeconds()?.toInt() ?: 0
+        )
     }
 }
 

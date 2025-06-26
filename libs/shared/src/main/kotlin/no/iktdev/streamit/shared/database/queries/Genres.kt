@@ -17,14 +17,14 @@ fun GenreTable.executeGetAll(): List<Genre> {
 fun GenreTable.executeSelectById(id: Int = -1): Genre? {
     if (id < 0) return null
     val row = transaction {
-        this@executeSelectById.select { this@executeSelectById.id.eq(id) }.singleOrNull()
+        this@executeSelectById.selectAll().where { this@executeSelectById.id.eq(id) }.singleOrNull()
     }
     return if (row == null) null else Genre.fromRow(row)
 }
 
 fun GenreTable.executeGetByIds(ids: List<Int>): List<Genre> {
     return if (ids.isNotEmpty()) transaction {
-        this@executeGetByIds.select { this@executeGetByIds.id inList ids.toList() }.map { Genre.fromRow(it) }
+        this@executeGetByIds.selectAll().where { this@executeGetByIds.id inList ids.toList() }.map { Genre.fromRow(it) }
     } else emptyList()
 }
 

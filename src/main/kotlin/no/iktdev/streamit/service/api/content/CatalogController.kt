@@ -66,7 +66,7 @@ class CatalogController {
         return CatalogTable.executeGetRecentlyUpdatedSeries()
     }
 
-    @GetMapping("/genred")
+    @GetMapping("/genre")
     fun getGenredCatalogs(): List<GenreCatalog> {
         log.info { "Processing '/catalog/genred'" }
         return GenreTable.executeGetCatalogGroupedByGenre()
@@ -75,6 +75,6 @@ class CatalogController {
     @GetMapping("/{userId}/continue/serie")
     fun getContinueOrResumeSerie(@PathVariable userId: String): List<Serie> {
         log.info { "Processing '/catalog/userId/continue/serie' where userId is $userId" }
-        return ProgressTable.executeResumeOrNext(userId)
+        return ProgressTable.executeResumeOrNextEpisode(userId)
     }
 }

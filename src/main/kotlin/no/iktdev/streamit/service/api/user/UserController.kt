@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 class UserController {
 
     @RequiresAuthentication(Mode.Soft)
-    @GetMapping("/")
+    @GetMapping(path = ["", "/all"])
     fun allUsers(): List<User> {
         return UserTable.executeSelectAll()
     }
@@ -34,7 +34,7 @@ class UserController {
      * Post Mapping below
      **/
     @RequiresAuthentication(Mode.Strict)
-    @PostMapping("/")
+    @PostMapping()
     fun createOrUpdateUser(@RequestBody user: User): ResponseEntity<String> {
         UserTable.upsert(user)
         return ResponseEntity("User Updated or Created", HttpStatus.OK)

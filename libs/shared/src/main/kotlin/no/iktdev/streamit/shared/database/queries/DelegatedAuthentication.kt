@@ -5,8 +5,10 @@ import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticati
 import no.iktdev.streamit.library.db.toEpochSeconds
 import no.iktdev.streamit.shared.classes.remote.DelegatedRequestData
 import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun DelegatedAuthenticationTable.executeInsertAndGetId(
@@ -26,7 +28,7 @@ fun DelegatedAuthenticationTable.executeInsertAndGetId(
 }
 
 fun DelegatedAuthenticationTable.executeGetDelegatePendingRequestBy(pin: String) = transaction {
-    DelegatedAuthenticationTable.select { DelegatedAuthenticationTable.pin eq pin }.firstNotNullOfOrNull {
+    DelegatedAuthenticationTable.selectAll().where { (DelegatedAuthenticationTable.pin eq pin) }.firstNotNullOfOrNull {
         DelegatedRequestData(
             pin = it[DelegatedAuthenticationTable.pin],
             requesterId = it[DelegatedAuthenticationTable.requesterId],

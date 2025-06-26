@@ -19,10 +19,10 @@ fun List<ProgressTableDto>.toMixedList(): List<BaseProgress> {
 fun List<ProgressTableDto>.toSerie(): List<ProgressSerie> {
     return this.filter { it.isSerie() }
         .groupBy { it.collection }
-        .filter { it -> it.value.isEmpty() }
+        .filter { it -> it.value.isNotEmpty() }
         .map { (_, entries) ->
             ProgressSerie.fromProgressTable(entries.first()).apply {
-                this.episodes = entries.mapNotNull { ep -> ProgressEpisode.fromFlat(ep) }
+                this.episodes = entries.mapNotNull { episodes -> ProgressEpisode.fromFlat(episodes) }
             }
         }
 }

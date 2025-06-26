@@ -15,3 +15,8 @@ annotation class ApiRestController
 @Retention(AnnotationRetention.RUNTIME)
 @RestController
 annotation class ContentRestController
+
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@RestController
+annotation class AssetRestController

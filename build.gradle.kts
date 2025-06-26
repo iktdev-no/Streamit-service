@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.5.31"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("org.springframework.boot") version "2.5.5"
@@ -9,6 +9,7 @@ group = "no.iktdev.streamit"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = uri("https://reposilite.iktdev.no/releases")
@@ -18,7 +19,7 @@ repositories {
     }
 }
 
-val exposedVersion = "0.44.0"
+val exposedVersion = "0.61.0"
 
 
 dependencies {
@@ -44,12 +45,12 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.9.0")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation("com.google.firebase:firebase-admin:9.2.0")
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:0.5.13-SNAPSHOT")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-internal4")
 
     implementation(project(mapOf("path" to ":libs:shared")))
 
+    implementation("com.google.zxing:core:3.5.1")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -68,4 +69,14 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.bootJar {
+    archiveFileName.set("app.jar")
+    launchScript()
+}
+
+tasks.jar {
+    archiveFileName.set("app.jar")
+    archiveBaseName.set("app")
 }

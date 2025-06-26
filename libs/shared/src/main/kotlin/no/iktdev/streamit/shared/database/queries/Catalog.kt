@@ -8,53 +8,48 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
-fun CatalogTable.executeGetAll(): List<Catalog> = transaction {
+fun CatalogTable.executeGetAll(): List<Catalog> =  transaction {
     CatalogTable.selectAll()
         .mapNotNull { Catalog.fromRow(it) }
 }
 
-fun CatalogTable.executeGetMovies(): List<Catalog> = transaction {
+fun CatalogTable.executeGetMovies(): List<Catalog> =
     CatalogTable.selectOnlyMovies()
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeGetSeries(): List<Catalog> = transaction {
+fun CatalogTable.executeGetSeries(): List<Catalog> =
     CatalogTable.selectOnlySeries()
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeFindWithGenres(): List<Catalog> = transaction {
+fun CatalogTable.executeFindWithGenres(): List<Catalog> =
     CatalogTable.selectWhereGenreIsSet()
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeGetRecentlyAdded(): List<Catalog> = transaction {
+
+fun CatalogTable.executeGetRecentlyAdded(): List<Catalog> =
     CatalogTable.selectRecentlyAdded(Env.frshness.toInt())
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeGetRecentlyUpdatedSeries(): List<Catalog> = transaction {
+fun CatalogTable.executeGetRecentlyUpdatedSeries(): List<Catalog> {
     val recentAdded = Env.getSerieCutoff()
     val dateTime = LocalDateTime.now().minusDays(Env.frshness)
 
-    CatalogTable.selectNewlyUpdatedSeries(noOlderThan = recentAdded)
-        .mapNotNull {
-            val recent = it[SerieTable.added] > dateTime
-            Catalog.fromRow(it, recent)
+   return CatalogTable.selectNewlyUpdatedSeries(noOlderThan = recentAdded)
+        .map {
+            val recent = it.serieTableEntryAdded > dateTime
+            Catalog.fromTable(it, recent)
         }
 }
 
-fun CatalogTable.executeSearchWith(keyword: String) = transaction {
+fun CatalogTable.executeSearchWith(keyword: String) =
     CatalogTable.searchWith(keyword)
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeSearchForMovie(keyword: String) = transaction {
+fun CatalogTable.executeSearchForMovie(keyword: String) =
     CatalogTable.searchMovieWith(keyword)
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }
 
-fun CatalogTable.executeSearchForSerie(keyword: String) = transaction {
+
+fun CatalogTable.executeSearchForSerie(keyword: String) =
     CatalogTable.searchSerieWith(keyword)
-        .mapNotNull { Catalog.fromRow(it) }
-}
+        .map { Catalog.fromTable(it) }

@@ -5,8 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import mu.KotlinLogging
-import no.iktdev.streamit.shared.classes.Jwt
 import no.iktdev.streamit.shared.classes.User
+import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.*
@@ -42,38 +42,45 @@ open class Authentication {
             return false
         }
         val decoded = decode(token) ?: return false
-        return decoded.expiresAtAsInstant.isBefore(Instant.now())
+        return if (decoded.expiresAtAsInstant != null)
+            decoded.expiresAtAsInstant.isBefore(Instant.now())
+        else true
     }
 
 
-    fun createJwt(user: User? = null, ttl: String? = null): Jwt {
+    fun createJwt(deviceInfo: RequestDeviceInfo? = null, ttl: String? = null): String {
         val zone = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
-        val usermap = user?.let { usr ->
+        val deviceMap = if (deviceInfo != null) {
             mapOf(
-                "guid" to usr.guid,
-                "name" to usr.name,
-                "image" to usr.image
+                "name" to deviceInfo.name,
+                "model" to deviceInfo.model,
+                "deviceManufacturer" to deviceInfo.manufacturer,
+                "clientOrOsVersion" to deviceInfo.clientOrOsVersion,
+                "clientOrOsPlatform" to deviceInfo.clientOrOsPlatform
             )
-        }
+        } else emptyMap()
+
         val builder = JWT.create()
             .withIssuer(issuer)
             .withIssuedAt(Date.from(Instant.now()))
             .withSubject("Authorization for A.O.I.")
-        usermap?.let { payload ->
-            builder.withPayload(mapOf("user" to payload))
-        }
+            .withPayload(mapOf(
+                "device" to deviceMap
+            ))
 
-        val setTtl = if (user == null) {
-            "5min"
-        } else if (!ttl.isNullOrBlank()) {
+        val setTtl = if (!ttl.isNullOrBlank()) {
             ttl
         } else Env.jwtExpiry
 
-        val expiry = Env.getExpiry(setTtl ?: "0d")
+        val expiry = setTtl?.let { Env.getExpiry(it) }
 
-        builder.withExpiresAt(expiry.toInstant(zone))
+        if (expiry != null) {
+            builder.withExpiresAt(expiry.toInstant(zone))
+        } else {
+            log.warn { "Access token is created without expiry" }
+        }
 
-        return Jwt(builder.sign(algorithm()))
+        return builder.sign(algorithm())
     }
 
     class MissingConfigurationException(message: String): Exception(message)

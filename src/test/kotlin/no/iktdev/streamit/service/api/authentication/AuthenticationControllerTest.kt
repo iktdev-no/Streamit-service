@@ -38,7 +38,7 @@ class AuthenticationControllerTest: TestBase() {
     fun `secure accessible endpoint should return OK with valid JWT`() {
         val jwt = auth.createJwt()
         val request = HttpEntity<Void>(HttpHeaders().apply {
-            setBearerAuth(jwt.token)
+            setBearerAuth(jwt)
         })
 
         val response = restTemplate.exchange(

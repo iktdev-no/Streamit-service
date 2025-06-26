@@ -1,52 +1,38 @@
 package no.iktdev.streamit.service
 
 import mu.KotlinLogging
-import javax.servlet.Filter
-import no.iktdev.exfl.coroutines.CoroutinesIO
-import no.iktdev.streamit.library.db.datasource.DataSource
 import no.iktdev.streamit.library.db.datasource.MySqlDataSource
 import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
 import no.iktdev.streamit.library.db.tables.authentication.RegisteredDevicesTable
-import no.iktdev.streamit.library.db.tables.content.CatalogTable
-import no.iktdev.streamit.library.db.tables.content.ContinueWatchTable
-import no.iktdev.streamit.library.db.tables.content.GenreTable
-import no.iktdev.streamit.library.db.tables.content.MovieTable
-import no.iktdev.streamit.library.db.tables.content.ProgressTable
-import no.iktdev.streamit.library.db.tables.content.SerieTable
-import no.iktdev.streamit.library.db.tables.content.SubtitleTable
-import no.iktdev.streamit.library.db.tables.content.SummaryTable
-import no.iktdev.streamit.library.db.tables.content.TitleTable
+import no.iktdev.streamit.library.db.tables.content.*
 import no.iktdev.streamit.library.db.tables.other.CastErrorTable
 import no.iktdev.streamit.library.db.tables.other.DataAudioTable
 import no.iktdev.streamit.library.db.tables.other.DataVideoTable
 import no.iktdev.streamit.library.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.library.db.withTransaction
-import no.iktdev.streamit.service.api.GeneralController
+import no.iktdev.streamit.shared.Env
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerTypePredicate
-import org.springframework.web.servlet.HandlerInterceptor
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
-import javax.servlet.http.HttpServletResponse
 
 val log = KotlinLogging.logger {}
 
@@ -116,13 +102,25 @@ class InterceptorConfiguration(
         super.configurePathMatch(configurer)
         configurer.addPathPrefix("/api/**", HandlerTypePredicate.forAnnotation(ApiRestController::class.java))
         configurer.addPathPrefix("/stream/**", HandlerTypePredicate.forAnnotation(ContentRestController::class.java))
+        configurer.addPathPrefix("/assets/**", HandlerTypePredicate.forAnnotation(AssetRestController::class.java))
+    }
+}
+
+@Configuration
+class WebConfig : WebMvcConfigurer {
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+            .allowedOrigins("*") // Tillat alle origins
+            .allowedMethods("*")
+            .allowedHeaders("*")
     }
 }
 
 @Component
 @Order(2)
 class PathDefiner : Filter {
-    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+
+    private fun setModifiedPath(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val httpRequest = request as HttpServletRequest
         val uri = httpRequest.requestURI
 
@@ -149,6 +147,19 @@ class PathDefiner : Filter {
             }
         }
         chain.doFilter(modifiedRequest, response)
+    }
+
+    private fun setSinglePath(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+        request.setAttribute("internalAccessMode", "open")
+        chain.doFilter(request, response)
+    }
+
+    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+        if (Env.singleEntryPaths) {
+            setSinglePath(request, response, chain)
+        } else {
+            setModifiedPath(request, response, chain)
+        }
     }
 }
 

@@ -1,5 +1,7 @@
 package no.iktdev.streamit.shared.classes
 
+import no.iktdev.streamit.library.db.objects.content.CatalogTableObject
+import no.iktdev.streamit.library.db.objects.content.RecentlyUpdatedSeriesHolderObject
 import no.iktdev.streamit.library.db.tables.content.CatalogTable
 import no.iktdev.streamit.library.db.tables.content.MovieTable
 import org.jetbrains.exposed.sql.ResultRow
@@ -46,6 +48,41 @@ open class Catalog(
             },
             collection = resultRow[CatalogTable.collection],
             genres = resultRow[CatalogTable.genres] ?: "",
+            recent = recent
+        )
+        fun fromTable(item: CatalogTableObject, recent: Boolean = false) = Catalog(
+            id = item.id,
+            title = item.title,
+            cover = item.cover,
+            type = item.type.let {
+                if (it.equals("movie", true))
+                    ContentType.Movie
+                else if (it.equals(
+                        "serie",
+                        true
+                    )
+                ) ContentType.Serie else ContentType.Unknown
+            },
+            collection = item.collection,
+            genres = item.genres ?: "",
+            recent = recent
+        )
+
+        fun fromTable(item: RecentlyUpdatedSeriesHolderObject, recent: Boolean = false) = Catalog(
+            id = item.id,
+            title = item.title,
+            cover = item.cover,
+            type = item.type.let {
+                if (it.equals("movie", true))
+                    ContentType.Movie
+                else if (it.equals(
+                        "serie",
+                        true
+                    )
+                ) ContentType.Serie else ContentType.Unknown
+            },
+            collection = item.collection,
+            genres = item.genres ?: "",
             recent = recent
         )
     }

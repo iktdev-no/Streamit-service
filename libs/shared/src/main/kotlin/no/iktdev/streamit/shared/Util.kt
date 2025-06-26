@@ -1,5 +1,6 @@
 package no.iktdev.streamit.shared
 
+import mu.KotlinLogging
 import java.io.File
 import java.nio.file.Paths
 import java.security.MessageDigest
@@ -32,4 +33,17 @@ fun toSHA256Hash(input: String): String {
 
 fun File.with(vararg path: String): File {
     return Paths.get(this.path, *path).toFile()
+}
+
+fun File.getOnlyFiles(): List<File> {
+    return this.walk().filter { it.isFile }.toList()
+}
+
+fun debugLog(message: String) {
+    if (Env.mode == "debug") {
+        val stackTrace = Thread.currentThread().stackTrace
+        val caller = stackTrace.getOrNull(3)
+        val origin = if (caller != null) "${caller.className}.${caller.methodName}:${caller.lineNumber}" else "UnknownOrigin"
+        KotlinLogging.logger {}.info { "[DEBUG][$origin] $message" }
+    }
 }

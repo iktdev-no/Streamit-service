@@ -21,6 +21,7 @@ import java.io.OutputStream
 import java.nio.file.Files
 
 @ContentRestController
+@RequestMapping(path = ["/stream/media/"])
 open class ContentController {
     val log = KotlinLogging.logger {}
 
@@ -89,38 +90,6 @@ open class ContentController {
                 .body(Files.readAllBytes(file.toPath()))
         }
         return ResponseEntity.notFound().build()
-
-    }
-
-
-
-    @RestController
-    @RequestMapping(path = ["/open/media"])
-    class OpenContentController(): ContentController() {
-    }
-
-    @RestController
-    @RequestMapping(path = ["/secure/media"])
-    class RestrictedContentController(): ContentController() {
-
-        @RequiresAuthentication(Mode.Strict)
-        override fun provideVideoFile(collection: String, video: String): ResponseEntity<Resource> {
-            return super.provideVideoFile(collection, video)
-        }
-
-        @RequiresAuthentication(Mode.Strict)
-        override fun provideImageFile(collection: String, image: String): ResponseEntity<ByteArray> {
-            return super.provideImageFile(collection, image)
-        }
-
-        @RequiresAuthentication(Mode.Strict)
-        override fun provideSubtitle(
-            collection: String,
-            language: String,
-            subtitle: String
-        ): ResponseEntity<ByteArray> {
-            return super.provideSubtitle(collection, language, subtitle)
-        }
 
     }
 

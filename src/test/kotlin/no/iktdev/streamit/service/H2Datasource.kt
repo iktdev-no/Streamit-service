@@ -14,48 +14,6 @@ class H2Datasource(databaseName: String) : MySqlDataSource(
     password = ""
 ) {
 
-    /*override fun getConnection(): Connection {
-        return jdbcDataSource.connection
-    }
-
-    override fun getConnection(username: String?, password: String?): Connection {
-        return jdbcDataSource.getConnection(username, password)
-    }
-
-    override fun setLoginTimeout(seconds: Int) {
-        jdbcDataSource.loginTimeout = seconds
-    }
-
-    override fun getLoginTimeout(): Int {
-        return jdbcDataSource.loginTimeout
-    }
-
-    override fun getLogWriter(): PrintWriter? {
-        return jdbcDataSource.logWriter
-    }
-
-    override fun setLogWriter(out: PrintWriter?) {
-        jdbcDataSource.logWriter = out
-    }
-
-    override fun getParentLogger(): Logger? {
-        throw SQLFeatureNotSupportedException("getParentLogger is not supported")
-    }
-
-    override fun <T : Any?> unwrap(iface: Class<T>?): T {
-        if (iface != null && iface.isAssignableFrom(this.javaClass)) {
-            return this as T
-        }
-        return jdbcDataSource.unwrap(iface)
-    }
-
-    override fun isWrapperFor(iface: Class<*>?): Boolean {
-        if (iface != null && iface.isAssignableFrom(this.javaClass)) {
-            return true
-        }
-        return jdbcDataSource.isWrapperFor(iface)
-    }*/
-
     override fun createDatabaseStatement(): String {
         return "CREATE SCHEMA $databaseName"
     }
@@ -67,6 +25,7 @@ class H2Datasource(databaseName: String) : MySqlDataSource(
     fun toDatabase2(): Database {
         return Database.connect(
             toConnectionUrl(),
+            driver = "org.h2.Driver",
             user = username,
             password = password
         )
