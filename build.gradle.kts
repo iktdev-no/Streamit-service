@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.5.31"
@@ -79,4 +81,49 @@ tasks.bootJar {
 tasks.jar {
     archiveFileName.set("app.jar")
     archiveBaseName.set("app")
+}
+
+fun findLatestTag(): String {
+    val stdout = ByteArrayOutputStream()
+    exec {
+        commandLine = listOf("git", "describe", "--tags", "--abbrev=0")
+        standardOutput = stdout
+        isIgnoreExitValue = true
+    }
+    return stdout.toString().trim().removePrefix("v")
+}
+
+fun isSnapshotBuild(): Boolean {
+    // Use environment variable or branch name to detect snapshot
+    val ref = System.getenv("GITHUB_REF") ?: ""
+    return ref.endsWith("/master") || ref.endsWith("/main")
+}
+
+fun getCommitsSinceTag(tag: String): Int {
+    val stdout = ByteArrayOutputStream()
+    exec {
+        commandLine = listOf("git", "rev-list", "$tag..HEAD", "--count")
+        standardOutput = stdout
+        isIgnoreExitValue = true
+    }
+    return stdout.toString().trim().toIntOrNull() ?: 0
+}
+
+val latestTag = findLatestTag()
+val versionString = if (isSnapshotBuild()) {
+    val parts = latestTag.split(".")
+    val patch = parts.lastOrNull()?.toIntOrNull()?.plus(1) ?: 1
+    val base = if (parts.size >= 2) "${parts[0]}.${parts[1]}" else latestTag
+    val buildNumber = getCommitsSinceTag("v$latestTag")
+    "$base.$patch-SNAPSHOT-$buildNumber"
+} else {
+    latestTag
+}
+
+version = versionString
+
+tasks.register("printVersion") {
+    doLast {
+        println(project.version)
+    }
 }

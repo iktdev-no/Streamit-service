@@ -1,0 +1,99 @@
+name: Snapshot builds
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-service:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: gradle-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            gradle-cache-
+
+      - name: Restore backend build cache
+        id: backend_cache
+        uses: actions/cache@v3
+        with:
+          path: backend/build
+          key: backend-build-${{ hashFiles('backend/**/*') }}
+          restore-keys: |
+            backend-build-
+
+      - name: Build Spring Boot backend
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootJar
+          echo "Build completed"          
+
+      - name: Set version output
+        id: set_version
+        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
+
+      - name: Save new backend build to cache
+        if: steps.backend_cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: backend/build
+          key: backend-build-${{ hashFiles('backend/**/*') }}
+
+      - name: Upload bootJar artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          retention-days: 90
+          overwrite: true
+          name: bootJar
+          path: ./build/libs/app.jar
+
+  docker-build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs:
+      - build-service
+    steps:
+      - name: Set version env
+        run: echo "VERSION=${{ needs.build-service.outputs.version }}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download bootJar artifact
+        uses: actions/download-artifact@v4.3.0
+        with:
+          name: bootJar
+          path: ./
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Debug Check extracted version
+        run: |
+          echo "Extracted version: ${{ env.VERSION }}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./dockerfiles/DebianJava
+          build-args: |
+            MODULE_NAME=ui
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/streamit-service:snapshot-latest
+            bskjon/streamit-service:${{ github.sha }}
+            bskjon/streamit-service:${{ env.VERSION }}
