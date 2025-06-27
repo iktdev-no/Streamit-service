@@ -46,7 +46,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-internal3")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc1")
 
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
