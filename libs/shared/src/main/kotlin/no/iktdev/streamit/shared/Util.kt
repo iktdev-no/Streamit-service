@@ -4,19 +4,7 @@ import mu.KotlinLogging
 import java.io.File
 import java.nio.file.Paths
 import java.security.MessageDigest
-import javax.servlet.http.HttpServletRequest
 
-fun HttpServletRequest?.getRequestersIp(): String? {
-    this ?: return null
-    val xforwardedIp: String? = this.getHeader("X-Forwarded-For")
-    return if (xforwardedIp.isNullOrEmpty()) {
-        this.remoteAddr
-    } else xforwardedIp
-}
-
-fun HttpServletRequest?.getAuthorization(): String? {
-    return this?.getHeader("Authorization")
-}
 
 fun toSHA256Hash(input: String): String {
     val bytes = input.toByteArray()

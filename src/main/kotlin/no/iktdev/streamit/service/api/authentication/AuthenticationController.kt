@@ -2,46 +2,27 @@ package no.iktdev.streamit.service.api.authentication
 
 import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.streamit.library.db.executeWithResult
-import no.iktdev.streamit.library.db.executeWithStatus
-import no.iktdev.streamit.library.db.isCausedByDuplicateError
-import no.iktdev.streamit.library.db.isExposedSqlException
+import no.iktdev.streamit.library.db.*
 import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
-import no.iktdev.streamit.library.db.toEpochSeconds
-import no.iktdev.streamit.library.db.withTransaction
 import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.shared.Authentication
 import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.classes.User
-import no.iktdev.streamit.shared.classes.remote.AuthInitiateRequest
-import no.iktdev.streamit.shared.classes.remote.DelegatedRequestData
-import no.iktdev.streamit.shared.classes.remote.InternalDelegatedRequestData
-import no.iktdev.streamit.shared.classes.remote.PermitRequestData
-import no.iktdev.streamit.shared.classes.remote.RequestCreatedResponse
-import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
+import no.iktdev.streamit.shared.classes.remote.*
 import no.iktdev.streamit.shared.database.queries.executeGetDelegatePendingRequestBy
 import no.iktdev.streamit.shared.database.queries.executeInsertAndGetId
 import no.iktdev.streamit.shared.debugLog
-import no.iktdev.streamit.shared.getRequestersIp
 import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.get
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
-import kotlin.compareTo
 
 @ApiRestController
 @RequestMapping("/api/auth")

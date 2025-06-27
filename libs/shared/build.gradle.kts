@@ -1,8 +1,5 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.spring") version "1.5.31"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("org.springframework.boot") version "2.5.5"
 }
 
 group = "no.iktdev.streamit.shared"
@@ -24,10 +21,6 @@ val exposedVersion = "0.61.0"
 
 dependencies {
     implementation(kotlin("script-runtime"))
-
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation("org.springdoc:springdoc-openapi-ui:1.6.4")
 
@@ -58,3 +51,4 @@ tasks.test {
 kotlin {
     jvmToolchain(17)
 }
+
