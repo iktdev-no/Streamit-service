@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream
+import kotlin.sequences.ifEmpty
 
 plugins {
     kotlin("jvm") version "2.1.0"
@@ -109,7 +110,7 @@ fun getCommitsSinceTag(tag: String): Int {
     return stdout.toString().trim().toIntOrNull() ?: 0
 }
 
-val latestTag = findLatestTag()
+val latestTag = findLatestTag().ifEmpty { "0.0" }
 val versionString = if (isSnapshotBuild()) {
     val parts = latestTag.split(".")
     val patch = parts.lastOrNull()?.toIntOrNull()?.plus(1) ?: 1
