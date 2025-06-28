@@ -63,7 +63,7 @@ class ConfigValueService {
             fingerprint = serverFingerprintFile.readText()
         }
 
-        val avahiServiceFolder = Env.configFilesFolder.using("avahi")
+        val avahiServiceFolder = if (Env.avahiServiceFolder.exists()) Env.avahiServiceFolder else Env.configFilesFolder.using("avahi")
         if (avahiServiceFolder.exists()) {
             val avahiContent = generateAvahi()
             val avahiFile = avahiServiceFolder.using("streamit_${serverId}.service")

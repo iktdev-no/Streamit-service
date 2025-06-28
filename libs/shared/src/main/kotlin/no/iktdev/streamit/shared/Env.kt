@@ -8,13 +8,15 @@ object Env {
     val mode: String = System.getenv("MODE") ?: "prod"
 
     var address: String? = System.getenv("DATABASE_ADDRESS") ?: "192.168.2.250" // "streamit-db"
-    var port: String? = System.getenv("DATABASE_PORT") ?: "8082" //"3306"
+    var port: String? = System.getenv("DATABASE_PORT") ?: "3306"
     var username: String = System.getenv("DATABASE_USERNAME") ?: "streamit"
     var password: String = System.getenv("DATABASE_PASSWORD") ?: "shFZ27eL2x2NoxyEDBMfDWkvFO"
     var database: String = System.getenv("DATABASE_USE") ?: "streamit"
 
     var content: File? = if (!System.getenv("CONTENT_FOLDER").isNullOrEmpty()) File(System.getenv("CONTENT_FOLDER")) else null
 
+    val avahiServiceFolder: File =
+        System.getenv("AVAHI_SERVICE_FOLDER")?.let { File(it) } ?: File("/etc/avahi/services")
     val configFilesFolder = System.getenv("CONFIG_FOLDER")?.let { File(it) } ?: File("/conf")
     val assetsFolder = System.getenv("ASSETS_FOLDER")?.let { File(it) } ?: File("/assets")
 
@@ -25,6 +27,7 @@ object Env {
     var frshness: Long = System.getenv("CONTENT_FRESH_DAYS")?.toLong() ?: 5
     var serieAgeCap: String = System.getenv("SERIE_AGE") ?: "30d"
     var continueWatch: Int = System.getenv("CONTENT_CONTINUE")?.toInt() ?: 10
+
     var jwtSecret: String? = System.getenv("JWT_SECRET") ?: "eO5zESo8livHiDWxwn+J5U7h5cAZPgWZr4JymG94zB0="
     var jwtExpiry: String? = System.getenv("JWT_EXPIRY")
     var pfnsApiToken: String? = System.getenv("PFNS_API_TOKEN")
