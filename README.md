@@ -226,8 +226,6 @@ server {
         proxy_read_timeout 60s;
     }
 }
-
 ```
+![Docker Pulls](https://img.shields.io/docker/pulls/bskjon/streamit-service?style=flat-square&logo=docker&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fbskjon%2Fstreamit-service)
 
-
-![Docker Pulls](https://img.shields.io/docker/pulls/bskjon/streamit-service?style=flat-square&logo=docker)
