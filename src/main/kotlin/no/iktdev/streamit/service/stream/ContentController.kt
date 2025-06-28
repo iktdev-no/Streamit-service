@@ -111,21 +111,26 @@ open class ContentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("<h2 style='color:tomato;'>This endpoint is only available in debug mode</h2>")
         }
-        val basePath = Env.getAssetsFolder().toPath()
 
+        val contentFileFolder = Env.getContentFolder()
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("<h2 style='color:tomato;'>Content folder is not configured</h2>")
+
+        val basePath = contentFileFolder.toPath().normalize()
         val fullPath = UrlPathHelper().getPathWithinApplication(request)
-        val mappingPrefix = "/stream/media/browse" // change to /assets/browse for Asset controller
-        val subPath = fullPath.removePrefix(mappingPrefix).ifBlank { "/" }
+        val mappingPrefix = "/stream/media/browse" // Update if reused in other controllers
+        val subPath = fullPath.removePrefix(mappingPrefix).removePrefix("/").ifBlank { "" }
         val current = basePath.resolve(subPath).normalize()
 
-        if (!current.startsWith(basePath) || !Files.exists(current)) {
+        if (!Files.exists(current)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("<h2 style='color:tomato;'>Path not found</h2>")
+                .body("<h2 style='color:tomato;'>Path not found: ${current}</h2>")
         }
 
         if (Files.isRegularFile(current)) {
+            val route = routeToFile(subPath)
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, "$mappingPrefix/content$subPath")
+                .header(HttpHeaders.LOCATION, route)
                 .build()
         }
 
@@ -143,5 +148,23 @@ open class ContentController {
 
         return ResponseEntity.ok(html)
     }
+
+    fun routeToFile(subPath: String): String {
+        val segments = subPath.removePrefix("/").split("/")
+        val ext = segments.last().substringAfterLast('.', missingDelimiterValue = "").lowercase()
+
+        return when {
+            segments.size == 2 && ext in listOf("jpg", "jpeg", "png", "webp") ->
+                "/stream/media/image/${segments[0]}/${segments[1]}"
+            segments.size == 2 && ext in listOf("mp4", "mkv", "avi") ->
+                "/stream/media/video/${segments[0]}/${segments[1]}"
+            segments.size == 4 && segments[1] == "subs" ->
+                "/stream/media/subtitle/${segments[0]}/${segments[2]}/${segments[3]}"
+            else -> "#"
+        }
+    }
+
+
+
 
 }

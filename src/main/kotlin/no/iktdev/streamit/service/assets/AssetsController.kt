@@ -71,22 +71,24 @@ open class AssetsController {
                 .body("<h2 style='color:tomato;'>This endpoint is only available in debug mode</h2>")
         }
 
-        val basePath = Env.getAssetsFolder().toPath()
+        val basePath = Env.getAssetsFolder().toPath().normalize()
         val fullPath = UrlPathHelper().getPathWithinApplication(request)
-        val mappingPrefix = "/assets/browse" // change to /assets/browse for Asset controller
-        val subPath = fullPath.removePrefix(mappingPrefix).ifBlank { "/" }
+        val mappingPrefix = "/assets/browse"
+        val subPath = fullPath.removePrefix(mappingPrefix).removePrefix("/").ifBlank { "" }
         val current = basePath.resolve(subPath).normalize()
 
-        if (!current.startsWith(basePath) || !Files.exists(current)) {
+        if (!Files.exists(current) || !current.startsWith(basePath)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("<h2 style='color:tomato;'>Path not found</h2>")
+                .body("<h2 style='color:tomato;'>Path not found: $current</h2>")
         }
 
         if (Files.isRegularFile(current)) {
+            val filename = current.fileName.toString()
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, "$mappingPrefix/content$subPath")
+                .header(HttpHeaders.LOCATION, "/assets/profile-image/$filename")
                 .build()
         }
+
 
         val entries = Files.list(current)
             .map { it.fileName.toString() to Files.isDirectory(it) }
@@ -102,5 +104,6 @@ open class AssetsController {
 
         return ResponseEntity.ok(html)
     }
+
 
 }
