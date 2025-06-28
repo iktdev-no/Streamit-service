@@ -33,10 +33,7 @@ class TestBase {
     }
 
     init {
-        mockkObject(Env)
-        every { Env.getConfigFolder() } returns File(System.getProperty("java.io.tmpdir"))
-        every { Env.getAvahiServiceFolder() } returns File(System.getProperty("java.io.tmpdir"))
-        every { Env.getAssetsFolder() } returns File(System.getProperty("java.io.tmpdir"))
+        mockFolders()
     }
 
 

@@ -3,6 +3,8 @@ package no.iktdev.streamit.service
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.mockk.every
+import io.mockk.mockkObject
 import no.iktdev.streamit.shared.Authentication.Companion.algorithm
 import no.iktdev.streamit.shared.Authentication.Companion.issuer
 import no.iktdev.streamit.shared.Env
@@ -17,6 +19,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.io.File
 import java.time.Instant
 import java.util.Date
 
@@ -55,4 +58,11 @@ fun generateInvalidJwt(): String {
 
     val token = builder.sign(Algorithm.HMAC256("Unauthorized"))
     return token
+}
+
+fun mockFolders() {
+    mockkObject(Env)
+    every { Env.getConfigFolder() } returns File(System.getProperty("java.io.tmpdir"))
+    every { Env.getAvahiServiceFolder() } returns File(System.getProperty("java.io.tmpdir"))
+    every { Env.getAssetsFolder() } returns File(System.getProperty("java.io.tmpdir"))
 }

@@ -142,6 +142,11 @@ class PathDefiner : Filter {
                     internalPath = "/stream" + uri.removePrefix("/$access/stream")
                     break
                 }
+                uri.startsWith("/$access/assets") -> {
+                    mode = access
+                    internalPath = "/assets" + uri.removePrefix("/$access/assets")
+                    break
+                }
             }
         }
 
