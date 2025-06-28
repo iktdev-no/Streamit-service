@@ -27,8 +27,15 @@ open class AssetsController {
     val log = KotlinLogging.logger {}
 
     init {
-        if (Env.getContentFolder() == null || Env.getContentFolder()?.exists() == false) {
-            log.warn { "No content provided or exists.. No providing through controller will be available.." }
+        if (!Env.getAssetsFolder().exists()) {
+            if (Env.getAssetsFolder().mkdirs()) {
+                log.info { "Assets folder created at ${Env.getAssetsFolder()}" }
+            } else {
+                log.error { "Failed to create assets folder at ${Env.getAssetsFolder()}" }
+            }
+            if (!Env.getAssetsFolder().exists()) {
+                log.warn { "No content provided or exists.. No providing through controller will be available.." }
+            }
         }
     }
 

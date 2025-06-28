@@ -27,7 +27,12 @@ open class ContentController {
 
     init {
         if (Env.getContentFolder() == null || Env.getContentFolder()?.exists() == false) {
-            log.warn { "No content provided or exists.. No providing through controller will be available.." }
+            if (Env.getContentFolder() != null) {
+                log.warn { "No content folder provided!" }
+            }
+            if (Env.getContentFolder()?.exists() == false) {
+                log.error { "Failed to find folder ${Env.getContentFolder()?.absolutePath}" }
+            }
         }
     }
 
