@@ -64,7 +64,7 @@ class SearchControllerTest: TestBaseWithDatabase() {
 
     @Test
     fun `Search should return single item`() {
-        val response = restTemplate.simpleGet("/api/open/search/Potet",
+        val response = restTemplate.simpleGet("/open/api/search/Potet",
             object : ParameterizedTypeReference<List<Catalog>>() {}
         )
         assertHttpOk(response)

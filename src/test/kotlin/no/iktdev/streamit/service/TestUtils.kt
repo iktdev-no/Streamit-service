@@ -1,6 +1,11 @@
 package no.iktdev.streamit.service
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.iktdev.streamit.shared.Authentication.Companion.algorithm
+import no.iktdev.streamit.shared.Authentication.Companion.issuer
+import no.iktdev.streamit.shared.Env
 import no.iktdev.streamit.shared.classes.Catalog
 import org.assertj.core.api.Assertions.assertThat
 import org.skyscreamer.jsonassert.JSONAssert
@@ -12,6 +17,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.time.Instant
+import java.util.Date
 
 val objectMapper = ObjectMapper()
 
@@ -38,4 +45,14 @@ fun assertJson(expected: String, actual: Any?) {
 
 fun <T> T.asList(): List<T> {
     return listOf(this)
+}
+
+fun generateInvalidJwt(): String {
+    val builder = JWT.create()
+        .withIssuer(issuer)
+        .withIssuedAt(Date.from(Instant.now()))
+        .withSubject("Authorization for A.O.I.")
+
+    val token = builder.sign(Algorithm.HMAC256("Unauthorized"))
+    return token
 }

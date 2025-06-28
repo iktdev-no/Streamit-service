@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
 @ApiRestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 class AuthenticationController() {
     val auth = Authentication()
     val log = KotlinLogging.logger {}

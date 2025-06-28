@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ApiRestController
-@RequestMapping("/api/search")
+@RequestMapping("/search")
 class SearchController {
 
     @RequiresAuthentication(Mode.Soft)

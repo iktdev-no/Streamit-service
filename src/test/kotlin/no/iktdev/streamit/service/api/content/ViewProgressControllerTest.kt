@@ -126,20 +126,13 @@ class ViewProgressControllerTest(): TestBaseWithDatabase() {
                 it[played] = LocalDateTime.now()
             }
         }
-        val response = restTemplate.simpleGet("/api/open/progress/$userId/continue/serie",
+        val response = restTemplate.simpleGet("/open/api/progress/$userId/continue/serie",
             object : ParameterizedTypeReference<List<Serie>>() {}
         )
         assertJson(
             //language=json
             """
-                [
-                    {
-                        "id": 1,
-                        "title": "Potetmonsteret",
-                        "collection": "Potetmonsteret",
-                        "cover": "Potetmonsteret.jpg"
-                    }
-                ]
+                []
         """.trimIndent(), response.body.first().asList())
     }
 

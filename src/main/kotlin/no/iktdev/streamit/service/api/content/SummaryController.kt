@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ApiRestController
-@RequestMapping("/api/summary")
+@RequestMapping("/summary")
 open class SummaryController {
 
     @RequiresAuthentication(Mode.Soft)

@@ -13,7 +13,7 @@ class AssetExtractor {
 
     @EventListener(ApplicationReadyEvent::class)
     fun unpackAssetsOnStartup() {
-        val outputDir = Env.assetsFolder.also {
+        val outputDir = Env.getAssetsFolder().also {
             if (!it.exists()) {
                 it.mkdirs()
             }

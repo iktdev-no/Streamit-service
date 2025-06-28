@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
-@RequestMapping("/api/remote")
+@RequestMapping("/remote")
 class RemoteController(
     @Autowired var service: PfnsClientService,
     @Autowired var config: ConfigValueService

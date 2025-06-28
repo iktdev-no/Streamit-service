@@ -21,19 +21,20 @@ import java.io.OutputStream
 import java.nio.file.Files
 
 @ContentRestController
-@RequestMapping(path = ["/stream/media/"])
+@RequestMapping(path = ["/media/"])
 open class ContentController {
     val log = KotlinLogging.logger {}
 
     init {
-        if (Env.content == null || Env.content?.exists() == false) {
+        if (Env.getContentFolder() == null || Env.getContentFolder()?.exists() == false) {
             log.warn { "No content provided or exists.. No providing through controller will be available.." }
         }
     }
 
+    @RequiresAuthentication(Mode.Strict)
     @GetMapping("video/{collection}/{video}")
     open fun provideVideoFile(@PathVariable collection: String, @PathVariable video: String): ResponseEntity<Resource> {
-        val file = Env.content?.with(collection, video)
+        val file = Env.getContentFolder()?.with(collection, video)
 
         if (file?.exists() == true) {
             val fileResource: Resource = FileSystemResource(file)
@@ -49,9 +50,10 @@ open class ContentController {
         }
     }
 
+    @RequiresAuthentication(Mode.Strict)
     @GetMapping("image/{collection}/{image}")
     open fun provideImageFile(@PathVariable collection: String, @PathVariable image: String): ResponseEntity<ByteArray> {
-        val file = Env.content?.with(collection, image)
+        val file = Env.getContentFolder()?.with(collection, image)
 
         if (file?.exists() == true) {
             val contentType = when (file.extension.lowercase()) {
@@ -73,9 +75,10 @@ open class ContentController {
 
     }
 
+    @RequiresAuthentication(Mode.Strict)
     @GetMapping("subtitle/{collection}/{language}/{subtitle}")
     open fun provideSubtitle(@PathVariable collection: String, @PathVariable language: String, @PathVariable subtitle: String): ResponseEntity<ByteArray> {
-        val file = Env.content?.with(collection, "sub", language, subtitle)
+        val file = Env.getContentFolder()?.with(collection, "sub", language, subtitle)
         if (file?.exists() == true) {
             val contentType = when (file.extension.lowercase()) {
                 "srt" -> MediaType.parseMediaType("application/x-subrip")

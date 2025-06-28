@@ -33,7 +33,7 @@ class GenreControllerTest: TestBaseWithDatabase() {
 
     @Test
     fun `Genres should return a list of entries`() {
-        val response = restTemplate.simpleGet("/api/open/genre",
+        val response = restTemplate.simpleGet("/open/api/genre",
             object : ParameterizedTypeReference<List<Genre>>() {}
         )
         assertHttpOk(response)

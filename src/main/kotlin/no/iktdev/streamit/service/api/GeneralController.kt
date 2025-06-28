@@ -17,7 +17,7 @@ import javax.imageio.ImageIO
 import javax.servlet.http.HttpServletRequest
 
 @ApiRestController
-@RequestMapping("/api")
+@RequestMapping()
 class GeneralController(
     @Autowired val config: ConfigValueService
 ) {

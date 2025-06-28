@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
-@RequestMapping("/api/catalog")
+@RequestMapping("/catalog")
 class CatalogController {
     val log = KotlinLogging.logger {}
 

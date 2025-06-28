@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
-@RequestMapping("/api/device/registration")
+@RequestMapping("/device/registration")
 class DeviceRegistrationController(
     @Autowired val config: ConfigValueService
 ) {

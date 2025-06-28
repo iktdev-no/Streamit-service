@@ -36,10 +36,10 @@ class ConfigValueService {
 
 
     fun loadConfiguration() {
-        val serverIdFile = Env.configFilesFolder.using("id")
+        val serverIdFile = Env.getConfigFolder().using("id")
 
-        if (!Env.configFilesFolder.exists()) {
-            Env.configFilesFolder.mkdirs()
+        if (!Env.getConfigFolder().exists()) {
+            Env.getConfigFolder().mkdirs()
         }
 
         if (!serverIdFile.exists()) {
@@ -53,7 +53,7 @@ class ConfigValueService {
         }
 
 
-        val avahiServiceFolder = if (Env.avahiServiceFolder.exists()) Env.avahiServiceFolder else Env.configFilesFolder.using("avahi")
+        val avahiServiceFolder = if (Env.getAvahiServiceFolder().exists()) Env.getAvahiServiceFolder() else Env.getConfigFolder().using("avahi")
         if (avahiServiceFolder.exists()) {
             val avahiContent = generateAvahi()
             val avahiFile = avahiServiceFolder.using("streamit_${serverId}.service")

@@ -22,19 +22,19 @@ import java.io.OutputStream
 import java.nio.file.Files
 
 @AssetRestController
-@RequestMapping(path = ["/assets/"])
+@RequestMapping()
 open class AssetsController {
     val log = KotlinLogging.logger {}
 
     init {
-        if (Env.content == null || Env.content?.exists() == false) {
+        if (Env.getContentFolder() == null || Env.getContentFolder()?.exists() == false) {
             log.warn { "No content provided or exists.. No providing through controller will be available.." }
         }
     }
 
     @GetMapping("/profile-image/{image}")
     open fun getProfileImage(@PathVariable image: String): ResponseEntity<Resource> {
-        val file = Env.assetsFolder.with(image)
+        val file = Env.getAssetsFolder().with(image)
 
         if (file.exists()) {
             val fileResource: Resource = FileSystemResource(file)

@@ -1,11 +1,8 @@
-package no.iktdev.streamit.service.api.authentication
+package no.iktdev.streamit.service.stream
 
-import io.mockk.every
-import io.mockk.mockkObject
-import no.iktdev.streamit.service.TestBase
 import no.iktdev.streamit.service.TestBaseWithDatabase
+import no.iktdev.streamit.service.generateInvalidJwt
 import no.iktdev.streamit.shared.Authentication
-import no.iktdev.streamit.shared.Env
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -15,9 +12,8 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import java.io.File
 
-class AuthenticationControllerTest: TestBaseWithDatabase() {
+class ContentControllerAccessTest: TestBaseWithDatabase() {
     lateinit var auth: Authentication
     @Autowired
     lateinit var restTemplate: TestRestTemplate
@@ -31,21 +27,19 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         jwt = auth.createJwt()
     }
 
-    // 1. Åpent endepunkt skal gi 200 OK uten autentisering
     @Test
-    fun `open accessible endpoint should return OK`() {
-        val headers = HttpHeaders().apply {
-        }
+    fun `open stream media video endpoint returns 404 when file does not exist`() {
+        val headers = HttpHeaders()
         val request = HttpEntity<Void>(headers)
 
         val response = restTemplate.exchange(
-            "/open/api/auth/accessible", // 👈 bare path
+            "/open/stream/media/video/testCollection/testVideo.mp4",
             HttpMethod.GET,
             request,
             Void::class.java
         )
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
     // 2. Sikkert endepunkt med gyldig JWT
@@ -56,42 +50,29 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         })
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/accessible", // 👈 bare path
+            "/secure/stream/media/video/testCollection/testVideo.mp4",
             HttpMethod.GET,
             request,
-            String::class.java
+            Void::class.java
         )
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
-    // 3. Sikkert endepunkt uten autentisering -> 401
+    // 2. Sikkert endepunkt med gyldig JWT
     @Test
-    fun `secure validate endpoint should return 401 without JWT`() {
-        val headers = HttpHeaders().apply {
-        }
-        val request = HttpEntity<Void>(headers)
-
-        val response = restTemplate.exchange(
-            "/secure/api/auth/accessible", // 👈 bare path
-            HttpMethod.GET,
-            request,
-            String::class.java
-        )
-        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
-    }
-
-    @Test
-    fun `secure accessible endpoint should return Unauthorized Request with invalid JWT`() {
+    fun `secure accessible endpoint should return Unauthorized with invalid JWT`() {
         val request = HttpEntity<Void>(HttpHeaders().apply {
-            setBearerAuth("potetmos")
+            setBearerAuth(generateInvalidJwt())
         })
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/accessible", // 👈 bare path
+            "/secure/stream/media/video/testCollection/testVideo.mp4",
             HttpMethod.GET,
             request,
-            String::class.java
+            Void::class.java
         )
+
         assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 

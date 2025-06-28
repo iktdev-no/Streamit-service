@@ -65,7 +65,7 @@ class CatalogControllerTest: TestBaseWithDatabase() {
 
     @Test
     fun `Catalog should return a list of entries`() {
-        val response = restTemplate.simpleGet("/api/open/catalog",
+        val response = restTemplate.simpleGet("/open/api/catalog",
             object : ParameterizedTypeReference<List<Catalog>>() {}
         )
         assertHttpOk(response)
@@ -85,7 +85,7 @@ class CatalogControllerTest: TestBaseWithDatabase() {
 
     @Test
     fun `Catalog should return a list of movies`() {
-        val response = restTemplate.simpleGet("/api/open/catalog/movie",
+        val response = restTemplate.simpleGet("/open/api/catalog/movie",
             object : ParameterizedTypeReference<List<Catalog>>() {}
         )
         assertHttpOk(response)
@@ -105,7 +105,7 @@ class CatalogControllerTest: TestBaseWithDatabase() {
 
     @Test
     fun `Catalog should return a list of genre grouped elements`() {
-        val response = restTemplate.simpleGet("/api/open/catalog/genred",
+        val response = restTemplate.simpleGet("/open/api/catalog/genre",
             object : ParameterizedTypeReference<List<GenreCatalog>>() {}
         )
         assertHttpOk(response)

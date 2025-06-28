@@ -34,7 +34,7 @@ class AuthorizationInterceptor: HandlerInterceptor, Authentication() {
                     return false
                 }
                 if (!isTokenValid(token)) {
-                    response.status = HttpStatus.BAD_REQUEST.value()
+                    response.status = HttpStatus.UNAUTHORIZED.value()
                     return false
                 }
                 return true
@@ -51,7 +51,10 @@ class AuthorizationInterceptor: HandlerInterceptor, Authentication() {
         val validation = try {
             if (handler is HandlerMethod)
                 handler.method.getAnnotation(RequiresAuthentication::class.java)
-            else null
+            else {
+                log.info { "Handler type: ${handler::class.qualifiedName}" }
+                null
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             val url = request.requestURL.toString()

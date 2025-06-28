@@ -6,19 +6,39 @@ import java.time.LocalDateTime
 object Env {
 
     val mode: String = System.getenv("MODE") ?: "prod"
-
-    var address: String? = System.getenv("DATABASE_ADDRESS") ?: "192.168.2.250" // "streamit-db"
-    var port: String? = System.getenv("DATABASE_PORT") ?: "3306"
-    var username: String = System.getenv("DATABASE_USERNAME") ?: "streamit"
-    var password: String = System.getenv("DATABASE_PASSWORD") ?: "shFZ27eL2x2NoxyEDBMfDWkvFO"
     var database: String = System.getenv("DATABASE_USE") ?: "streamit"
 
-    var content: File? = if (!System.getenv("CONTENT_FOLDER").isNullOrEmpty()) File(System.getenv("CONTENT_FOLDER")) else null
+    fun getContentFolder(): File? {
+        return if (!System.getenv("CONTENT_FOLDER").isNullOrEmpty()) {
+            File(System.getenv("CONTENT_FOLDER"))
+        } else {
+            null
+        }
+    }
 
-    val avahiServiceFolder: File =
-        System.getenv("AVAHI_SERVICE_FOLDER")?.let { File(it) } ?: File("/etc/avahi/services")
-    val configFilesFolder = System.getenv("CONFIG_FOLDER")?.let { File(it) } ?: File("/conf")
-    val assetsFolder = System.getenv("ASSETS_FOLDER")?.let { File(it) } ?: File("/assets")
+    fun getConfigFolder(): File {
+        return if (!System.getenv("CONFIG_FOLDER").isNullOrEmpty()) {
+            File(System.getenv("CONFIG_FOLDER"))
+        } else {
+            File("/conf")
+        }
+    }
+
+    fun getAssetsFolder(): File {
+        return if (!System.getenv("ASSETS_FOLDER").isNullOrEmpty()) {
+            File(System.getenv("ASSETS_FOLDER"))
+        } else {
+            File("/assets")
+        }
+    }
+
+    fun getAvahiServiceFolder(): File {
+        return if (!System.getenv("AVAHI_SERVICE_FOLDER").isNullOrEmpty()) {
+            File(System.getenv("AVAHI_SERVICE_FOLDER"))
+        } else {
+            File("/etc/avahi/services")
+        }
+    }
 
     val isSelfSignedUsed: Boolean = System.getenv("CONFIG_IS_SELF_SIGNED")?.toBoolean() ?: true
     val lanAddress: String? = System.getenv("CONFIG_LAN_ADDRESS")

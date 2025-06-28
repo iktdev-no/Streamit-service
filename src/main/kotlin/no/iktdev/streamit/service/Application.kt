@@ -102,9 +102,9 @@ class InterceptorConfiguration(
 
     override fun configurePathMatch(configurer: PathMatchConfigurer) {
         super.configurePathMatch(configurer)
-        configurer.addPathPrefix("/api/**", HandlerTypePredicate.forAnnotation(ApiRestController::class.java))
-        configurer.addPathPrefix("/stream/**", HandlerTypePredicate.forAnnotation(ContentRestController::class.java))
-        configurer.addPathPrefix("/assets/**", HandlerTypePredicate.forAnnotation(AssetRestController::class.java))
+        configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(ApiRestController::class.java))
+        configurer.addPathPrefix("/stream", HandlerTypePredicate.forAnnotation(ContentRestController::class.java))
+        configurer.addPathPrefix("/assets", HandlerTypePredicate.forAnnotation(AssetRestController::class.java))
     }
 }
 
@@ -126,23 +126,28 @@ class PathDefiner : Filter {
         val httpRequest = request as HttpServletRequest
         val uri = httpRequest.requestURI
 
-        val modePart = if (uri.startsWith("/api")) uri.substringAfter("/api")
-        else if (uri.startsWith("/stream")) uri.substringAfter("/stream") else uri
-        val mode = modePart.substringAfter("/").substringBefore("/")
+        val accessModes = listOf("open", "secure")
+        var mode = "unknown"
+        var internalPath = uri
+
+        for (access in accessModes) {
+            when {
+                uri.startsWith("/$access/api") -> {
+                    mode = access
+                    internalPath = "/api" + uri.removePrefix("/$access/api")
+                    break
+                }
+                uri.startsWith("/$access/stream") -> {
+                    mode = access
+                    internalPath = "/stream" + uri.removePrefix("/$access/stream")
+                    break
+                }
+            }
+        }
 
         request.removeAttribute("internalAccessMode")
         request.setAttribute("internalAccessMode", mode)
 
-        val internalPath = if (uri.startsWith("/api")) {
-            val stripped = uri.removePrefix("/api").removePrefix("/secure").removePrefix("/open")
-            "/api$stripped"
-        } else if (uri.startsWith("/stream")) {
-            val stripped = uri.removePrefix("/stream").removePrefix("/secure").removePrefix("/open")
-            "/stream$stripped"
-        } else uri
-
-
-        // Opprett en ny request med den modifiserte pathen
         val modifiedRequest = object : HttpServletRequestWrapper(httpRequest) {
             override fun getRequestURI(): String {
                 return internalPath
@@ -150,6 +155,7 @@ class PathDefiner : Filter {
         }
         chain.doFilter(modifiedRequest, response)
     }
+
 
     private fun setSinglePath(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         request.setAttribute("internalAccessMode", "open")

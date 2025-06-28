@@ -15,6 +15,6 @@ class AssetsApiController {
     @GetMapping("/profile-image")
     fun profileImage(): List<String> {
         log.info { "Processing '/assets/profile-image'" }
-        return Env.assetsFolder.getOnlyFiles().filter { it.nameWithoutExtension.isNotBlank() }.map { it.name }
+        return Env.getAssetsFolder().getOnlyFiles().filter { it.nameWithoutExtension.isNotBlank() }.map { it.name }
     }
 }

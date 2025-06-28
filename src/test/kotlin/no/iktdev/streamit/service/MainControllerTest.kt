@@ -22,7 +22,7 @@ class MainControllerTest: TestBase() {
         val request = HttpEntity<Void>(headers)
 
         val response = restTemplate.exchange(
-            "/api/open/", // 👈 bare path
+            "/open/api/", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -38,7 +38,7 @@ class MainControllerTest: TestBase() {
         val request = HttpEntity<Void>(headers)
 
         val response = restTemplate.exchange(
-            "/api/open/heartbeat", // 👈 bare path
+            "/open/api/heartbeat", // 👈 bare path
             HttpMethod.GET,
             request,
             Heartbeat::class.java
