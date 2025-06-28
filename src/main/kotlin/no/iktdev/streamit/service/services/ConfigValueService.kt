@@ -30,7 +30,7 @@ class ConfigValueService {
         setServerObject()
     }
 
-    private fun generateServerId(): String {
+    fun generateServerId(): String {
         return UUID.randomUUID().toString().uppercase().substringAfterLast("-")
     }
 
@@ -86,9 +86,16 @@ class ConfigValueService {
         val writer = QRCodeWriter()
         val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, 20, 20)
 
-        for (y in 0 until bitMatrix.height) {
+        for (y in 0 until bitMatrix.height step 2) {
             for (x in 0 until bitMatrix.width) {
-                print(if (bitMatrix[x, y]) "██" else "  ")
+                val upper = bitMatrix[x, y]
+                val lower = if (y + 1 < bitMatrix.height) bitMatrix[x, y + 1] else false
+                print(when {
+                    upper && lower -> "█"
+                    upper -> "▀"
+                    lower -> "▄"
+                    else -> " "
+                })
             }
             println()
         }
