@@ -27,6 +27,10 @@ fun File.getOnlyFiles(): List<File> {
     return this.walk().filter { it.isFile }.toList()
 }
 
+fun isDebug(): Boolean {
+    return Env.mode == "debug"
+}
+
 fun debugLog(message: String) {
     if (Env.mode == "debug") {
         val stackTrace = Thread.currentThread().stackTrace
