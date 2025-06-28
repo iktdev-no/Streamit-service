@@ -7,10 +7,7 @@ data class AuthInitiateRequest(
     val pin: String,
     val deviceInfo: RequestDeviceInfo
 ) {
-    fun toRequestId(): String {
-        val unhashed = arrayListOf(deviceInfo.name, deviceInfo.model, deviceInfo.manufacturer, deviceInfo.clientOrOsVersion, deviceInfo.clientOrOsPlatform).joinToString("+")
-        return toSHA256Hash(unhashed + LocalDateTime.now().toString())
-    }
+    fun toRequestId(): String = deviceInfo.toRequestId(true)
 }
 
 data class RequestDeviceInfo(
@@ -19,7 +16,15 @@ data class RequestDeviceInfo(
     val manufacturer: String,
     val clientOrOsVersion: String,
     val clientOrOsPlatform: String
-)
+) {
+    fun toRequestId(withTimestamp: Boolean = false): String {
+        val unhashed = arrayListOf(name, model, manufacturer, clientOrOsVersion, clientOrOsPlatform).joinToString("+")
+        return if (withTimestamp)
+            toSHA256Hash(unhashed + LocalDateTime.now().toString())
+        else
+            toSHA256Hash(unhashed)
+    }
+}
 
 data class RequestCreatedResponse(
     val expiry: Long,

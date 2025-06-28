@@ -12,6 +12,7 @@ import no.iktdev.streamit.library.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.library.db.withTransaction
 import no.iktdev.streamit.shared.Env
+import no.iktdev.streamit.shared.database.AccessTokenTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
@@ -69,7 +70,8 @@ fun getTables(): Array<Table> {
 
     val authTables = arrayOf<Table>(
         DelegatedAuthenticationTable,
-        RegisteredDevicesTable
+        RegisteredDevicesTable,
+        AccessTokenTable
     )
 
     val miscTables = arrayOf<Table>(

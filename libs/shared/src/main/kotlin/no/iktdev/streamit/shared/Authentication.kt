@@ -7,6 +7,8 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import mu.KotlinLogging
 import no.iktdev.streamit.shared.classes.User
 import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
+import no.iktdev.streamit.shared.database.AccessTokenTable
+import no.iktdev.streamit.shared.database.queries.executeInsertAndGetId
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.*
@@ -49,9 +51,11 @@ open class Authentication {
 
 
     fun createJwt(deviceInfo: RequestDeviceInfo? = null, ttl: String? = null): String {
+        val deviceId = deviceInfo?.toRequestId() ?: UUID.randomUUID().toString()
         val zone = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
         val deviceMap = if (deviceInfo != null) {
             mapOf(
+                "id" to deviceId,
                 "name" to deviceInfo.name,
                 "model" to deviceInfo.model,
                 "deviceManufacturer" to deviceInfo.manufacturer,
@@ -80,7 +84,9 @@ open class Authentication {
             log.warn { "Access token is created without expiry" }
         }
 
-        return builder.sign(algorithm())
+        val token = builder.sign(algorithm())
+        AccessTokenTable.executeInsertAndGetId(deviceId, token)
+        return token
     }
 
     class MissingConfigurationException(message: String): Exception(message)
