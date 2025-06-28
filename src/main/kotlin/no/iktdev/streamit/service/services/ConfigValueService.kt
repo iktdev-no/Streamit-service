@@ -35,15 +35,9 @@ class ConfigValueService {
         return UUID.randomUUID().toString().uppercase().substringAfterLast("-")
     }
 
-    private fun generateFingerprint(): String {
-        val md = MessageDigest.getInstance("SHA-1")
-        val bytes = md.digest(UUID.randomUUID().toString().toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
 
     fun loadConfiguration() {
         val serverIdFile = Env.configFilesFolder.using("id")
-        val serverFingerprintFile = Env.configFilesFolder.using("fingerprint")
 
         if (!Env.configFilesFolder.exists()) {
             Env.configFilesFolder.mkdirs()
@@ -51,22 +45,22 @@ class ConfigValueService {
 
         if (!serverIdFile.exists()) {
             val serverId = generateServerId().also { serverId = it }
+            if (!serverIdFile.exists()) {
+                serverIdFile.createNewFile()
+            }
             serverIdFile.writeText(serverId)
         } else {
             serverId = serverIdFile.readText()
         }
 
-        if (!serverFingerprintFile.exists()) {
-            val fingerprint = generateFingerprint().also { this.fingerprint = it }
-            serverFingerprintFile.writeText(fingerprint)
-        } else {
-            fingerprint = serverFingerprintFile.readText()
-        }
 
         val avahiServiceFolder = if (Env.avahiServiceFolder.exists()) Env.avahiServiceFolder else Env.configFilesFolder.using("avahi")
         if (avahiServiceFolder.exists()) {
             val avahiContent = generateAvahi()
             val avahiFile = avahiServiceFolder.using("streamit_${serverId}.service")
+            if (!avahiFile.exists()) {
+                avahiFile.createNewFile()
+            }
             avahiFile.writeText(avahiContent)
         } else {
             log.warn { "Avahi service folder does not exist, skipping Avahi service generation." }
