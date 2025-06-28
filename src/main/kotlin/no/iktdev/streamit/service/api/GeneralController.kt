@@ -48,16 +48,6 @@ class GeneralController(
         }
     }
 
-    @GetMapping("/info/fingerprint")
-    fun serverFingerprint(): ResponseEntity<String> {
-        val fingerprint = config.fingerprint
-        return if (fingerprint.isNullOrBlank()) {
-            ResponseEntity.notFound().build()
-        } else {
-            ResponseEntity.ok(fingerprint)
-        }
-    }
-
     @GetMapping("/info/server")
     fun serverInfo(): ResponseEntity<Server?> {
         val server = config.server ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)

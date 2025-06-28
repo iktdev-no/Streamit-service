@@ -23,7 +23,6 @@ import javax.xml.transform.stream.StreamResult
 class ConfigValueService {
     val log = KotlinLogging.logger {}
     lateinit var serverId: String
-    lateinit var fingerprint: String
     var server: Server? = null
 
     init {
@@ -76,7 +75,6 @@ class ConfigValueService {
         server = Server(
             id = serverId,
             name = "Streamit Server",
-            fingerprint = fingerprint,
             lan = Env.lanAddress!!,
             remote = Env.wanAddress,
             remoteSecure = !Env.isSelfSignedUsed
@@ -135,7 +133,6 @@ class ConfigValueService {
                 <service>
                     <type>_streamit._tcp</type>
                     <txt-record>id=${serverId}</txt-record>
-                    <txt-record>fingerprint=${fingerprint}</txt-record>
                     <txt-record>lan=${lan}</txt-record>
                     <txt-record>remote=${wan}</txt-record>
                     <txt-record>remoteSecure=${!Env.isSelfSignedUsed}</txt-record>
