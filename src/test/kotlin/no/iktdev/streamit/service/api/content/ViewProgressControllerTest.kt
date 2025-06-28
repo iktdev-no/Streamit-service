@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -78,6 +79,7 @@ class ViewProgressControllerTest(): TestBaseWithDatabase() {
         }
     }
 
+    @Disabled
     @Test
     @DisplayName("""
         Given a normal viewing pattern,

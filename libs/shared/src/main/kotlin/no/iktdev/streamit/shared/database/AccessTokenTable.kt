@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 object AccessTokenTable: IntIdTable(name = "AccessToken") {
     val deviceId = varchar("deviceId", 70).uniqueIndex()
-    val token = varchar("token", 255).uniqueIndex()
+    val token = varchar("token", 1024).uniqueIndex()
     val createdAt = datetime("created").clientDefault { LocalDateTime.now() }
     val revoked = bool("revoked").default(false)
 
