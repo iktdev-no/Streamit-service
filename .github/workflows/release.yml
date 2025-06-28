@@ -1,9 +1,8 @@
-name: Snapshot builds
+name: Release builds
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [created]
 
 jobs:
   build-service:
@@ -94,6 +93,6 @@ jobs:
             PASS_APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
-            bskjon/streamit-service:snapshot-latest
+            bskjon/streamit-service:latest
             bskjon/streamit-service:${{ github.sha }}
             bskjon/streamit-service:${{ env.VERSION }}
