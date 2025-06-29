@@ -118,7 +118,7 @@ services:
       CONTENT_FRESH_DAYS: ${streamit_content_fresh_days}
       SERIE_AGE: ${streamit_serie_age}
       CONTENT_CONTINUE: ${streamit_content_continue}
-      CONTENT_DIRECTORY: ${streamit_content_folder}
+      CONTENT_FOLDER: ${streamit_content_folder}
       JWT_SECRET: ${streamit_jwt_secret}
       JWT_EXPIRY: ${streamit_jwt_expiry}
       PFNS_API_TOKEN: ${streamit_pns_api_token}
@@ -149,7 +149,7 @@ streamit_database_password=<your_database_password_here>
 streamit_content_fresh_days=5
 streamit_serie_age=1m
 streamit_content_continue=10
-streamit_content_directory=/media/stream
+streamit_content_folder=/media/stream
 
 streamit_jwt_secret=<your_jwt_secret_here>
 streamit_jwt_expiry=1y

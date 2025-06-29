@@ -9,6 +9,7 @@ build/
 
 assets/
 tmp/
+conf/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

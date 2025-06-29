@@ -125,7 +125,7 @@ class ConfigValueService {
         }
 
         val wan = Env.wanAddress?.let {
-            if (it.startsWith("https")) {
+            if (it.startsWith("http")) {
                 it
             } else {
                 "https://$it"
