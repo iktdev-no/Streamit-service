@@ -112,9 +112,8 @@ class InterceptorConfiguration(
 class WebConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOrigins("*") // Tillat alle origins
+            .allowedOrigins("*") // or specify allowed origins
             .allowedMethods("*")
-            .allowedHeaders("*")
     }
 }
 
