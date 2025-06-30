@@ -74,7 +74,11 @@ open class Authentication {
 
         val setTtl = if (!ttl.isNullOrBlank()) {
             ttl
-        } else Env.jwtExpiry
+        } else if (!Env.jwtExpiry.isNullOrBlank()) {
+            Env.jwtExpiry
+        } else {
+            null
+        }
 
         val expiry = setTtl?.let { Env.getExpiry(it) }
 
