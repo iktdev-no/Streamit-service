@@ -5,10 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import mu.KotlinLogging
-import no.iktdev.streamit.shared.classes.User
 import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
 import no.iktdev.streamit.shared.database.AccessTokenTable
-import no.iktdev.streamit.shared.database.queries.executeInsertAndGetId
+import no.iktdev.streamit.shared.database.queries.executeInsertOrUpdate
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.*
@@ -50,7 +49,7 @@ open class Authentication {
     }
 
 
-    fun createJwt(deviceInfo: RequestDeviceInfo? = null, ttl: String? = null): String {
+    fun createJwt(deviceInfo: RequestDeviceInfo? = null, ttl: String? = null): String? {
         val deviceId = deviceInfo?.toRequestId() ?: UUID.randomUUID().toString()
         val zone = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
         val deviceMap = if (deviceInfo != null) {
@@ -89,8 +88,11 @@ open class Authentication {
         }
 
         val token = builder.sign(algorithm())
-        AccessTokenTable.executeInsertAndGetId(deviceId, token)
-        return token
+        return try {
+            AccessTokenTable.executeInsertOrUpdate(deviceId, token)
+        } catch (e: Exception) {
+            return null
+        }
     }
 
     class MissingConfigurationException(message: String): Exception(message)

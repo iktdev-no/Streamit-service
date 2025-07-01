@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun DelegatedAuthenticationTable.executeInsertAndGetId(
+fun DelegatedAuthenticationTable.executeInsertOrUpdate(
     pin: String,
     requestId: String,
     deviceInfo: String,

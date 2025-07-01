@@ -11,7 +11,7 @@ import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
 import no.iktdev.streamit.shared.classes.remote.*
 import no.iktdev.streamit.shared.database.queries.executeGetDelegatePendingRequestBy
-import no.iktdev.streamit.shared.database.queries.executeInsertAndGetId
+import no.iktdev.streamit.shared.database.queries.executeInsertOrUpdate
 import no.iktdev.streamit.shared.debugLog
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.and
@@ -54,8 +54,13 @@ class AuthenticationController() {
 
     @RequiresAuthentication(Mode.Strict)
     @PostMapping(value = ["/new"])
-    fun createJWT(@RequestBody deviceInfo: RequestDeviceInfo): String {
-        return auth.createJwt(deviceInfo)
+    fun createJWT(@RequestBody deviceInfo: RequestDeviceInfo): ResponseEntity<String> {
+        val token = auth.createJwt(deviceInfo)
+        if (token == null) {
+            log.error { "Failed to create JWT for device: ${deviceInfo.name}" }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+        return ResponseEntity.ok(token)
     }
 
     @GetMapping(value = ["/delegate/required"])
@@ -112,7 +117,7 @@ class AuthenticationController() {
                 e.printStackTrace()
             }
         }) {
-            insertedId = DelegatedAuthenticationTable.executeInsertAndGetId(
+            insertedId = DelegatedAuthenticationTable.executeInsertOrUpdate(
                 pin = data.pin,
                 requestId = reqId,
                 deviceInfo = Gson().toJson(data.deviceInfo),

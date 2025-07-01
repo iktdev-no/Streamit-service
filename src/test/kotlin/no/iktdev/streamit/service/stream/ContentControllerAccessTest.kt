@@ -19,7 +19,7 @@ class ContentControllerAccessTest: TestBaseWithDatabase() {
     lateinit var restTemplate: TestRestTemplate
 
 
-    lateinit var jwt: String
+    var jwt: String? = null
     @BeforeAll
     fun createToken() {
         // For å kunne bruke JWT i testene

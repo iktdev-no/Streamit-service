@@ -1,18 +1,28 @@
 package no.iktdev.streamit.shared.database.queries
 
 import no.iktdev.streamit.shared.database.AccessTokenTable
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
-fun AccessTokenTable.executeInsertAndGetId(
+fun AccessTokenTable.executeInsertOrUpdate(
     deviceId: String,
     token: String
-) = transaction {
-    AccessTokenTable.insertAndGetId {
-        it[AccessTokenTable.deviceId] = deviceId
-        it[AccessTokenTable.token] = token
+): String = transaction {
+    val existing = AccessTokenTable.selectAll().where { AccessTokenTable.deviceId eq deviceId }.firstOrNull()
+    if (existing != null) {
+        AccessTokenTable.update({ AccessTokenTable.deviceId eq deviceId }) {
+            it[AccessTokenTable.token] = token
+        }
+    } else {
+        AccessTokenTable.insert {
+            it[AccessTokenTable.deviceId] = deviceId
+            it[AccessTokenTable.token] = token
+        }
     }
+    token
 }
 
 fun AccessTokenTable.executeGetTokenByDeviceId(
