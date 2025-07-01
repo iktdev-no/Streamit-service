@@ -136,7 +136,7 @@ class ConfigValueService {
             <?xml version="1.0" standalone='no'?>
             <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
             <service-group>
-                <name replace-wildcards="yes">%h Streamit</name>
+                <name replace-wildcards="yes">${Env.avahiServiceName}</name>
                 <service>
                     <type>_streamit._tcp</type>
                     <txt-record>id=${serverId}</txt-record>

@@ -52,6 +52,7 @@ object Env {
     var jwtExpiry: String? = System.getenv("JWT_EXPIRY")
     var pfnsApiToken: String? = System.getenv("PFNS_API_TOKEN")
     var singleEntryPaths: Boolean = System.getenv("SINGLE_ENTRY_PATHS")?.toBoolean() ?: false
+    var avahiServiceName: String = System.getenv("AVAHI_SERVICE_NAME") ?: "Streamit Server %h"
 
     fun getSerieCutoff(): LocalDateTime {
         val time = serieAgeCap
