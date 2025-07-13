@@ -31,6 +31,12 @@ jobs:
           restore-keys: |
             build-
 
+      - name: Run tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test
+
+
       - name: Build Spring Boot
         run: |
           chmod +x ./gradlew

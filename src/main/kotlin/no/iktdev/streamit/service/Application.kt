@@ -36,6 +36,7 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
+import javax.servlet.http.HttpServletResponse
 
 val log = KotlinLogging.logger {}
 
@@ -133,6 +134,34 @@ class WebConfig : WebMvcConfigurer {
             .allowCredentials(Env.getAllowCredentials())
     }
 }
+
+@Component
+class PreflightCorsFilter : Filter {
+
+    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+        val req = request as HttpServletRequest
+        val res = response as HttpServletResponse
+
+        if (req.method.equals("OPTIONS", ignoreCase = true)) {
+            log.info("→ Preflight-intercept for ${req.requestURI}")
+
+            val allowedOrigins = Env.getAllowedOrigins().joinToString(",")
+            val allowedMethods = Env.getMethods().joinToString(",")
+            val allowedHeaders = req.getHeader("Access-Control-Request-Headers") ?: "*"
+            val allowCredentials = Env.getAllowCredentials().toString()
+
+            res.setHeader("Access-Control-Allow-Origin", allowedOrigins)
+            res.setHeader("Access-Control-Allow-Methods", allowedMethods)
+            res.setHeader("Access-Control-Allow-Headers", allowedHeaders)
+            res.setHeader("Access-Control-Allow-Credentials", allowCredentials)
+            res.status = HttpServletResponse.SC_OK
+        } else {
+            chain.doFilter(request, response)
+        }
+    }
+}
+
+
 
 @Component
 @Order(2)
