@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.interceptor
 
+import mu.KotlinLogging
 import no.iktdev.streamit.shared.Env
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
@@ -8,6 +9,11 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class OptionsInterceptor : HandlerInterceptor {
+    val log = KotlinLogging.logger {}
+
+    init {
+        log.info { "Loading ${this.javaClass.simpleName}" }
+    }
 
     override fun preHandle(
         request: HttpServletRequest,
@@ -15,11 +21,26 @@ class OptionsInterceptor : HandlerInterceptor {
         handler: Any
     ): Boolean {
         if (request.method.equals("OPTIONS", ignoreCase = true)) {
+            log.info("Identified preflight")
+
+            val allowedOrigins = Env.getAllowedOrigins().joinToString(",")
+            val allowedMethods = Env.getMethods().joinToString(",")
+            val allowedHeaders = request.getHeader("Access-Control-Request-Headers") ?: "*"
+            val allowCredentials = Env.getAllowCredentials().toString()
+
             response.status = HttpServletResponse.SC_OK
-            response.setHeader("Access-Control-Allow-Origin", Env.getAllowedOrigins().joinToString(",")) // eller dine tillatte origins
-            response.setHeader("Access-Control-Allow-Methods", Env.getMethods().joinToString(","))
-            response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers") ?: "*")
-            response.setHeader("Access-Control-Allow-Credentials", Env.getAllowCredentials().toString())
+            response.setHeader("Access-Control-Allow-Origin", allowedOrigins)
+            response.setHeader("Access-Control-Allow-Methods", allowedMethods)
+            response.setHeader("Access-Control-Allow-Headers", allowedHeaders)
+            response.setHeader("Access-Control-Allow-Credentials", allowCredentials)
+
+            // Logg respons-headers
+            log.info("Response headers for OPTIONS:")
+            log.info("Access-Control-Allow-Origin: $allowedOrigins")
+            log.info("Access-Control-Allow-Methods: $allowedMethods")
+            log.info("Access-Control-Allow-Headers: $allowedHeaders")
+            log.info("Access-Control-Allow-Credentials: $allowCredentials")
+            log.info("Response status: ${response.status}")
 
             return false // Stopper videre håndtering, svarer direkte
         }

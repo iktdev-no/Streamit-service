@@ -22,6 +22,7 @@ class GeneralController(
     @Autowired val config: ConfigValueService
 ) {
 
+    @RequiresAuthentication(Mode.None)
     @GetMapping("/heartbeat")
     fun heartbeatPath(): Heartbeat {
         return Heartbeat(true, System.currentTimeMillis() / 1000L)
