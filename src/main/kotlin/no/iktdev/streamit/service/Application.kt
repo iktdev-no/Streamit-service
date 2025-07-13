@@ -141,6 +141,8 @@ class PreflightCorsFilter : Filter {
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
+        log.info("→ Preflight-intercept for method ${req.method} on ${req.requestURI}")
+
 
         if (req.method.equals("OPTIONS", ignoreCase = true)) {
             log.info("→ Preflight-intercept for ${req.requestURI}")

@@ -20,6 +20,8 @@ class OptionsInterceptor : HandlerInterceptor {
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
+        log.info("${this.javaClass.simpleName} triggered on ${request.method}")
+
         if (request.method.equals("OPTIONS", ignoreCase = true)) {
             log.info("Identified preflight")
 
