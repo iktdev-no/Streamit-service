@@ -12,7 +12,6 @@ import no.iktdev.streamit.library.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.library.db.withTransaction
 import no.iktdev.streamit.service.interceptor.AuthorizationInterceptor
-import no.iktdev.streamit.service.interceptor.OptionsInterceptor
 import no.iktdev.streamit.shared.Env
 import no.iktdev.streamit.shared.database.AccessTokenTable
 import org.jetbrains.exposed.sql.Database
@@ -95,16 +94,10 @@ fun databaseSetup(database: Database) {
 
 @Configuration
 class InterceptorConfiguration(
-    @Autowired val authInterceptor: AuthorizationInterceptor,
-    @Autowired val optionsInterceptor: OptionsInterceptor
+    @Autowired val authInterceptor: AuthorizationInterceptor
 ): WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         super.addInterceptors(registry)
-        optionsInterceptor.let {
-            log.info("Adding ${it.javaClass.simpleName}")
-            registry.addInterceptor(it).addPathPatterns("/**")
-        }
-
         authInterceptor.let {
             log.info("Adding ${it.javaClass.simpleName}")
             registry.addInterceptor(it).addPathPatterns("/**")
@@ -137,31 +130,36 @@ class WebConfig : WebMvcConfigurer {
 
 @Component
 class PreflightCorsFilter : Filter {
-
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
-        log.info("→ Preflight-intercept for method ${req.method} on ${req.requestURI}")
 
+        val origin = req.getHeader("Origin")
+        val allowedOrigins = Env.getAllowedOrigins()
+        val allowedMethods = Env.getMethods()
+        val allowCredentials = Env.getAllowCredentials()
 
         if (req.method.equals("OPTIONS", ignoreCase = true)) {
-            log.info("→ Preflight-intercept for ${req.requestURI}")
-
-            val allowedOrigins = Env.getAllowedOrigins().joinToString(",")
-            val allowedMethods = Env.getMethods().joinToString(",")
-            val allowedHeaders = req.getHeader("Access-Control-Request-Headers") ?: "*"
-            val allowCredentials = Env.getAllowCredentials().toString()
-
-            res.setHeader("Access-Control-Allow-Origin", allowedOrigins)
-            res.setHeader("Access-Control-Allow-Methods", allowedMethods)
-            res.setHeader("Access-Control-Allow-Headers", allowedHeaders)
-            res.setHeader("Access-Control-Allow-Credentials", allowCredentials)
-            res.status = HttpServletResponse.SC_OK
-        } else {
-            chain.doFilter(request, response)
+            if (origin != null && allowedOrigins.contains(origin)) {
+                res.setHeader("Access-Control-Allow-Origin", origin)
+                res.setHeader("Vary", "Origin")
+                res.setHeader("Access-Control-Allow-Methods", allowedMethods.joinToString(","))
+                res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers") ?: "*")
+                if (allowCredentials) {
+                    res.setHeader("Access-Control-Allow-Credentials", "true")
+                }
+                res.status = HttpServletResponse.SC_OK
+                return  // stopper videre kjeding
+            } else {
+                res.status = HttpServletResponse.SC_FORBIDDEN
+                return
+            }
         }
+        // Vanlig request → gå videre
+        chain.doFilter(request, response)
     }
 }
+
 
 
 
