@@ -46,6 +46,12 @@ object Env {
         return defaultOrigins + additionalOrigins
     }
 
+    fun getMethods(): List<String> {
+        return listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
+    }
+
+    fun getAllowCredentials(): Boolean = true
+
     val isSelfSignedUsed: Boolean = System.getenv("CONFIG_IS_SELF_SIGNED")?.toBoolean() ?: true
     val lanAddress: String? = System.getenv("CONFIG_LAN_ADDRESS")
     val wanAddress: String? = System.getenv("CONFIG_WAN_ADDRESS")

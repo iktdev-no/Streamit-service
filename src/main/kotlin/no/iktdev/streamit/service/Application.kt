@@ -11,6 +11,8 @@ import no.iktdev.streamit.library.db.tables.other.DataVideoTable
 import no.iktdev.streamit.library.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.library.db.withTransaction
+import no.iktdev.streamit.service.interceptor.AuthorizationInterceptor
+import no.iktdev.streamit.service.interceptor.OptionsInterceptor
 import no.iktdev.streamit.shared.Env
 import no.iktdev.streamit.shared.database.AccessTokenTable
 import org.jetbrains.exposed.sql.Database
@@ -92,12 +94,20 @@ fun databaseSetup(database: Database) {
 
 @Configuration
 class InterceptorConfiguration(
-    @Autowired val authInterceptor: AuthorizationInterceptor
+    @Autowired val authInterceptor: AuthorizationInterceptor,
+    @Autowired val optionsInterceptor: OptionsInterceptor
 ): WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         super.addInterceptors(registry)
-        log.info { "Adding AuthorizationInterceptor" }
-        registry.addInterceptor(authInterceptor).addPathPatterns("/**")
+        optionsInterceptor.let {
+            log.info("Adding ${it.javaClass.simpleName}")
+            registry.addInterceptor(it).addPathPatterns("/**")
+        }
+
+        authInterceptor.let {
+            log.info("Adding ${it.javaClass.simpleName}")
+            registry.addInterceptor(it).addPathPatterns("/**")
+        }
     }
 
     override fun configurePathMatch(configurer: PathMatchConfigurer) {
@@ -112,15 +122,15 @@ class InterceptorConfiguration(
 class WebConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         val origins = Env.getAllowedOrigins();
-        log.info("Allowing origins:" + origins.joinToString("\n\t"))
+        log.info("Allowing origins:\n\t" + origins.joinToString("\n\t"))
 
-        val methods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
-        log.info("Allowing methods:" + methods.joinToString("\n\t"))
+        val methods = Env.getMethods()
+        log.info("Allowing methods:\n\t" + methods.joinToString("\n\t"))
 
         registry.addMapping("/**")
             .allowedOrigins(*origins.toTypedArray()) // or specify allowed origins
             .allowedMethods(*methods.toTypedArray())
-            .allowCredentials(true)
+            .allowCredentials(Env.getAllowCredentials())
     }
 }
 

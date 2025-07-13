@@ -1,13 +1,16 @@
-package no.iktdev.streamit.service
+package no.iktdev.streamit.service.interceptor
 
 import mu.KotlinLogging
-import no.iktdev.streamit.shared.*
+import no.iktdev.streamit.service.getAuthorization
+import no.iktdev.streamit.service.getRequestersIp
+import no.iktdev.streamit.shared.Authentication
+import no.iktdev.streamit.shared.Mode
+import no.iktdev.streamit.shared.RequiresAuthentication
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
-import org.springframework.web.servlet.ModelAndView
 import java.util.stream.Collectors
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -63,7 +66,7 @@ class AuthorizationInterceptor: HandlerInterceptor, Authentication() {
             log.error { "Error report:\n\tSource:${request.getRequestersIp()}\n\tUrl:$url\n\tQuery params:$queryParams\n\tBody:$body" }
             null
         }
-        return validation?.mode ?: kotlin.run {
+        return validation?.mode ?: run {
             log.warn { "No handler found on ${request.method} @ ${request.requestURI}" }
             Mode.None
         }
