@@ -111,9 +111,15 @@ class InterceptorConfiguration(
 @Configuration
 class WebConfig : WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
+        val origins = Env.getAllowedOrigins();
+        log.info("Allowing origins:" + origins.joinToString("\n\t"))
+
+        val methods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
+        log.info("Allowing methods:" + methods.joinToString("\n\t"))
+
         registry.addMapping("/**")
-            .allowedOrigins(*Env.getAllowedOrigins().toTypedArray()) // or specify allowed origins
-            .allowedMethods("*")
+            .allowedOrigins(*origins.toTypedArray()) // or specify allowed origins
+            .allowedMethods(*methods.toTypedArray())
             .allowCredentials(true)
     }
 }
