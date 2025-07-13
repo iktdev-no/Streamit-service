@@ -40,6 +40,12 @@ object Env {
         }
     }
 
+    fun getAllowedOrigins(): List<String> {
+        val defaultOrigins = listOfNotNull(lanAddress, wanAddress)
+        val additionalOrigins = System.getenv("ALLOWED_ORIGINS")?.split(",")?.toList() ?: emptyList()
+        return defaultOrigins + additionalOrigins
+    }
+
     val isSelfSignedUsed: Boolean = System.getenv("CONFIG_IS_SELF_SIGNED")?.toBoolean() ?: true
     val lanAddress: String? = System.getenv("CONFIG_LAN_ADDRESS")
     val wanAddress: String? = System.getenv("CONFIG_WAN_ADDRESS")
