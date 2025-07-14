@@ -50,13 +50,26 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
 
     // 2. Sikkert endepunkt med gyldig JWT
     @Test
-    fun `secure accessible endpoint should return OK with valid JWT`() {
+    fun `secure accessible endpoint should return OK with valid JWT in header`() {
         val request = HttpEntity<Void>(HttpHeaders().apply {
             setBearerAuth(jwt)
         })
 
         val response = restTemplate.exchange(
             "/secure/api/auth/accessible", // 👈 bare path
+            HttpMethod.GET,
+            request,
+            String::class.java
+        )
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    @Test
+    fun `secure accessible endpoint should return OK with valid JWT in url`() {
+        val request = HttpEntity<Void>(HttpHeaders())
+
+        val response = restTemplate.exchange(
+            "/secure/api/auth/accessible?token=$jwt", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -81,13 +94,26 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
     }
 
     @Test
-    fun `secure accessible endpoint should return Unauthorized Request with invalid JWT`() {
+    fun `secure accessible endpoint should return Unauthorized Request with invalid JWT in header`() {
         val request = HttpEntity<Void>(HttpHeaders().apply {
             setBearerAuth("potetmos")
         })
 
         val response = restTemplate.exchange(
             "/secure/api/auth/accessible", // 👈 bare path
+            HttpMethod.GET,
+            request,
+            String::class.java
+        )
+        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+
+    @Test
+    fun `secure accessible endpoint should return Unauthorized Request with invalid token passed in url`() {
+        val request = HttpEntity<Void>(HttpHeaders())
+
+        val response = restTemplate.exchange(
+            "/secure/api/auth/accessible?token=potetmos", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java

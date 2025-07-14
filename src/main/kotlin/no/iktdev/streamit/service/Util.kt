@@ -11,5 +11,6 @@ fun HttpServletRequest?.getRequestersIp(): String? {
 }
 
 fun HttpServletRequest?.getAuthorization(): String? {
-    return this?.getHeader("Authorization")
+    val header = this?.getHeader("Authorization")
+    return if (header.isNullOrBlank()) this?.getParameter("token") else header
 }
