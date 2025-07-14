@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 open class SummaryController {
 
     @RequiresAuthentication(Mode.Soft)
-    @GetMapping("/summary/{id}")
+    @GetMapping("/{id}")
     open fun getSummaryById(@PathVariable id: Int): List<Summary> {
         return if (id > -1) SummaryTable.executeSelectOnId(id) else emptyList()
     }
