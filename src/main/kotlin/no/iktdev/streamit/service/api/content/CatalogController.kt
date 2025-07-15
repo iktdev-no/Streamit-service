@@ -23,6 +23,12 @@ class CatalogController {
         return CatalogTable.executeGetAll()
     }
 
+    @GetMapping("/get/{ids}")
+    fun getCatalogById(@PathVariable ids: String): List<Catalog> {
+        val intIds: List<Int> = ids.split(",").map { it.trim() }.mapNotNull { it.toIntOrNull() }
+        return CatalogTable.executeGetByIds(intIds);
+    }
+
     @GetMapping("/new")
     fun getNewContent(): List<Catalog> {
         log.info { "Processing '/catalog/new'" }

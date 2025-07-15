@@ -13,6 +13,11 @@ fun CatalogTable.executeGetAll(): List<Catalog> =  transaction {
         .mapNotNull { Catalog.fromRow(it) }
 }
 
+fun CatalogTable.executeGetByIds(ids: List<Int>): List<Catalog> = transaction {
+    CatalogTable.selectAll().where { CatalogTable.id inList ids }
+        .mapNotNull { Catalog.fromRow(it) }
+}
+
 fun CatalogTable.executeGetMovies(): List<Catalog> =
     CatalogTable.selectOnlyMovies()
         .map { Catalog.fromTable(it) }
