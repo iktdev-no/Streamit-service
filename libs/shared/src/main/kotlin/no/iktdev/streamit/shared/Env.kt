@@ -42,8 +42,9 @@ object Env {
 
     fun getAllowedOrigins(): List<String> {
         val defaultOrigins = listOfNotNull(lanAddress, wanAddress, "https://www.gstatic.com")
-        val additionalOrigins = System.getenv("CONFIG_ALLOWED_ORIGINS")?.split(",")?.toList() ?: emptyList()
-        return defaultOrigins + additionalOrigins
+        val additionalOrigins = System.getenv("CONFIG_ALLOWED_ORIGINS")?.split(",")?.map { it.trim() }?.toList() ?: emptyList()
+        val allOrigins = defaultOrigins + additionalOrigins
+        return allOrigins.distinct()
     }
 
     fun getMethods(): List<String> {
