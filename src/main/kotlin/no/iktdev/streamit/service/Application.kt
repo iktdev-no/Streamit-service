@@ -128,39 +128,6 @@ class WebConfig : WebMvcConfigurer {
     }
 }
 
-@Component
-class PreflightCorsFilter : Filter {
-    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
-        val req = request as HttpServletRequest
-        val res = response as HttpServletResponse
-
-        val origin = req.getHeader("Origin")
-        val allowedOrigins = Env.getAllowedOrigins()
-        val allowedMethods = Env.getMethods()
-        val allowCredentials = Env.getAllowCredentials()
-
-        if (req.method.equals("OPTIONS", ignoreCase = true)) {
-            if (origin != null && allowedOrigins.contains(origin)) {
-                res.setHeader("Access-Control-Allow-Origin", origin)
-                res.setHeader("Vary", "Origin")
-                res.setHeader("Access-Control-Allow-Methods", allowedMethods.joinToString(","))
-                res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers") ?: "*")
-                if (allowCredentials) {
-                    res.setHeader("Access-Control-Allow-Credentials", "true")
-                }
-                res.status = HttpServletResponse.SC_OK
-                return  // stopper videre kjeding
-            } else {
-                res.status = HttpServletResponse.SC_FORBIDDEN
-                return
-            }
-        }
-        // Vanlig request → gå videre
-        chain.doFilter(request, response)
-    }
-}
-
-
 
 
 @Component
