@@ -42,13 +42,13 @@ class UserController {
 
     @RequiresAuthentication(Mode.Strict)
     @DeleteMapping("/")
-    fun deleteUser(@RequestBody user: User): ResponseEntity<String>
+    fun deleteUser(@RequestBody userId: String): ResponseEntity<String>
     {
-        val succeeded = UserTable.executeDeleteWith(user.guid)
+        val succeeded = UserTable.executeDeleteWith(userId)
         return if (succeeded)
-            ResponseEntity("Deleted user ${user.name} with Guid ${user.guid}", HttpStatus.OK)
+            ResponseEntity("Deleted user ${userId} with Guid ${userId}", HttpStatus.OK)
         else
-            ResponseEntity("Could not find user ${user.name} with Guid ${user.guid} to be deleted", HttpStatus.NOT_FOUND)
+            ResponseEntity("Could not find user ${userId} with Guid ${userId} to be deleted", HttpStatus.NOT_FOUND)
     }
 
 
