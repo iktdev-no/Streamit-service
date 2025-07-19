@@ -41,7 +41,7 @@ class UserController {
     }
 
     @RequiresAuthentication(Mode.Strict)
-    @DeleteMapping("/")
+    @DeleteMapping("")
     fun deleteUser(@RequestBody userId: String): ResponseEntity<String>
     {
         val succeeded = UserTable.executeDeleteWith(userId)
