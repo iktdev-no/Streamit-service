@@ -1,5 +1,6 @@
 package no.iktdev.streamit.shared.database
 
+import org.jetbrains.exposed.sql.ResultRow
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -11,4 +12,8 @@ fun timestampToLocalDateTime(timestamp: Int): LocalDateTime {
 
 fun LocalDateTime.toEpochSeconds(): Long {
     return this.toEpochSecond(ZoneOffset.ofTotalSeconds(ZoneOffset.systemDefault().rules.getOffset(LocalDateTime.now()).totalSeconds))
+}
+
+fun ResultRow?.exists(): Boolean {
+    return this != null
 }

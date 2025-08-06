@@ -2,11 +2,8 @@ package no.iktdev.streamit.service.assets
 
 import mu.KotlinLogging
 import no.iktdev.streamit.service.AssetRestController
-import no.iktdev.streamit.service.ContentRestController
 import no.iktdev.streamit.service.supporting.WebUtil
 import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.Mode
-import no.iktdev.streamit.shared.RequiresAuthentication
 import no.iktdev.streamit.shared.isDebug
 import no.iktdev.streamit.shared.with
 import org.springframework.core.io.FileSystemResource
@@ -18,11 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.util.UrlPathHelper
-import java.io.FileInputStream
-import java.io.OutputStream
 import java.nio.file.Files
 import javax.servlet.http.HttpServletRequest
 

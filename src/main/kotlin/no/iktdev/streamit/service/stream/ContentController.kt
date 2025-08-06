@@ -4,8 +4,8 @@ import mu.KotlinLogging
 import no.iktdev.streamit.service.ContentRestController
 import no.iktdev.streamit.service.supporting.WebUtil
 import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.isDebug
 import no.iktdev.streamit.shared.with
 import org.springframework.core.io.FileSystemResource
@@ -43,9 +43,11 @@ open class ContentController {
     }
 
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.MediaRead)
     @GetMapping("video/{collection}/{video}")
     open fun provideVideoFile(@PathVariable collection: String, @PathVariable video: String): ResponseEntity<Resource> {
+        log.info("REACHED provideVideoFile with collection=$collection, video=$video")
+
         val file = Env.getContentFolder()?.with(collection, video)
 
         if (file?.exists() == true) {
@@ -62,7 +64,7 @@ open class ContentController {
         }
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.MediaRead)
     @GetMapping("image/{collection}/{image}")
     open fun provideImageFile(@PathVariable collection: String, @PathVariable image: String): ResponseEntity<ByteArray> {
         val file = Env.getContentFolder()?.with(collection, image)
@@ -87,7 +89,7 @@ open class ContentController {
 
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.MediaRead)
     @GetMapping("subtitle/{collection}/{language}/{subtitle}")
     open fun provideSubtitle(@PathVariable collection: String, @PathVariable language: String, @PathVariable subtitle: String): ResponseEntity<ByteArray> {
         val file = Env.getContentFolder()?.with(collection, "sub", language, subtitle)

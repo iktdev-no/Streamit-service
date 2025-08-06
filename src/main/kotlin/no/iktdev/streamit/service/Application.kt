@@ -11,9 +11,10 @@ import no.iktdev.streamit.library.db.tables.other.DataVideoTable
 import no.iktdev.streamit.library.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.library.db.withTransaction
-import no.iktdev.streamit.service.interceptor.AuthorizationInterceptor
+import no.iktdev.streamit.service.interceptor.GeneralAuthorizationInterceptor
+import no.iktdev.streamit.service.interceptor.MediaAuthorizationInterceptor
 import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.database.AccessTokenTable
+import no.iktdev.streamit.shared.database.PersistentTokenTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
@@ -35,7 +36,6 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
-import javax.servlet.http.HttpServletResponse
 
 val log = KotlinLogging.logger {}
 
@@ -73,7 +73,7 @@ fun getTables(): Array<Table> {
     val authTables = arrayOf<Table>(
         DelegatedAuthenticationTable,
         RegisteredDevicesTable,
-        AccessTokenTable
+        PersistentTokenTable
     )
 
     val miscTables = arrayOf<Table>(
@@ -94,14 +94,23 @@ fun databaseSetup(database: Database) {
 
 @Configuration
 class InterceptorConfiguration(
-    @Autowired val authInterceptor: AuthorizationInterceptor
+    @Autowired val authInterceptor: GeneralAuthorizationInterceptor,
+    @Autowired val mediaInterceptor: MediaAuthorizationInterceptor
 ): WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         super.addInterceptors(registry)
         authInterceptor.let {
             log.info("Adding ${it.javaClass.simpleName}")
-            registry.addInterceptor(it).addPathPatterns("/**")
+            registry.addInterceptor(it)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/stream/**")
         }
+        mediaInterceptor.let {
+            log.info("Adding ${it.javaClass.simpleName}")
+            registry.addInterceptor(it)
+                .addPathPatterns("/stream/**")
+        }
+
     }
 
     override fun configurePathMatch(configurer: PathMatchConfigurer) {

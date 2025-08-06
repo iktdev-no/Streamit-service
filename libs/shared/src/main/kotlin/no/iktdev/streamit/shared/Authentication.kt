@@ -4,11 +4,14 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.google.gson.Gson
 import mu.KotlinLogging
+import no.iktdev.streamit.shared.classes.remote.MediaScopedAuthRequest
 import no.iktdev.streamit.shared.classes.remote.RequestDeviceInfo
-import no.iktdev.streamit.shared.database.AccessTokenTable
-import no.iktdev.streamit.shared.database.queries.executeInsertOrUpdate
+import no.iktdev.streamit.shared.database.PersistentTokenTable
+import no.iktdev.streamit.shared.database.TokenTable
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
@@ -43,11 +46,13 @@ open class Authentication {
             return false
         }
         val decoded = decode(token) ?: return false
-        return if (decoded.expiresAtAsInstant != null)
-            decoded.expiresAtAsInstant.isBefore(Instant.now())
-        else true
+        return decoded.expiresAtAsInstant?.isAfter(Instant.now()) ?: true
     }
 
+    enum class TokenType {
+        Device,
+        Cast
+    }
 
     fun createJwt(deviceInfo: RequestDeviceInfo? = null, ttl: String? = null): String? {
         val deviceId = deviceInfo?.toRequestId() ?: UUID.randomUUID().toString()
@@ -68,6 +73,8 @@ open class Authentication {
             .withIssuedAt(Date.from(Instant.now()))
             .withSubject("Authorization for A.O.I.")
             .withPayload(mapOf(
+                "type" to TokenType.Device.name,
+                "scope" to userDefaultScope(),
                 "device" to deviceMap
             ))
 
@@ -89,9 +96,33 @@ open class Authentication {
 
         val token = builder.sign(algorithm())
         return try {
-            AccessTokenTable.executeInsertOrUpdate(deviceId, token)
+            PersistentTokenTable.executeInsertOrUpdate(deviceId, token)
         } catch (e: Exception) {
+            e.printStackTrace()
             return null
+        }
+    }
+
+    fun createMediaScopedJwt(scopeInfo: MediaScopedAuthRequest, tokenType: TokenType, scopes: Map<String, List<String>>): String? {
+        val expire = LocalDateTime.now().plusHours(4).asZoned()
+
+        val builder = JWT.create()
+            .withIssuer(issuer)
+            .withIssuedAt(LocalDateTime.now().asZoned())
+            .withSubject("Scoped Authorization token")
+            .withPayload(mapOf(
+                "type" to tokenType.name,
+                "scope" to scopes,
+                "media" to Gson().toJson(scopeInfo)
+            ))
+            .withExpiresAt(expire)
+        val token =  builder.sign(algorithm())
+        return try {
+            val success = TokenTable.insertToken(token)
+            if (success) token else null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 

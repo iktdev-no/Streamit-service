@@ -2,8 +2,8 @@ package no.iktdev.streamit.service.api
 
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.classes.CapabilitiesObject
 import no.iktdev.streamit.shared.classes.Heartbeat
 import no.iktdev.streamit.shared.classes.fcm.clazzes.Server
@@ -22,13 +22,13 @@ class GeneralController(
     @Autowired val config: ConfigValueService
 ) {
 
-    @RequiresAuthentication(Mode.None)
+    @RequiresAuthentication(Scope.None)
     @GetMapping("/heartbeat")
     fun heartbeatPath(): Heartbeat {
         return Heartbeat(true, System.currentTimeMillis() / 1000L)
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizedRead)
     @GetMapping()
     fun main(request: HttpServletRequest? = null): ResponseEntity<String> {
         return ResponseEntity.ok().body(null)

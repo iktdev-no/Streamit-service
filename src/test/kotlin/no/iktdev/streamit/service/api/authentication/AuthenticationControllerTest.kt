@@ -18,18 +18,9 @@ import org.springframework.http.HttpStatus
 import java.io.File
 
 class AuthenticationControllerTest: TestBaseWithDatabase() {
-    lateinit var auth: Authentication
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
-
-    var jwt: String? = null
-    @BeforeAll
-    fun createToken() {
-        // For å kunne bruke JWT i testene
-        auth = Authentication()
-        jwt = auth.createJwt()
-    }
 
     // 1. Åpent endepunkt skal gi 200 OK uten autentisering
     @Test
@@ -52,7 +43,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
     @Test
     fun `secure accessible endpoint should return OK with valid JWT in header`() {
         val request = HttpEntity<Void>(HttpHeaders().apply {
-            setBearerAuth(jwt)
+            setBearerAuth(validToken)
         })
 
         val response = restTemplate.exchange(
@@ -69,7 +60,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         val request = HttpEntity<Void>(HttpHeaders())
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/accessible?token=$jwt", // 👈 bare path
+            "/secure/api/auth/accessible?token=$validToken", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
