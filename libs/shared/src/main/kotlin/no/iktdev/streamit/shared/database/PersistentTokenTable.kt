@@ -1,40 +1,37 @@
 package no.iktdev.streamit.shared.database
 
+import no.iktdev.streamit.shared.toMD5
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.insertIgnore
-import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
-import java.time.LocalDateTime
 
 object PersistentTokenTable : IntIdTable(name = "PersistentTokens") {
     val deviceId = varchar("deviceId", 70).uniqueIndex()
-    val token = reference("token", TokenTable.token)
+    val tokenId = reference("tokenId", TokenTable.tokenId)
 
     init {
-        uniqueIndex(deviceId, token)
+        uniqueIndex(deviceId, tokenId)
     }
 
     fun executeInsertOrUpdate(deviceId: String, token: String): String? = transaction {
+        val tokenId = token.toMD5()
         val existsInPersist = PersistentTokenTable.selectAll()
-            .where { PersistentTokenTable.deviceId.eq(deviceId) or PersistentTokenTable.token.eq(token) }.firstOrNull()
+            .where { PersistentTokenTable.deviceId.eq(deviceId) or PersistentTokenTable.tokenId.eq(tokenId) }.firstOrNull()
 
         if (existsInPersist.exists()) {
-            PersistentTokenTable.update({ PersistentTokenTable.deviceId.eq(deviceId) or PersistentTokenTable.token.eq(token)}) {
-                it[PersistentTokenTable.token] = token
+            PersistentTokenTable.update({ PersistentTokenTable.deviceId.eq(deviceId) or PersistentTokenTable.tokenId.eq(tokenId)}) {
+                it[PersistentTokenTable.tokenId] = tokenId
                 it[PersistentTokenTable.deviceId] = PersistentTokenTable.deviceId
             }
         } else {
-            TokenTable.insertIgnore {
-                it[TokenTable.token] = token
-            }
+            TokenTable.insertToken(token)
 
             PersistentTokenTable.insert {
                 it[PersistentTokenTable.deviceId] = deviceId
-                it[PersistentTokenTable.token] = token
+                it[PersistentTokenTable.tokenId] = tokenId
             }
 
 

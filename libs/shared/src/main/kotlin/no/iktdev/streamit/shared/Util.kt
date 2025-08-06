@@ -2,6 +2,7 @@ package no.iktdev.streamit.shared
 
 import mu.KotlinLogging
 import java.io.File
+import java.math.BigInteger
 import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.Instant
@@ -20,6 +21,13 @@ fun toSHA256Hash(input: String): String {
     }
 
     return result.toString()
+}
+
+fun String.toMD5(): String {
+    val md = MessageDigest.getInstance("MD5")
+    return BigInteger(1, md.digest(this.toByteArray()))
+        .toString(16)
+        .padStart(32, '0')
 }
 
 fun File.with(vararg path: String): File {
