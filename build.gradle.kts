@@ -54,6 +54,7 @@ dependencies {
     implementation(project(mapOf("path" to ":libs:shared")))
 
     implementation("com.google.zxing:core:3.5.1")
+    implementation("com.sksamuel.aedile:aedile-core:3.0.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -65,6 +66,8 @@ dependencies {
 
     testImplementation("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-actuator")
+
     testImplementation("io.mockk:mockk:1.13.10")
 }
 

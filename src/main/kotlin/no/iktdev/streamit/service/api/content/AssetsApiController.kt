@@ -3,6 +3,8 @@ package no.iktdev.streamit.service.api.content
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.shared.Env
+import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.getOnlyFiles
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 class AssetsApiController {
     val log = KotlinLogging.logger {}
 
+    @RequiresAuthentication(Scope.None)
     @GetMapping("/profile-image")
     fun profileImage(): List<String> {
         log.info { "Processing '/assets/profile-image'" }

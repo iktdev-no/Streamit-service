@@ -6,9 +6,12 @@ import no.iktdev.streamit.library.db.*
 import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.getRequestersIp
+import no.iktdev.streamit.service.services.TokenState
+import no.iktdev.streamit.service.services.TokenStateCacheService
 import no.iktdev.streamit.shared.Authentication
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
+import no.iktdev.streamit.shared.castScope
 import no.iktdev.streamit.shared.classes.remote.*
 import no.iktdev.streamit.shared.database.queries.executeGetDelegatePendingRequestBy
 import no.iktdev.streamit.shared.database.queries.executeInsertOrUpdate
@@ -18,6 +21,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -27,32 +31,34 @@ import javax.servlet.http.HttpServletRequest
 @ApiRestController
 @RequestMapping("/auth")
 class AuthenticationController() {
+    @Autowired lateinit var tokenStateCacheService: TokenStateCacheService
+
     val auth = Authentication()
     val log = KotlinLogging.logger {}
 
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizedRead)
     @GetMapping(value = ["/validate"])
     fun validateToken(request: HttpServletRequest? = null): ResponseEntity<Boolean?> {
         val token = request?.getHeader("Authorization") ?: run {
             debugLog("No Authorization header found in request")
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false)
         }
-        val isValid = auth.isTokenValid(token)
+        val isValid = auth.isTokenValid(token) && tokenStateCacheService.getTokenState(token) == TokenState.Active
         return if (isValid) {
-            ResponseEntity.status(202).body(isValid)
+            ResponseEntity.status(202).body(true)
         } else {
-            ResponseEntity.status(405).body(isValid)
+            ResponseEntity.status(405).body(false)
         }
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizedRead)
     @GetMapping(value = ["/accessible"])
     fun validateAccessibilityToServer(request: HttpServletRequest? = null): ResponseEntity<String> {
         return ResponseEntity.ok().body(null)
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizationCreate)
     @PostMapping(value = ["/new"])
     fun createJWT(@RequestBody deviceInfo: RequestDeviceInfo): ResponseEntity<String> {
         val token = auth.createJwt(deviceInfo)
@@ -63,8 +69,24 @@ class AuthenticationController() {
         return ResponseEntity.ok(token)
     }
 
+    /**
+     * Will create a scoped token,
+     * Limited lifetime (3h)
+     * Only able to play media associated defined base name
+     */
+    @RequiresAuthentication(Scope.AuthorizationCreate)
+    @PostMapping(value = ["/new/cast"])
+    fun createScopedCastJwt(@RequestBody scopeInfo: MediaScopedAuthRequest): ResponseEntity<String> {
+        val token = auth.createMediaScopedJwt(scopeInfo, Authentication.TokenType.Cast,castScope())
+        if (token == null) {
+            log.error { "Failed to create scoped token" }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+        return ResponseEntity.ok(token)
+    }
+
     @GetMapping(value = ["/delegate/required"])
-    @RequiresAuthentication(Mode.None)
+    @RequiresAuthentication(Scope.None)
     fun doesRequireDelegate(): ResponseEntity<Boolean> {
         return ResponseEntity.ok(true)
     }
@@ -80,7 +102,7 @@ class AuthenticationController() {
      * @return A {@link ResponseEntity} containing a session identifier as a string.
      */
     @PostMapping(value = ["/delegate/request/pin"])
-    @RequiresAuthentication(Mode.None)
+    @RequiresAuthentication(Scope.None)
     fun createPINDelegationRequestSession(@RequestBody data: AuthInitiateRequest, request: HttpServletRequest? = null): ResponseEntity<RequestCreatedResponse> {
         return createDelegationRequestSession(data, DelegatedAuthenticationTable.AuthMethod.PIN, request)
     }
@@ -96,7 +118,7 @@ class AuthenticationController() {
      * @return A {@link ResponseEntity} containing a session identifier as a string.
      */
     @PostMapping(value = ["/delegate/request/qr"])
-    @RequiresAuthentication(Mode.None)
+    @RequiresAuthentication(Scope.None)
     fun createQRDelegationRequestSession(@RequestBody data: AuthInitiateRequest, request: HttpServletRequest? = null): ResponseEntity<RequestCreatedResponse> {
         return createDelegationRequestSession(data, DelegatedAuthenticationTable.AuthMethod.QR, request)
     }
@@ -146,7 +168,7 @@ class AuthenticationController() {
 
 
     @GetMapping(value = ["/delegate/request/pending/{pin}/info"])
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizationPermit)
     fun getPendingRequestOnPIN(@PathVariable pin: String): ResponseEntity<DelegatedRequestData> {
         val data = DelegatedAuthenticationTable.executeGetDelegatePendingRequestBy(pin)
         if (data == null) {
@@ -157,7 +179,7 @@ class AuthenticationController() {
     }
 
     @GetMapping(value = ["/delegate/request/pending/{pin}/permitted/{session}"])
-    @RequiresAuthentication(Mode.None)
+    @RequiresAuthentication(Scope.None)
     fun getPermittedStatusAndToken(@PathVariable pin: String, @PathVariable session: String, request: HttpServletRequest? = null): ResponseEntity<String> {
         val result = try {
             transaction {
@@ -220,7 +242,7 @@ class AuthenticationController() {
     }
 
     @PostMapping(value = ["/delegate/request/{session}/{pin}/permit"])
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.AuthorizationPermit)
     fun permitDelegationRequest(@RequestBody permitData: PermitRequestData, @PathVariable session: String, @PathVariable pin: String): ResponseEntity<String> {
         val success = executeWithStatus {
             DelegatedAuthenticationTable.update({

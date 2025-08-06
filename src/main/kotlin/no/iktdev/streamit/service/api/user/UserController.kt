@@ -2,8 +2,8 @@ package no.iktdev.streamit.service.api.user
 
 import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.classes.User
 import no.iktdev.streamit.shared.database.queries.executeDeleteWith
 import no.iktdev.streamit.shared.database.queries.executeSelectAll
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/user")
 class UserController {
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.UserRead)
     @GetMapping(path = ["", "/all"])
     fun allUsers(): List<User> {
         return UserTable.executeSelectAll()
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.UserRead)
     @GetMapping("/{guid}")
     fun getUserByGuid(@PathVariable guid: String): User? {
         return UserTable.executeSelectWith(guid)
@@ -33,14 +33,14 @@ class UserController {
     /**
      * Post Mapping below
      **/
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.UserWrite)
     @PostMapping()
     fun createOrUpdateUser(@RequestBody user: User): ResponseEntity<String> {
         UserTable.upsert(user)
         return ResponseEntity("User Updated or Created", HttpStatus.OK)
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.UserWrite)
     @DeleteMapping("")
     fun deleteUser(@RequestBody userId: String): ResponseEntity<String>
     {

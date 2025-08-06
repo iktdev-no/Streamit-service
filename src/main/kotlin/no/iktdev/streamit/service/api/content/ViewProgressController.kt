@@ -10,46 +10,25 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.api.content.mapping.toMixedList
 import no.iktdev.streamit.service.api.content.mapping.toSerie
 import no.iktdev.streamit.service.log
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.classes.BaseProgress
-import no.iktdev.streamit.shared.classes.Movie
-import no.iktdev.streamit.shared.classes.ProgressMovie
-import no.iktdev.streamit.shared.classes.ProgressSerie
-import no.iktdev.streamit.shared.classes.Response
-import no.iktdev.streamit.shared.classes.Serie
-import no.iktdev.streamit.shared.database.queries.executeFindForVideo
-import no.iktdev.streamit.shared.database.queries.executeGetAllOn
-import no.iktdev.streamit.shared.database.queries.executeGetMovieWithTitleOn
-import no.iktdev.streamit.shared.database.queries.executeGetMoviesAfterOn
-import no.iktdev.streamit.shared.database.queries.executeGetMoviesOn
-import no.iktdev.streamit.shared.database.queries.executeGetSeriesAfterOn
-import no.iktdev.streamit.shared.database.queries.executeGetSeriesOn
-import no.iktdev.streamit.shared.database.queries.executeGetSeriesWithCollectionOn
-import no.iktdev.streamit.shared.database.queries.executeResumeOrNextEpisode
+import no.iktdev.streamit.shared.Scope
+import no.iktdev.streamit.shared.classes.*
+import no.iktdev.streamit.shared.database.queries.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.web.bind.annotation.ControllerAdvice
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.*
 
 @ApiRestController
 @RequestMapping("/progress")
 class ViewProgressController {
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping("/{guid}")
     fun allProgressOnGuid(@PathVariable guid: String): List<BaseProgress> {
         return ProgressTable.executeGetAllOn(guid).toMixedList()
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping(value = [
         "/{guid}/movie",
         "/{guid}/movie/after/{time}"
@@ -61,7 +40,7 @@ class ViewProgressController {
             .map { ProgressMovie.fromProgressTable(it) }
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping(value = [
         "/{guid}/serie",
         "/{guid}/serie/after/{time}"
@@ -73,7 +52,7 @@ class ViewProgressController {
         return result.toSerie()
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping("/{guid}/movie/{title}")
     fun getProgressForUserWithMovieTitle(@PathVariable guid: String, @PathVariable title: String): ProgressMovie? {
         return ProgressTable.executeGetMovieWithTitleOn(guid, title)?.let { it ->
@@ -81,7 +60,7 @@ class ViewProgressController {
         }
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping("/{guid}/serie/{collection}")
     fun getProgressForUserWithSerieCollection(@PathVariable guid: String, @PathVariable collection: String): ProgressSerie? {
         return ProgressTable.executeGetSeriesWithCollectionOn(guid, collection)
@@ -90,7 +69,7 @@ class ViewProgressController {
 
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.ProgressRead)
     @GetMapping("/{guid}/continue/serie")
     fun getContinueSerie(@PathVariable guid: String): List<Serie> {
         return ProgressTable.executeResumeOrNextEpisode(guid).map { serie ->
@@ -108,7 +87,7 @@ class ViewProgressController {
      * Post mapping below
      **/
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.ProgressWrite)
     @PostMapping("/{guid}/movie")
     @ResponseStatus(HttpStatus.OK)
     fun uploadedProgressMovieOnGuid(@PathVariable guid: String, @RequestBody progress: Movie) : ResponseEntity<String> {
@@ -142,7 +121,7 @@ class ViewProgressController {
         }
     }
 
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.ProgressWrite)
     @PostMapping("/{guid}/serie")
     @ResponseStatus(HttpStatus.OK)
     fun uploadedProgressSerieOnGuid(@PathVariable guid: String, @RequestBody progress: Serie): ResponseEntity<String> {

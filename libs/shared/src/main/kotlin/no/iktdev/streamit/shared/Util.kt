@@ -4,6 +4,9 @@ import mu.KotlinLogging
 import java.io.File
 import java.nio.file.Paths
 import java.security.MessageDigest
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 fun toSHA256Hash(input: String): String {
@@ -38,4 +41,9 @@ fun debugLog(message: String) {
         val origin = if (caller != null) "${caller.className}.${caller.methodName}:${caller.lineNumber}" else "UnknownOrigin"
         KotlinLogging.logger {}.info { "[DEBUG][$origin] $message" }
     }
+}
+
+fun LocalDateTime.asZoned(): Instant {
+    val zone = ZoneOffset.systemDefault().rules.getOffset(Instant.now());
+    return this.toInstant(zone)
 }

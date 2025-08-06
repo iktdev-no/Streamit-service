@@ -1,5 +1,8 @@
 package no.iktdev.streamit.service
 
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import javax.servlet.http.HttpServletRequest
 
 fun HttpServletRequest?.getRequestersIp(): String? {
@@ -11,6 +14,10 @@ fun HttpServletRequest?.getRequestersIp(): String? {
 }
 
 fun HttpServletRequest?.getAuthorization(): String? {
-    val header = this?.getHeader("Authorization")
-    return if (header.isNullOrBlank()) this?.getParameter("token") else header
+    val bearerToken = this?.getHeader("Authorization")
+    return if (bearerToken?.contains("Bearer", true) == true) {
+        bearerToken.substring(bearerToken.indexOf(" ")+1)
+    } else {
+        this?.getParameter("token")
+    }
 }

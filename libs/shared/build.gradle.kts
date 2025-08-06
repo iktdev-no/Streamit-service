@@ -41,7 +41,8 @@ dependencies {
 
     implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc1")
 
-
+    testImplementation("io.mockk:mockk:1.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 

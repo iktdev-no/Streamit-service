@@ -4,8 +4,8 @@ import no.iktdev.streamit.library.db.executeWithStatus
 import no.iktdev.streamit.library.db.tables.authentication.RegisteredDevicesTable
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.classes.CapabilitiesObject
 import no.iktdev.streamit.shared.classes.RegisterDeviceData
 import org.jetbrains.exposed.sql.insert
@@ -64,7 +64,7 @@ class DeviceRegistrationController(
     }
 
     @GetMapping("/list")
-    @RequiresAuthentication(Mode.Strict)
+    @RequiresAuthentication(Scope.DeviceRegistryRead)
     fun getRegisteredDevices(): ResponseEntity<String> {
         return ResponseEntity.noContent().build()
     }

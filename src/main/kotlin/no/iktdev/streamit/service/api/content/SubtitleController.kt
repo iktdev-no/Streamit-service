@@ -2,8 +2,8 @@ package no.iktdev.streamit.service.api.content
 
 import no.iktdev.streamit.library.db.tables.content.SubtitleTable
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.Mode
 import no.iktdev.streamit.shared.RequiresAuthentication
+import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.classes.Subtitle
 import no.iktdev.streamit.shared.database.queries.executeFindForVideo
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/subtitle")
 class SubtitleController {
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.CatalogRead)
     @GetMapping(
         value = [
             "/movie/{title}",
@@ -27,7 +27,7 @@ class SubtitleController {
         else SubtitleTable.executeFindForVideo(title, format)
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.CatalogRead)
     @GetMapping(
         value = [
             "/serie/{collection}",
@@ -39,12 +39,12 @@ class SubtitleController {
         else SubtitleTable.executeFindForVideo(collection, format)
     }
 
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.CatalogRead)
     @GetMapping("/{name}")
     fun anySubtitle(@PathVariable name: String): List<Subtitle> {
         return SubtitleTable.executeFindForVideo(name)
     }
-    @RequiresAuthentication(Mode.Soft)
+    @RequiresAuthentication(Scope.CatalogRead)
     @GetMapping("/{name}/{format}")
     fun anySubtitleOnFormat(@PathVariable name: String, @PathVariable format: String): List<Subtitle> {
         return SubtitleTable.executeFindForVideo(name, format)

@@ -26,6 +26,11 @@ data class RequestDeviceInfo(
     }
 }
 
+data class MediaScopedAuthRequest(
+    val collection: String,
+    val media: List<String>
+)
+
 data class RequestCreatedResponse(
     val expiry: Long,
     val sessionId: String
