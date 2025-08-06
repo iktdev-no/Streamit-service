@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
-object TokenTable :  IntIdTable(name = "AccessToken") {
+object TokenTable :  IntIdTable(name = "Token") {
     val token = varchar("token", 1024).uniqueIndex()
     val createdAt = datetime("created").clientDefault { LocalDateTime.now() }
     val revoked = bool("revoked").default(false)

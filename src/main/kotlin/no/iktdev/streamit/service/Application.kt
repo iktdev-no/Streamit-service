@@ -15,6 +15,7 @@ import no.iktdev.streamit.service.interceptor.GeneralAuthorizationInterceptor
 import no.iktdev.streamit.service.interceptor.MediaAuthorizationInterceptor
 import no.iktdev.streamit.shared.Env
 import no.iktdev.streamit.shared.database.PersistentTokenTable
+import no.iktdev.streamit.shared.database.TokenTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
@@ -73,7 +74,8 @@ fun getTables(): Array<Table> {
     val authTables = arrayOf<Table>(
         DelegatedAuthenticationTable,
         RegisteredDevicesTable,
-        PersistentTokenTable
+        PersistentTokenTable,
+        TokenTable
     )
 
     val miscTables = arrayOf<Table>(
