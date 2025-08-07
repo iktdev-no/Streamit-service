@@ -204,11 +204,6 @@ server {
     listen       192.168.2.250:80;
     server_name  streamit.lan streamit.local;
 
-    add_header 'Access-Control-Allow-Origin' *;
-    add_header 'Access-Control-Allow-Credentials' 'true';
-    add_header 'Access-Control-Allow-Headers' 'Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range';
-
-
     location / {
         index  app.html app.htm;
         proxy_pass http://192.168.2.250:8085/open;
