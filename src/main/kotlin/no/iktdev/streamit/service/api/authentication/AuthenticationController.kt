@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.iktdev.streamit.library.db.*
 import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.getAuthorization
 import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.service.services.TokenState
 import no.iktdev.streamit.service.services.TokenStateCacheService
@@ -40,22 +41,16 @@ class AuthenticationController() {
     @RequiresAuthentication(Scope.AuthorizedRead)
     @GetMapping(value = ["/validate"])
     fun validateToken(request: HttpServletRequest? = null): ResponseEntity<Boolean?> {
-        val token = request?.getHeader("Authorization") ?: run {
+        val token = request.getAuthorization()  ?: run {
             debugLog("No Authorization header found in request")
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false)
         }
         val isValid = auth.isTokenValid(token) && tokenStateCacheService.getTokenState(token) == TokenState.Active
         return if (isValid) {
-            ResponseEntity.status(202).body(true)
+            ResponseEntity.status(200).body(true)
         } else {
             ResponseEntity.status(405).body(false)
         }
-    }
-
-    @RequiresAuthentication(Scope.AuthorizedRead)
-    @GetMapping(value = ["/accessible"])
-    fun validateAccessibilityToServer(request: HttpServletRequest? = null): ResponseEntity<String> {
-        return ResponseEntity.ok().body(null)
     }
 
     @RequiresAuthentication(Scope.AuthorizationCreate)

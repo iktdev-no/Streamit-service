@@ -27,12 +27,16 @@ object PersistentTokenTable : IntIdTable(name = "PersistentTokens") {
                 it[PersistentTokenTable.deviceId] = PersistentTokenTable.deviceId
             }
         } else {
-            TokenTable.insertToken(token)
-
-            PersistentTokenTable.insert {
-                it[PersistentTokenTable.deviceId] = deviceId
-                it[PersistentTokenTable.tokenId] = tokenId
+            val success = TokenTable.insertToken(token)
+            if (success) {
+                PersistentTokenTable.insert {
+                    it[PersistentTokenTable.deviceId] = deviceId
+                    it[PersistentTokenTable.tokenId] = tokenId
+                }
+            } else {
+                throw RuntimeException("Unable to insert token into token table")
             }
+
 
 
         }

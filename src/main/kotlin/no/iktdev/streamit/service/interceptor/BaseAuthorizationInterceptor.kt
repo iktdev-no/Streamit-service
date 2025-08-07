@@ -26,7 +26,12 @@ abstract class BaseAuthorizationInterceptor: HandlerInterceptor, Authentication(
     @Autowired lateinit var tokenCacheService: TokenStateCacheService
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val isAuthenticationRequired = doesEndpointRequireAuthorization(request)
+        val isAuthenticationRequired = try {
+            doesEndpointRequireAuthorization(request)
+        } catch (e: MissingAccessModeException) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.message)
+            return false
+        }
         if (!isAuthenticationRequired) {
             return true
         }
