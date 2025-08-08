@@ -4,6 +4,7 @@ import no.iktdev.streamit.shared.classes.AccessTokenObject
 import no.iktdev.streamit.shared.toMD5
 import no.iktdev.streamit.shared.toSHA256Hash
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.javatime.datetime
@@ -34,10 +35,22 @@ object TokenTable :  IntIdTable(name = "Tokens") {
     }
 
     fun insertToken(token: String): Boolean = transaction {
-        val rows = TokenTable.insert {
-            it[TokenTable.tokenId] = token.toMD5()
-            it[TokenTable.token] = token
+        val tokenId = token.toMD5()
+        if (tokenIdExists(tokenId)) return@transaction true
+
+        try {
+            TokenTable.insert {
+                it[TokenTable.tokenId] = tokenId
+                it[TokenTable.token] = token
+            }
+            true
+        } catch (e: Exception) {
+            false
         }
-        rows.insertedCount == 1
     }
+
+    fun tokenIdExists(tokenId: String): Boolean = transaction {
+        !TokenTable.select(TokenTable.tokenId).where { TokenTable.tokenId eq tokenId }.empty()
+    }
+
 }

@@ -14,6 +14,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+import kotlin.math.min
 
 open class Authentication {
     private val log = KotlinLogging.logger {}
@@ -103,8 +104,16 @@ open class Authentication {
         }
     }
 
+    /** Token expiry is dynamically calculated based on the number of requested video files.
+        This ensures that each playback session has a limited lifespan, reducing the risk of token misuse.
+        Especially important in public networks, where tokens could be intercepted.
+        Google Cast sessions are also auto-terminated after inactivity, providing an additional layer of protection.
+     **/
     fun createMediaScopedJwt(scopeInfo: MediaScopedAuthRequest, tokenType: TokenType, scopes: Map<String, List<String>>): String? {
-        val expire = LocalDateTime.now().plusHours(4).asZoned()
+        val videoFilesRequested = scopes.values.flatten().count { it -> it.startsWith("video/") }
+        val maxViewingHours = 12L
+        val designatedExpiryTime = min(if (videoFilesRequested <= 1) 3 else 3 * videoFilesRequested, maxViewingHours.toInt())
+        val expire = LocalDateTime.now().plusHours(designatedExpiryTime.toLong()).asZoned()
 
         val builder = JWT.create()
             .withIssuer(issuer)
