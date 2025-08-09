@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import java.net.URLDecoder
 import java.util.stream.Collectors
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -38,7 +39,7 @@ class MediaAuthorizationInterceptor: BaseAuthorizationInterceptor() {
                 return true // Slipp rett igjennom
             }
 
-            val path = request.requestURI.substringAfter("/media/")
+            val path = request.requestURI.let { it -> URLDecoder.decode(it, "UTF-8") }.substringAfter("/media/")
             if (tokenType == TokenType.Cast.name) {
                 val mediaJson = token.getClaim("media").asString()
                 val scopeInfo = Gson().fromJson(mediaJson, MediaScopedAuthRequest::class.java)
