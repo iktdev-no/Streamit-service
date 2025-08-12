@@ -39,7 +39,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc1")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc3")
 
     testImplementation("io.mockk:mockk:1.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")

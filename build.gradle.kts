@@ -49,7 +49,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc1")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc3")
 
     implementation(project(mapOf("path" to ":libs:shared")))
 
