@@ -68,7 +68,8 @@ fun getTables(): Array<Table> {
     )
     val userTable = arrayOf<Table>(
         UserTable,
-        ProfileImageTable
+        ProfileImageTable,
+        FavoriteTable
     )
 
     val authTables = arrayOf<Table>(
