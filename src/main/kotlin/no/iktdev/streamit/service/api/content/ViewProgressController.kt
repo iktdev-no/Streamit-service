@@ -14,6 +14,7 @@ import no.iktdev.streamit.shared.RequiresAuthentication
 import no.iktdev.streamit.shared.Scope
 import no.iktdev.streamit.shared.classes.*
 import no.iktdev.streamit.shared.database.queries.*
+import no.iktdev.streamit.shared.isDebug
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -125,6 +126,9 @@ class ViewProgressController {
     @PostMapping("/{guid}/serie")
     @ResponseStatus(HttpStatus.OK)
     fun uploadedProgressSerieOnGuid(@PathVariable guid: String, @RequestBody progress: Serie): ResponseEntity<String> {
+        if (isDebug()) {
+            log.info { "Performing serie progress update on ${progress.collection}\n ${Gson().toJson(progress)}" }
+        }
         val result = executeWithResult {
             progress.episodes.map {
                 ProgressTable.upsertSerieRecord(
