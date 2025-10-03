@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.iktdev.streamit.library.db.*
 import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.doesEndpointRequireAuthorization
 import no.iktdev.streamit.service.getAuthorization
 import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.service.services.TokenState
@@ -82,8 +83,9 @@ class AuthenticationController() {
 
     @GetMapping(value = ["/delegate/required"])
     @RequiresAuthentication(Scope.None)
-    fun doesRequireDelegate(): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(true)
+    fun doesRequireDelegate(request: HttpServletRequest): ResponseEntity<Boolean> {
+        val doesRequire = request.doesEndpointRequireAuthorization()
+        return ResponseEntity.ok(doesRequire)
     }
 
     /**
