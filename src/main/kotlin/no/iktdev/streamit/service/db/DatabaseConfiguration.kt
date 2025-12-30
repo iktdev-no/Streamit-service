@@ -15,14 +15,7 @@ open class DatabaseConfiguration {
 
     @Bean
     fun dataSource(): DataSource {
-        val access = Access(
-            username = "sa",
-            password = "",
-            address = "", // ikke brukt for H2
-            port = 0,     // ikke brukt for H2
-            databaseName = "testdb",
-            dbType = DbType.H2
-        )
+        val access = DatabaseEnv.toAccess()
         return DatabaseConfig.connect(access).second
     }
 
