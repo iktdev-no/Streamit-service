@@ -1,24 +1,22 @@
 package no.iktdev.streamit.service.interceptor
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import no.iktdev.streamit.service.getAuthorization
 import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.service.services.TokenState
 import no.iktdev.streamit.service.services.TokenStateCacheService
-import no.iktdev.streamit.shared.Authentication
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.impliedScopes
-import no.iktdev.streamit.shared.scopesFromClaims
+import no.iktdev.streamit.service.auth.Authentication
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.auth.impliedScopes
+import no.iktdev.streamit.service.auth.scopesFromClaims
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import java.util.stream.Collectors
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 abstract class BaseAuthorizationInterceptor: HandlerInterceptor, Authentication() {
     private val log = KotlinLogging.logger {}

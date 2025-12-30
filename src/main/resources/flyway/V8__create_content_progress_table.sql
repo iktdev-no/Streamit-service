@@ -1,0 +1,19 @@
+CREATE TABLE PROGRESS
+(
+    ID         BIGINT       NOT NULL AUTO_INCREMENT,
+    USER_ID    CHAR(36)     NOT NULL,
+    TYPE       VARCHAR(10)  NOT NULL,
+    TITLE      VARCHAR(250) NOT NULL,
+    COLLECTION VARCHAR(250),
+    EPISODE    INT,
+    SEASON     INT,
+    VIDEO      VARCHAR(250) NOT NULL,
+    PROGRESS   INT          NOT NULL,
+    DURATION   INT          NOT NULL,
+    PLAYED     DATETIME(6),
+    PRIMARY KEY (ID),
+    CONSTRAINT unique_progress_on_each_user UNIQUE (USER_ID, TITLE, COLLECTION, TYPE, SEASON, EPISODE)
+);
+
+CREATE INDEX idx_progress_guid_collection_season_episode
+    ON Progress (USER_ID, COLLECTION, SEASON, EPISODE);

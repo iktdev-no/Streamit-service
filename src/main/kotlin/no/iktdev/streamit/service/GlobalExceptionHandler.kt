@@ -1,24 +1,22 @@
 package no.iktdev.streamit.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import no.iktdev.streamit.shared.isDebug
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.context.request.WebRequest
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerMapping
 import java.io.ByteArrayInputStream
-import javax.servlet.FilterChain
-import javax.servlet.ReadListener
-import javax.servlet.ServletInputStream
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletRequestWrapper
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.FilterChain
+import jakarta.servlet.ReadListener
+import jakarta.servlet.ServletInputStream
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequestWrapper
+import jakarta.servlet.http.HttpServletResponse
 
 
 @ControllerAdvice

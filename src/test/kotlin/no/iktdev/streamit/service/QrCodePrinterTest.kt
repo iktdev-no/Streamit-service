@@ -2,8 +2,8 @@ package no.iktdev.streamit.service
 
 import com.google.gson.Gson
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.classes.fcm.clazzes.Server
+import no.iktdev.streamit.service.Env
+import no.iktdev.streamit.service.dto.Server
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

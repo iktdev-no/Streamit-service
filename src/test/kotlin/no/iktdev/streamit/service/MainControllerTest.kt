@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service
 
-import no.iktdev.streamit.shared.classes.Heartbeat
+import no.iktdev.streamit.service.dto.Heartbeat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

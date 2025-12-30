@@ -5,10 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockkObject
-import no.iktdev.streamit.shared.Authentication.Companion.algorithm
-import no.iktdev.streamit.shared.Authentication.Companion.issuer
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.classes.Catalog
+import no.iktdev.streamit.service.auth.Authentication.Companion.issuer
+import no.iktdev.streamit.service.Env
 import org.assertj.core.api.Assertions.assertThat
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode

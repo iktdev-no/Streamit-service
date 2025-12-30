@@ -1,13 +1,14 @@
 package no.iktdev.streamit.service.stream
 
+import jakarta.servlet.http.HttpServletRequest
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ContentRestController
+import no.iktdev.streamit.service.Env
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.isDebug
 import no.iktdev.streamit.service.supporting.WebUtil
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.isDebug
-import no.iktdev.streamit.shared.with
+import no.iktdev.streamit.service.with
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -17,14 +18,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.util.UrlPathHelper
-import java.io.FileInputStream
-import java.io.OutputStream
 import java.nio.file.Files
-import javax.servlet.http.HttpServletRequest
 
 @ContentRestController
 @RequestMapping(path = ["/media/"])

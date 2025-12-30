@@ -1,7 +1,7 @@
 package no.iktdev.streamit.service.services
 
 import mu.KotlinLogging
-import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
+import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
 import org.jetbrains.exposed.sql.and

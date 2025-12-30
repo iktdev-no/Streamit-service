@@ -2,10 +2,10 @@ package no.iktdev.streamit.service.api.content
 
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.getOnlyFiles
+import no.iktdev.streamit.service.Env
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.getOnlyFiles
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 

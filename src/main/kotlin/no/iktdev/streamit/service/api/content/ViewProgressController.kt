@@ -1,20 +1,33 @@
 package no.iktdev.streamit.service.api.content
 
 import com.google.gson.Gson
-import no.iktdev.streamit.library.db.executeWithResult
-import no.iktdev.streamit.library.db.ext.UpsertResult
-import no.iktdev.streamit.library.db.tables.content.ProgressTable
-import no.iktdev.streamit.library.db.tables.content.SubtitleTable
-import no.iktdev.streamit.library.db.withTransaction
+import no.iktdev.streamit.service.db.tables.util.executeWithResult
+import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.api.content.mapping.toMixedList
 import no.iktdev.streamit.service.api.content.mapping.toSerie
+import no.iktdev.streamit.service.db.queries.executeFindForVideo
+import no.iktdev.streamit.service.db.queries.executeGetAllOn
+import no.iktdev.streamit.service.db.queries.executeGetMovieWithTitleOn
+import no.iktdev.streamit.service.db.queries.executeGetMoviesAfterOn
+import no.iktdev.streamit.service.db.queries.executeGetMoviesOn
+import no.iktdev.streamit.service.db.queries.executeGetSeriesAfterOn
+import no.iktdev.streamit.service.db.queries.executeGetSeriesOn
+import no.iktdev.streamit.service.db.queries.executeGetSeriesWithCollectionOn
+import no.iktdev.streamit.service.db.queries.executeResumeOrNextEpisode
+import no.iktdev.streamit.service.db.tables.content.ProgressTable
+import no.iktdev.streamit.service.db.tables.content.SubtitleTable
 import no.iktdev.streamit.service.log
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.*
-import no.iktdev.streamit.shared.database.queries.*
-import no.iktdev.streamit.shared.isDebug
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.db.tables.util.UpsertResult
+import no.iktdev.streamit.service.dto.BaseProgress
+import no.iktdev.streamit.service.dto.Movie
+import no.iktdev.streamit.service.dto.ProgressMovie
+import no.iktdev.streamit.service.dto.ProgressSerie
+import no.iktdev.streamit.service.dto.Response
+import no.iktdev.streamit.service.dto.Serie
+import no.iktdev.streamit.service.isDebug
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -92,7 +105,7 @@ class ViewProgressController {
     @PostMapping("/{guid}/movie")
     @ResponseStatus(HttpStatus.OK)
     fun uploadedProgressMovieOnGuid(@PathVariable guid: String, @RequestBody progress: Movie) : ResponseEntity<String> {
-        val result = try {
+        val result: UpsertResult? = try {
             withTransaction {
                 ProgressTable.upsertMovieRecord(
                     userId = guid,
@@ -103,7 +116,7 @@ class ViewProgressController {
                     played = progress.played,
                     videoFile = progress.video
                 )
-            }
+            }.getOrNull()
         } catch (e: Exception) {
             log.error { "An error occurred while updating movie progress for user $guid with title ${progress.title}." }
             e.printStackTrace()

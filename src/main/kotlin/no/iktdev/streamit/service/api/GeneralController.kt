@@ -2,11 +2,11 @@ package no.iktdev.streamit.service.api
 
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.CapabilitiesObject
-import no.iktdev.streamit.shared.classes.Heartbeat
-import no.iktdev.streamit.shared.classes.fcm.clazzes.Server
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.dto.CapabilitiesObject
+import no.iktdev.streamit.service.dto.Heartbeat
+import no.iktdev.streamit.service.dto.Server
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 @ApiRestController
 @RequestMapping()
