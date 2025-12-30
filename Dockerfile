@@ -1,4 +1,4 @@
-FROM openjdk:18-jdk
+FROM eclipse-temurin:21-jdk
 EXPOSE 8080
 
 COPY ./app.jar app.jar
