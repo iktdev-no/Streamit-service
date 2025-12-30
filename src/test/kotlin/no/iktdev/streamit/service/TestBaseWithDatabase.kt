@@ -3,7 +3,7 @@ package no.iktdev.streamit.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.iktdev.streamit.service.auth.Authentication
 import no.iktdev.streamit.service.db.Access
-import no.iktdev.streamit.service.db.DbType
+import no.iktdev.streamit.service.db.DatabaseTypes
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
@@ -43,7 +43,7 @@ abstract class TestBaseWithDatabase: TestBase() {
             address = "", // ikke brukt for H2
             port = 0,     // ikke brukt for H2
             databaseName = "testdb",
-            dbType = DbType.H2
+            dbType = DatabaseTypes.H2
         )
         database = Database.connect(dataSource)
         flyway = Flyway.configure()
@@ -82,7 +82,7 @@ abstract class TestBaseWithDatabase: TestBase() {
                 "CAST_ERROR",
                 "USERS",
                 "PROFILE_IMAGE",
-                "MEDIA_VIDEO_DATA",
+                "MEDIA_DATA_VIDEO",
                 "MEDIA_DATA_AUDIO"
             )
             val existingTables = tableNames.map {

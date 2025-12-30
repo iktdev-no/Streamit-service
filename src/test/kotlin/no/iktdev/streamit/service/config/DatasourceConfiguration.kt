@@ -3,7 +3,7 @@ package no.iktdev.streamit.service.config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.iktdev.streamit.service.db.Access
-import no.iktdev.streamit.service.db.DbType
+import no.iktdev.streamit.service.db.DatabaseTypes
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -20,7 +20,7 @@ class DatasourceConfiguration {
             address = "", // ikke brukt for H2
             port = 0,     // ikke brukt for H2
             databaseName = "testdb",
-            dbType = DbType.H2
+            dbType = DatabaseTypes.H2
         )
 
         val maxPoolSize: Int = 10
