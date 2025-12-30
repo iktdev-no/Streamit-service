@@ -1,9 +1,9 @@
 package no.iktdev.streamit.service.services
 
 import mu.KotlinLogging
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.classes.CapabilitiesObject
-import no.iktdev.streamit.shared.classes.pfns.PfnsRemoteServerObject
+import no.iktdev.streamit.service.Env
+import no.iktdev.streamit.service.dto.CapabilitiesObject
+import no.iktdev.streamit.service.dto.pfns.PfnsRemoteServerObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

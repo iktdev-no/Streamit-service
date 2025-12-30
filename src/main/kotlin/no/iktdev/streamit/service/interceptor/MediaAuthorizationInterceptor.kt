@@ -1,22 +1,14 @@
 package no.iktdev.streamit.service.interceptor
 
 import com.google.gson.Gson
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import no.iktdev.streamit.service.getAuthorization
-import no.iktdev.streamit.service.getRequestersIp
-import no.iktdev.streamit.service.services.TokenState
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.remote.MediaScopedAuthRequest
+import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.method.HandlerMethod
-import org.springframework.web.servlet.HandlerInterceptor
 import java.net.URLDecoder
-import java.util.stream.Collectors
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 @Order(1)

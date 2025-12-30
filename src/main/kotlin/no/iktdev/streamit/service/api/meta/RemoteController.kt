@@ -4,8 +4,8 @@ import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
 import no.iktdev.streamit.service.services.PfnsClientService
-import no.iktdev.streamit.shared.classes.pfns.ServerConfigPushObject
-import no.iktdev.streamit.shared.classes.pfns.PfnsRemoteServerObject
+import no.iktdev.streamit.service.dto.pfns.ServerConfigPushObject
+import no.iktdev.streamit.service.dto.pfns.PfnsRemoteServerObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

@@ -1,14 +1,14 @@
 package no.iktdev.streamit.service.api.user
 
-import no.iktdev.streamit.library.db.tables.user.UserTable
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.User
-import no.iktdev.streamit.shared.database.queries.executeDeleteWith
-import no.iktdev.streamit.shared.database.queries.executeSelectAll
-import no.iktdev.streamit.shared.database.queries.executeSelectWith
-import no.iktdev.streamit.shared.database.queries.upsert
+import no.iktdev.streamit.service.db.tables.user.UserTable
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.dto.User
+import no.iktdev.streamit.service.db.queries.executeDeleteWith
+import no.iktdev.streamit.service.db.queries.executeSelectAll
+import no.iktdev.streamit.service.db.queries.executeSelectWith
+import no.iktdev.streamit.service.db.queries.upsert
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

@@ -1,7 +1,5 @@
 package no.iktdev.streamit.service
 
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.with
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver

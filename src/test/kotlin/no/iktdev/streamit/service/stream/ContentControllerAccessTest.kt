@@ -2,11 +2,10 @@ package no.iktdev.streamit.service.stream
 
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.generateInvalidJwt
-import no.iktdev.streamit.shared.Authentication
-import no.iktdev.streamit.shared.castScope
-import no.iktdev.streamit.shared.classes.remote.MediaScopedAuthRequest
+import no.iktdev.streamit.service.auth.Authentication
+import no.iktdev.streamit.service.auth.castScope
+import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

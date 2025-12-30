@@ -1,14 +1,13 @@
 package no.iktdev.streamit.service.api.content
 
-import no.iktdev.streamit.library.db.tables.content.CatalogTable
-import no.iktdev.streamit.library.db.tables.content.GenreTable
-import no.iktdev.streamit.library.db.tables.content.ProgressTable
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.asList
 import no.iktdev.streamit.service.assertJson
+import no.iktdev.streamit.service.db.tables.content.CatalogTable
+import no.iktdev.streamit.service.db.tables.content.ProgressTable
 import no.iktdev.streamit.service.simpleGet
-import no.iktdev.streamit.shared.classes.Catalog
-import no.iktdev.streamit.shared.classes.Serie
+import no.iktdev.streamit.service.dto.Catalog
+import no.iktdev.streamit.service.dto.Serie
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction

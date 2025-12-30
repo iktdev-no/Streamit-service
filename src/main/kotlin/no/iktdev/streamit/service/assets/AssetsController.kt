@@ -3,9 +3,7 @@ package no.iktdev.streamit.service.assets
 import mu.KotlinLogging
 import no.iktdev.streamit.service.AssetRestController
 import no.iktdev.streamit.service.supporting.WebUtil
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.isDebug
-import no.iktdev.streamit.shared.with
+import no.iktdev.streamit.service.Env
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -17,7 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.util.UrlPathHelper
 import java.nio.file.Files
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
+import no.iktdev.streamit.service.isDebug
+import no.iktdev.streamit.service.with
 
 @AssetRestController
 @RequestMapping()

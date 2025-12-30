@@ -2,22 +2,23 @@ package no.iktdev.streamit.service.api.authentication
 
 import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.streamit.library.db.*
-import no.iktdev.streamit.library.db.tables.authentication.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.db.tables.util.executeWithStatus
+import no.iktdev.streamit.service.db.tables.util.isCausedByDuplicateError
+import no.iktdev.streamit.service.db.tables.util.isExposedSqlException
+import no.iktdev.streamit.service.db.tables.util.toEpochSeconds
+import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.doesEndpointRequireAuthorization
 import no.iktdev.streamit.service.getAuthorization
 import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.service.services.TokenState
 import no.iktdev.streamit.service.services.TokenStateCacheService
-import no.iktdev.streamit.shared.Authentication
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.castScope
-import no.iktdev.streamit.shared.classes.remote.*
-import no.iktdev.streamit.shared.database.queries.executeGetDelegatePendingRequestBy
-import no.iktdev.streamit.shared.database.queries.executeInsertOrUpdate
-import no.iktdev.streamit.shared.debugLog
+import no.iktdev.streamit.service.auth.Authentication
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.auth.castScope
+import no.iktdev.streamit.service.db.queries.executeGetDelegatePendingRequestBy
+import no.iktdev.streamit.service.db.queries.executeInsertOrUpdate
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.selectAll
@@ -28,7 +29,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
+import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
+import no.iktdev.streamit.service.debugLog
+import no.iktdev.streamit.service.dto.auth.AuthInitiateRequest
+import no.iktdev.streamit.service.dto.auth.DelegatedRequestData
+import no.iktdev.streamit.service.dto.auth.InternalDelegatedRequestData
+import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
+import no.iktdev.streamit.service.dto.auth.PermitRequestData
+import no.iktdev.streamit.service.dto.auth.RequestCreatedResponse
+import no.iktdev.streamit.service.dto.auth.RequestDeviceInfo
 
 @ApiRestController
 @RequestMapping("/auth")
@@ -126,10 +136,17 @@ class AuthenticationController() {
         val reqId = data.toRequestId()
         var insertedId: Int? = null
         val success = executeWithStatus(onError = { e ->
-            log.error { "Failed to insert delegation request for ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${Gson().toJson(data)}" }
-            val isCuasedByDuplication = (e.isExposedSqlException() && (e as ExposedSQLException).isCausedByDuplicateError())
+            log.error {
+                "Failed to insert delegation request for ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${
+                    Gson().toJson(
+                        data
+                    )
+                }"
+            }
+            val isCuasedByDuplication =
+                (e.isExposedSqlException() && (e as ExposedSQLException).isCausedByDuplicateError())
             if (isCuasedByDuplication) {
-                log.error { "(Confirmed) Duplicate key violation for request ID: $reqId. This might be a retry."}
+                log.error { "(Confirmed) Duplicate key violation for request ID: $reqId. This might be a retry." }
             } else if (e.message.orEmpty().contains("Duplicate entry")) {
                 log.warn { "Duplicate key violation for request ID: $reqId. This might be a retry." }
             } else {
@@ -150,17 +167,19 @@ class AuthenticationController() {
         val expires = withTransaction {
             DelegatedAuthenticationTable.selectAll()
                 .where {
-                DelegatedAuthenticationTable.id eq insertedId
-            }.map { it[DelegatedAuthenticationTable.expires] }.firstOrNull()
-        }
+                    DelegatedAuthenticationTable.id eq insertedId
+                }.map { it[DelegatedAuthenticationTable.expires] }.firstOrNull()
+        }.getOrNull()
         log.info { "Successfully inserted delegate request for requestId: $reqId with data ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${Gson().toJson(data)}" }
         if (expires == null) {
             log.error { "Expiry is null!" }
         }
-        return ResponseEntity.ok(RequestCreatedResponse(
-            expiry = expires?.toEpochSeconds() ?: 0,
-            sessionId = reqId
-        ))
+        return ResponseEntity.ok(
+            RequestCreatedResponse(
+                expiry = expires?.toEpochSeconds() ?: 0,
+                sessionId = reqId
+            )
+        )
     }
 
 

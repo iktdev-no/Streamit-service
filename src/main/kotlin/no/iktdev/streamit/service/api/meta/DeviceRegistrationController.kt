@@ -1,13 +1,13 @@
 package no.iktdev.streamit.service.api.meta
 
-import no.iktdev.streamit.library.db.executeWithStatus
-import no.iktdev.streamit.library.db.tables.authentication.RegisteredDevicesTable
+import no.iktdev.streamit.service.db.tables.util.executeWithStatus
 import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.CapabilitiesObject
-import no.iktdev.streamit.shared.classes.RegisterDeviceData
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.dto.CapabilitiesObject
+import no.iktdev.streamit.service.dto.RegisterDeviceData
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.update
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,17 +1,16 @@
 package no.iktdev.streamit.service.api.content
 
-import no.iktdev.streamit.library.db.tables.content.CatalogTable
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.Catalog
-import no.iktdev.streamit.shared.database.queries.executeSearchForMovie
-import no.iktdev.streamit.shared.database.queries.executeSearchForSerie
-import no.iktdev.streamit.shared.database.queries.executeSearchWith
+import no.iktdev.streamit.service.db.tables.content.CatalogTable
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.dto.Catalog
+import no.iktdev.streamit.service.db.queries.executeSearchForMovie
+import no.iktdev.streamit.service.db.queries.executeSearchForSerie
+import no.iktdev.streamit.service.db.queries.executeSearchWith
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 @ApiRestController
 @RequestMapping("/search")

@@ -3,8 +3,8 @@ package no.iktdev.streamit.service.interceptor
 import mu.KotlinLogging
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 @Component
 @Order(1)

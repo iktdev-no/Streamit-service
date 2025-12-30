@@ -6,8 +6,8 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import mu.KotlinLogging
 import no.iktdev.exfl.using
-import no.iktdev.streamit.shared.Env
-import no.iktdev.streamit.shared.classes.fcm.clazzes.Server
+import no.iktdev.streamit.service.Env
+import no.iktdev.streamit.service.dto.Server
 import org.springframework.stereotype.Service
 import org.w3c.dom.Document
 import java.awt.image.BufferedImage

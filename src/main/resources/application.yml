@@ -1,0 +1,21 @@
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
+  flyway:
+    enabled: true
+    locations: classpath:flyway
+    baseline-on-migrate: true
+
+springdoc:
+  swagger-ui:
+    path: /open/swagger-ui
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          socket:
+            config:
+              WebSocketMessageBrokerStats: WARN

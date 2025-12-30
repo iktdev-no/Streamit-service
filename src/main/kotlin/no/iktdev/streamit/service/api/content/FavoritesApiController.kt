@@ -1,13 +1,13 @@
 package no.iktdev.streamit.service.api.content
 
 import mu.KotlinLogging
-import no.iktdev.streamit.library.db.tables.content.CatalogTable
-import no.iktdev.streamit.library.db.tables.content.FavoriteTable
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.shared.RequiresAuthentication
-import no.iktdev.streamit.shared.Scope
-import no.iktdev.streamit.shared.classes.Catalog
-import no.iktdev.streamit.shared.database.queries.executeGetByIds
+import no.iktdev.streamit.service.db.tables.content.FavoriteTable
+import no.iktdev.streamit.service.auth.RequiresAuthentication
+import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.dto.Catalog
+import no.iktdev.streamit.service.db.queries.executeGetByIds
+import no.iktdev.streamit.service.db.tables.content.CatalogTable
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

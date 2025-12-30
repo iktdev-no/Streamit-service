@@ -1,16 +1,14 @@
 package no.iktdev.streamit.service.api.meta
 
-import no.iktdev.streamit.library.db.tables.other.DataAudioTable
-import no.iktdev.streamit.library.db.tables.other.DataVideoTable
-import no.iktdev.streamit.shared.classes.AudioData
-import no.iktdev.streamit.shared.classes.StreamData
-import no.iktdev.streamit.shared.classes.VideoData
-import org.jetbrains.exposed.sql.select
+import no.iktdev.streamit.service.db.tables.info.DataAudioTable
+import no.iktdev.streamit.service.db.tables.info.DataVideoTable
+import no.iktdev.streamit.service.dto.AudioData
+import no.iktdev.streamit.service.dto.StreamData
+import no.iktdev.streamit.service.dto.VideoData
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RestController
 
 /**
  *

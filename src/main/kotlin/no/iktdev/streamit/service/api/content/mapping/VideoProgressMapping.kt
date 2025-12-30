@@ -1,14 +1,13 @@
 package no.iktdev.streamit.service.api.content.mapping
 
-import no.iktdev.streamit.library.db.tables.content.ProgressTable
-import no.iktdev.streamit.shared.classes.BaseProgress
-import no.iktdev.streamit.shared.classes.ProgressEpisode
-import no.iktdev.streamit.shared.classes.ProgressMovie
-import no.iktdev.streamit.shared.classes.ProgressSerie
-import no.iktdev.streamit.shared.classes.ProgressTableDto
-import no.iktdev.streamit.shared.classes.Serie
-import no.iktdev.streamit.shared.classes.isMovie
-import no.iktdev.streamit.shared.classes.isSerie
+import no.iktdev.streamit.service.dto.BaseProgress
+import no.iktdev.streamit.service.dto.ProgressEpisode
+import no.iktdev.streamit.service.dto.ProgressMovie
+import no.iktdev.streamit.service.dto.ProgressSerie
+import no.iktdev.streamit.service.dto.ProgressTableDto
+import no.iktdev.streamit.service.dto.Serie
+import no.iktdev.streamit.service.dto.isMovie
+import no.iktdev.streamit.service.dto.isSerie
 
 fun List<ProgressTableDto>.toMixedList(): List<BaseProgress> {
     return this.filter { it.isMovie() }

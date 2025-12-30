@@ -1,11 +1,11 @@
 import java.io.ByteArrayOutputStream
-import kotlin.sequences.ifEmpty
 
 plugins {
     kotlin("jvm") version "2.1.0"
-    kotlin("plugin.spring") version "1.5.31"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("org.springframework.boot") version "2.5.5"
+    kotlin("plugin.spring") version "2.1.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+    id("org.springframework.boot") version "3.2.2"
+    id("io.spring.dependency-management") version "1.1.4"
 }
 
 group = "no.iktdev.streamit"
@@ -38,28 +38,33 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation ("mysql:mysql-connector-java:8.0.29")
-
     implementation ("com.auth0:java-jwt:4.0.0")
     implementation ("com.google.code.gson:gson:2.9.0")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc4")
+    // Database stuff
+    implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
+    implementation("org.jetbrains.exposed:exposed-java-time:${exposedVersion}")
 
-    implementation(project(mapOf("path" to ":libs:shared")))
+    implementation ("mysql:mysql-connector-java:8.0.33")
+    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.xerial:sqlite-jdbc:3.43.2.0")
+
+    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.flywaydb:flyway-core")
 
     implementation("com.google.zxing:core:3.5.1")
     implementation("com.sksamuel.aedile:aedile-core:3.0.0")
 
-    testImplementation("junit:junit:4.13.2")
+
+
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
+
     testImplementation("org.assertj:assertj-core:3.4.1")
     testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("org.jetbrains.kotlin:kotlin-test")

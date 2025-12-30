@@ -3,7 +3,7 @@ package no.iktdev.streamit.service.services
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.expireAfterWrite
-import no.iktdev.streamit.shared.database.TokenTable
+import no.iktdev.streamit.service.db.tables.pfns.TokenTable
 import org.springframework.stereotype.Service
 import kotlin.time.Duration.Companion.minutes
 
