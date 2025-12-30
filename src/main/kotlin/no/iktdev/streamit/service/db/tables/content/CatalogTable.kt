@@ -15,7 +15,7 @@ object CatalogTable : IntIdTable(name = "CATALOG") {
     var collection: Column<String> = varchar("COLLECTION", 250)
     var iid: Column<Int?> = integer("IID").nullable()
     var genres: Column<String?> = varchar("GENRES", 24).nullable()
-    val added: Column<LocalDateTime> = datetime("ADDED").defaultExpression(CurrentDateTime)
+    val added: Column<LocalDateTime> = datetime("ADDED_AT").defaultExpression(CurrentDateTime)
 
     init {
         uniqueIndex(title, type)
