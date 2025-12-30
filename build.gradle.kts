@@ -57,6 +57,8 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
+
 
     implementation("com.google.zxing:core:3.5.1")
     implementation("com.sksamuel.aedile:aedile-core:3.0.0")

@@ -11,5 +11,5 @@ data class Access(
     val address: String,
     val port: Int,
     val databaseName: String,
-    val dbType: DbType
+    val dbType: DatabaseTypes
 ) {}

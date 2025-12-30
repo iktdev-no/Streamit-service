@@ -21,17 +21,17 @@ open class DatabaseConfiguration {
         val access = DatabaseEnv.toAccess()
 
         val jdbcUrl = when (access.dbType) {
-            DbType.MySQL -> "jdbc:mysql://${access.address}:${access.port}/${access.databaseName}?useSSL=false&serverTimezone=UTC"
-            DbType.PostgreSQL -> "jdbc:postgresql://${access.address}:${access.port}/${access.databaseName}"
-            DbType.SQLite -> "jdbc:sqlite:${access.databaseName}.db"
-            DbType.H2 -> "jdbc:h2:mem:${access.databaseName};MODE=MySQL;DB_CLOSE_DELAY=-1"
+            DatabaseTypes.MySQL -> "jdbc:mysql://${access.address}:${access.port}/${access.databaseName}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+            DatabaseTypes.PostgreSQL -> "jdbc:postgresql://${access.address}:${access.port}/${access.databaseName}"
+            DatabaseTypes.SQLite -> "jdbc:sqlite:${access.databaseName}.db"
+            DatabaseTypes.H2 -> "jdbc:h2:mem:${access.databaseName};MODE=MySQL;DB_CLOSE_DELAY=-1"
         }
 
         val driver = when (access.dbType) {
-            DbType.MySQL -> "com.mysql.cj.jdbc.Driver"
-            DbType.PostgreSQL -> "org.postgresql.Driver"
-            DbType.SQLite -> "org.sqlite.JDBC"
-            DbType.H2 -> "org.h2.Driver"
+            DatabaseTypes.MySQL -> "com.mysql.cj.jdbc.Driver"
+            DatabaseTypes.PostgreSQL -> "org.postgresql.Driver"
+            DatabaseTypes.SQLite -> "org.sqlite.JDBC"
+            DatabaseTypes.H2 -> "org.h2.Driver"
         }
 
         val config = HikariConfig().apply {

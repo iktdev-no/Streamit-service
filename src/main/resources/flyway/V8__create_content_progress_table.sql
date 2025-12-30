@@ -16,4 +16,4 @@ CREATE TABLE PROGRESS
 );
 
 CREATE INDEX idx_progress_guid_collection_season_episode
-    ON Progress (USER_ID, COLLECTION, SEASON, EPISODE);
+    ON PROGRESS (USER_ID, COLLECTION, SEASON, EPISODE);
