@@ -1,34 +1,38 @@
 package no.iktdev.streamit.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.iktdev.streamit.service.db.tables.util.withDirtyRead
-import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.auth.Authentication
 import no.iktdev.streamit.service.db.Access
-import no.iktdev.streamit.service.db.DatabaseConfig
 import no.iktdev.streamit.service.db.DbType
-import org.assertj.core.api.Assertions.assertThat
+import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.exists
 import org.jetbrains.exposed.sql.statements.jdbc.JdbcConnectionImpl
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import javax.sql.DataSource
 import kotlin.test.assertNotNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TestBaseWithDatabase: TestBase() {
-    lateinit var dataSource: DataSource
-    lateinit var database: Database
-    private lateinit var flyway: Flyway
-    val mapper = ObjectMapper()
+abstract class TestBaseWithDatabase: TestBase() {
+
+    init {
+        mockFolders()
+    }
 
     var validToken: String? = null
+    val mapper = ObjectMapper()
+
+
+    @Autowired
+    lateinit var dataSource: DataSource
+
+    lateinit var database: Database
+    private lateinit var flyway: Flyway
 
 
     @BeforeAll
@@ -41,11 +45,9 @@ class TestBaseWithDatabase: TestBase() {
             databaseName = "testdb",
             dbType = DbType.H2
         )
-        val (database, ds) = DatabaseConfig.connect(access)
-        dataSource = ds
-        this.database = database
+        database = Database.connect(dataSource)
         flyway = Flyway.configure()
-            .dataSource(ds)
+            .dataSource(dataSource)
             .locations("classpath:flyway")
             .cleanDisabled(false)
             .load()
@@ -100,4 +102,7 @@ class TestBaseWithDatabase: TestBase() {
         flyway.clean()
         TransactionManager.closeAndUnregister(database)
     }
+
+
+
 }

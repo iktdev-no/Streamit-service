@@ -7,8 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import kotlin.test.Test
 
-@SpringBootTest(classes = [Application::class])
-class RestControllerBeanLoadTest {
+class RestControllerBeanLoadTest: TestBase() {
 
     @Autowired
     lateinit var context: ApplicationContext

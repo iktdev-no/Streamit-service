@@ -1,5 +1,7 @@
 package no.iktdev.streamit.service.db
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import jakarta.annotation.PostConstruct
 import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
@@ -15,8 +17,35 @@ open class DatabaseConfiguration {
 
     @Bean
     fun dataSource(): DataSource {
+        val maxPoolSize: Int = 10
         val access = DatabaseEnv.toAccess()
-        return DatabaseConfig.connect(access).second
+
+        val jdbcUrl = when (access.dbType) {
+            DbType.MySQL -> "jdbc:mysql://${access.address}:${access.port}/${access.databaseName}?useSSL=false&serverTimezone=UTC"
+            DbType.PostgreSQL -> "jdbc:postgresql://${access.address}:${access.port}/${access.databaseName}"
+            DbType.SQLite -> "jdbc:sqlite:${access.databaseName}.db"
+            DbType.H2 -> "jdbc:h2:mem:${access.databaseName};MODE=MySQL;DB_CLOSE_DELAY=-1"
+        }
+
+        val driver = when (access.dbType) {
+            DbType.MySQL -> "com.mysql.cj.jdbc.Driver"
+            DbType.PostgreSQL -> "org.postgresql.Driver"
+            DbType.SQLite -> "org.sqlite.JDBC"
+            DbType.H2 -> "org.h2.Driver"
+        }
+
+        val config = HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            this.driverClassName = driver
+            this.username = access.username
+            this.password = access.password
+            this.maximumPoolSize = maxPoolSize
+            this.isAutoCommit = false
+            this.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            this.validate()
+        }
+
+        return HikariDataSource(config)
     }
 
 }

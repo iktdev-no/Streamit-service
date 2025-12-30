@@ -22,6 +22,10 @@ import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
+import org.jetbrains.exposed.sql.Database
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import javax.sql.DataSource
 
 
 val log = KotlinLogging.logger {}
@@ -34,6 +38,17 @@ var context: ApplicationContext? = null
 fun main(args: Array<String>) {
     context = runApplication<Application>(*args)
 }
+
+@Component
+class ExposedInitializer(
+    private val dataSource: DataSource
+) : ApplicationRunner {
+
+    override fun run(args: ApplicationArguments?) {
+        Database.connect(dataSource)
+    }
+}
+
 
 
 @Configuration
