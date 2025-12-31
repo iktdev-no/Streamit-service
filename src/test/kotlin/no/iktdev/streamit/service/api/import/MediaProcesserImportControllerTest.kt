@@ -399,6 +399,109 @@ class MediaProcesserImportControllerTest : TestBaseWithDatabase() {
         }
     }
 
+    @Test
+    fun catalogCover_shouldNotBeOverwritten_whenAlreadyExists() {
+
+        // ---------- STEP 1: Import with cover ----------
+        val firstImport = MediaProcesserImport(
+            collection = "movies",
+            metadata = MediaProcesserImport.MetadataImport(
+                title = "Inception",
+                genres = listOf("Sci-Fi"),
+                cover = "inception.jpg",
+                summary = emptyList(),
+                mediaType = MediaProcesserImport.MediaType.Movie,
+                source = "local"
+            ),
+            media = MediaProcesserImport.MediaImport(
+                videoFile = "inception.mkv",
+                subtitles = emptyList()
+            ),
+            episodeInfo = null
+        )
+
+        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
+        restTemplate.postForEntity(
+            "/open/api/mediaprocesser/import",
+            HttpEntity(firstImport, headers),
+            Void::class.java
+        ).statusCode shouldBe HttpStatus.OK
+
+
+        // ---------- STEP 2: Import again WITHOUT cover ----------
+        val secondImport = firstImport.copy(
+            metadata = firstImport.metadata.copy(
+                cover = "inception2.jpg" // intentionally missing
+            )
+        )
+
+        restTemplate.postForEntity(
+            "/open/api/mediaprocesser/import",
+            HttpEntity(secondImport, headers),
+            Void::class.java
+        ).statusCode shouldBe HttpStatus.OK
+
+
+        // ---------- STEP 3: Verify cover was NOT overwritten ----------
+        transaction {
+            val catalog = CatalogTable.selectAll().single()
+
+            catalog[CatalogTable.cover] shouldBe "inception.jpg" // unchanged
+        }
+    }
+
+    @Test
+    fun catalogCover_shouldBeFilled_whenMissing() {
+
+        // ---------- STEP 1: Import WITHOUT cover ----------
+        val firstImport = MediaProcesserImport(
+            collection = "movies",
+            metadata = MediaProcesserImport.MetadataImport(
+                title = "Interstellar",
+                genres = listOf("Sci-Fi"),
+                cover = null, // missing
+                summary = emptyList(),
+                mediaType = MediaProcesserImport.MediaType.Movie,
+                source = "local"
+            ),
+            media = MediaProcesserImport.MediaImport(
+                videoFile = "interstellar.mkv",
+                subtitles = emptyList()
+            ),
+            episodeInfo = null
+        )
+
+        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
+        restTemplate.postForEntity(
+            "/open/api/mediaprocesser/import",
+            HttpEntity(firstImport, headers),
+            Void::class.java
+        ).statusCode shouldBe HttpStatus.OK
+
+
+        // ---------- STEP 2: Import again WITH cover ----------
+        val secondImport = firstImport.copy(
+            metadata = firstImport.metadata.copy(
+                cover = "interstellar.jpg"
+            )
+        )
+
+        restTemplate.postForEntity(
+            "/open/api/mediaprocesser/import",
+            HttpEntity(secondImport, headers),
+            Void::class.java
+        ).statusCode shouldBe HttpStatus.OK
+
+
+        // ---------- STEP 3: Verify cover WAS updated ----------
+        transaction {
+            val catalog = CatalogTable.selectAll().single()
+
+            catalog[CatalogTable.cover] shouldBe "interstellar.jpg" // updated
+        }
+    }
+
+
 
 
 }

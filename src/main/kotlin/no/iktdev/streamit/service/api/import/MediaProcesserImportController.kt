@@ -12,7 +12,9 @@ import no.iktdev.streamit.service.db.tables.content.SubtitleTable
 import no.iktdev.streamit.service.db.tables.content.SummaryTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.dto.MediaProcesserImport
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertIgnoreAndGetId
+import org.jetbrains.exposed.sql.update
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -41,7 +43,8 @@ class MediaProcesserImportController {
                 }
                 result.getOrNull()
             } else {
-                val episodeInfo = import.episodeInfo ?: throw IllegalStateException("Episode info not available, which is required when providing serie type")
+                val episodeInfo = import.episodeInfo
+                    ?: throw IllegalStateException("Episode info not available, which is required when providing serie type")
                 val serieInsertResult = withTransaction {
                     SerieTable.insertSerie(
                         title = episodeInfo.episodeTitle,
@@ -82,22 +85,36 @@ class MediaProcesserImportController {
 
 
         val catalogId = withTransaction {
-            CatalogTable.insertIgnoreAndGetId {
-                it[CatalogTable.title] = import.metadata.title
-                it[CatalogTable.collection] = import.collection
-                it[CatalogTable.cover] = import.metadata.cover
-                it[CatalogTable.type] = import.metadata.mediaType.name.lowercase()
-                it[CatalogTable.genres] = genreIds.joinToString(",")
+            val insertedId = CatalogTable.insertIgnoreAndGetId {
+                it[title] = import.metadata.title
+                it[collection] = import.collection
+                it[cover] = import.metadata.cover
+                it[type] = import.metadata.mediaType.name.lowercase()
+                it[genres] = genreIds.joinToString(",")
                 it[CatalogTable.iid] = iid
-                it[CatalogTable.added] = LocalDateTime.now()
+                it[added] = LocalDateTime.now()
             }?.value
-        }.getOrNull()
 
-        if (catalogId != null) {
-            import.metadata.summary.forEach { summary ->
-                withTransaction {
-                    SummaryTable.insertIgnore(catalogId, summary.language, summary.description )
+            insertedId ?: CatalogTable.select(CatalogTable.id)
+                .where {
+                    (CatalogTable.title eq import.metadata.title) and
+                            (CatalogTable.collection eq import.collection)
+                }.single()[CatalogTable.id].value
+        }.getOrThrow()
+
+
+
+        if (import.metadata.cover != null) {
+            withTransaction {
+                CatalogTable.update(where = { (CatalogTable.id eq catalogId) and CatalogTable.cover.isNull() }) {
+                    it[CatalogTable.cover] = import.metadata.cover
                 }
+            }
+        }
+
+        import.metadata.summary.forEach { summary ->
+            withTransaction {
+                SummaryTable.insertIgnore(catalogId, summary.language, summary.description)
             }
         }
 
