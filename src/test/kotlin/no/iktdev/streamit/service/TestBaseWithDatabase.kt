@@ -4,9 +4,30 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.iktdev.streamit.service.auth.Authentication
 import no.iktdev.streamit.service.db.Access
 import no.iktdev.streamit.service.db.DatabaseTypes
+import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
+import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
+import no.iktdev.streamit.service.db.tables.content.CatalogTable
+import no.iktdev.streamit.service.db.tables.content.ContinueWatchTable
+import no.iktdev.streamit.service.db.tables.content.FavoriteTable
+import no.iktdev.streamit.service.db.tables.content.GenreTable
+import no.iktdev.streamit.service.db.tables.content.MovieTable
+import no.iktdev.streamit.service.db.tables.content.ProgressTable
+import no.iktdev.streamit.service.db.tables.content.SerieTable
+import no.iktdev.streamit.service.db.tables.content.SubtitleTable
+import no.iktdev.streamit.service.db.tables.content.SummaryTable
+import no.iktdev.streamit.service.db.tables.content.TitleTable
+import no.iktdev.streamit.service.db.tables.info.CastErrorTable
+import no.iktdev.streamit.service.db.tables.info.DataAudioTable
+import no.iktdev.streamit.service.db.tables.info.DataVideoTable
+import no.iktdev.streamit.service.db.tables.pfns.PersistentTokenTable
+import no.iktdev.streamit.service.db.tables.pfns.TokenTable
+import no.iktdev.streamit.service.db.tables.user.ProfileImageTable
+import no.iktdev.streamit.service.db.tables.user.UserTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
+import no.iktdev.streamit.service.dto.CastError
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.statements.jdbc.JdbcConnectionImpl
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.junit.jupiter.api.AfterAll
@@ -103,6 +124,27 @@ abstract class TestBaseWithDatabase: TestBase() {
         TransactionManager.closeAndUnregister(database)
     }
 
+    fun clearTables() {
+        PersistentTokenTable.deleteAll()
+        TokenTable.deleteAll()
+        DelegatedAuthenticationTable.deleteAll()
+        RegisteredDevicesTable.deleteAll()
+        CatalogTable.deleteAll()
+        ContinueWatchTable.deleteAll()
+        FavoriteTable.deleteAll()
+        GenreTable.deleteAll()
+        MovieTable.deleteAll()
+        ProgressTable.deleteAll()
+        SerieTable.deleteAll()
+        SubtitleTable.deleteAll()
+        SummaryTable.deleteAll()
+        TitleTable.deleteAll()
+        CastErrorTable.deleteAll()
+        UserTable.deleteAll()
+        ProfileImageTable.deleteAll()
+        DataVideoTable.deleteAll()
+        DataAudioTable.deleteAll()
+    }
 
 
 }

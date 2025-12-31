@@ -1,6 +1,7 @@
 package no.iktdev.streamit.service.api.meta
 
 import com.google.gson.Gson
+import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
 import no.iktdev.streamit.service.dto.CastError
 import no.iktdev.streamit.service.dto.Response
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 
+@ApiRestController
 @RequestMapping("/cast")
 class CastErrorController {
 

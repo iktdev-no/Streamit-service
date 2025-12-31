@@ -77,6 +77,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-actuator")
 
     testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+
 }
 
 tasks.test {
