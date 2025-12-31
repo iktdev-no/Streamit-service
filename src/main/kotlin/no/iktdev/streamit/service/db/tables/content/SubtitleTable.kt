@@ -15,8 +15,17 @@ object SubtitleTable : IntIdTable(name = "SUBTITLE") {
         uniqueIndex(associatedWithVideo, language, format)
     }
 
-    fun insertAndIgnore(collection: String, language: String, subtitleFile: String, correspondingVideoFile: String, format: String): InsertStatement<Long> {
+    fun insertAndIgnore(collection: String, language: String, subtitleFile: String, correspondingVideoFile: String): InsertStatement<Long> {
         val fileName = File(correspondingVideoFile).nameWithoutExtension
+        val format = when (File(subtitleFile).extension.lowercase()) {
+            "vtt" -> "VTT"
+            "srt" -> "SRT"
+            "ass" -> "ASS"
+            "smi" -> "SMI"
+            else -> throw RuntimeException("Unknown or unsupported subtitle format found")
+        }
+
+
         return SubtitleTable.insertIgnore {
             it[SubtitleTable.associatedWithVideo] = fileName
             it[SubtitleTable.language] = language

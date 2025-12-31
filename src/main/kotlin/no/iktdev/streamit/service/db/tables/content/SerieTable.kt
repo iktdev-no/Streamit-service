@@ -30,7 +30,7 @@ object SerieTable: IntIdTable(name = "SERIE") {
         }
     }
 
-    fun insertSerie(title: String, collection: String, episode: Int, season: Int, videoFile: String): EntityID<Int>? {
+    fun insertSerie(title: String?, collection: String, episode: Int, season: Int, videoFile: String): EntityID<Int>? {
         return SerieTable.insertIgnoreAndGetId {
             it[this.title] = title
             it[this.collection] = collection
