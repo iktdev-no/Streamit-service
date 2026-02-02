@@ -10,6 +10,7 @@ data class MediaProcesserImport(
     data class MetadataImport(
         // Vi tar ikke med collection fra metadata, da det bestemmes i Migrate
         val title: String,
+        val alternativeTitles: List<String> = emptyList(),
         val genres: List<String> = emptyList(),
         val cover: String? = null,
         val summary: List<Summary> = emptyList(),
