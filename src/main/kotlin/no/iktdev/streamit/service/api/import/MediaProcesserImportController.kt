@@ -38,7 +38,7 @@ class MediaProcesserImportController(
         return if (success) {
             ResponseEntity(HttpStatus.OK)
         } else {
-            log.warn("Import failed for collection=${import.collection}, title=${import.metadata.title}")
+            log.warn("Import failed for collection=${import.collection}, title=${import.metadata?.title}")
             ResponseEntity(HttpStatus.BAD_REQUEST)
         }
     }

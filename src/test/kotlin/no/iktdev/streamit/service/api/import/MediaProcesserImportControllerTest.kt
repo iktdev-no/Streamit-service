@@ -430,7 +430,7 @@ class MediaProcesserImportControllerTest : TestBaseWithDatabase() {
 
         // ---------- STEP 2: Import again WITHOUT cover ----------
         val secondImport = firstImport.copy(
-            metadata = firstImport.metadata.copy(
+            metadata = firstImport.metadata!!.copy(
                 cover = "inception2.jpg" // intentionally missing
             )
         )
@@ -481,7 +481,7 @@ class MediaProcesserImportControllerTest : TestBaseWithDatabase() {
 
         // ---------- STEP 2: Import again WITH cover ----------
         val secondImport = firstImport.copy(
-            metadata = firstImport.metadata.copy(
+            metadata = firstImport.metadata!!.copy(
                 cover = "interstellar.jpg"
             )
         )

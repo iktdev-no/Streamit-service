@@ -4,7 +4,7 @@ data class MediaProcesserImport(
     val collection: String,
     val episodeInfo: EpisodeInfo? = null,
     val media: MediaImport? = null,
-    val metadata: MetadataImport
+    val metadata: MetadataImport?
 ) {
 
     data class MetadataImport(

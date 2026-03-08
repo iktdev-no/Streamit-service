@@ -26,8 +26,22 @@ class ImportContentService {
 
     fun importContent(import: MediaProcesserImport): Boolean {
 
+        if (import.metadata != null) {
+            return fullImport(import)
+        }
+        import.media?.let { media ->
+            if (media.subtitles.isNotEmpty()) {
+                insertSubtitles(import.collection, media)
+                return true
+            }
+        }
+        return false // metadata mangler og ingen subtitles → ingenting å gjøre
+
+    }
+
+    fun fullImport(import: MediaProcesserImport): Boolean {
         // 1. Insert movie or serie → get iid (Int?) or fail
-        val iid: Int? = when (import.metadata.mediaType) {
+        val iid: Int? = when (import.metadata!!.mediaType) {
             MediaProcesserImport.MediaType.Movie -> insertMovieAndGetId(import)
             MediaProcesserImport.MediaType.Serie -> {
                 val ok = insertSerie(import)
@@ -37,26 +51,21 @@ class ImportContentService {
         }
 
         // 2. Insert subtitles
-        import.media?.subtitles?.forEach { subtitle ->
-            withTransaction {
-                SubtitleTable.insertAndIgnore(
-                    import.collection,
-                    subtitle.language,
-                    subtitle.subtitleFile,
-                    import.media.videoFile ?: subtitle.subtitleFile
-                )
-            }.onFailure { log.error("Error while importing subtitle $subtitle", it) }
+        import.media?.run {
+            insertSubtitles(import.collection, import.media)
         }
 
         // 3. Resolve genres
-        val genreIds = resolveGenres(import)
+        val genreIds = resolveGenres(import.metadata)
 
         // 4. Find or create catalog
-        val catalogId = findCatalogId(import)
-            ?: insertCatalog(import, genreIds, iid)
+        val catalogId = findCatalogId(import.collection, import.metadata)
+            ?: insertCatalog(import.collection, import.metadata, genreIds, iid)
 
         // 5. Update cover if missing
-        updateCoverIfMissing(catalogId, import)
+        import.metadata.cover?.let { cover ->
+            updateCoverIfMissing(catalogId, cover)
+        }
 
         // 6. Insert summaries
         import.metadata.summary.forEach { summary ->
@@ -66,41 +75,29 @@ class ImportContentService {
         }
 
         // 7. Insert titles (master + alternatives)
-        upsertTitles(import)
+        upsertTitles(import.metadata)
 
         return true
     }
 
-    fun importMetadata(import: MediaProcesserImport): Boolean {
 
-        // 1. Resolve genres
-        val genreIds = resolveGenres(import)
-
-        // 2. Find catalog (must exist — metadata skal ikke opprette nye kataloger)
-        val catalogId = findCatalogId(import)
-            ?: return false // metadata kan ikke opprette nye kataloger
-
-        // 3. Update cover if missing
-        updateCoverIfMissing(catalogId, import)
-
-        // 4. Insert summaries
-        import.metadata.summary.forEach { summary ->
+    fun insertSubtitles(collection: String, media: MediaProcesserImport.MediaImport) {
+        media.subtitles.forEach { subtitle ->
             withTransaction {
-                SummaryTable.insertIgnore(catalogId, summary.language, summary.description)
-            }
+                SubtitleTable.insertAndIgnore(
+                    collection,
+                    subtitle.language,
+                    subtitle.subtitleFile,
+                    media.videoFile ?: subtitle.subtitleFile
+                )
+            }.onFailure { log.error("Error while importing subtitle $subtitle", it) }
         }
-
-        // 5. Insert titles (master + alternatives)
-        upsertTitles(import)
-
-        return true
     }
 
 
 
-    private fun findCatalogId(import: MediaProcesserImport): Int? {
-        val type = import.metadata.mediaType.name.lowercase()
-        val collection = import.collection
+    private fun findCatalogId(collection: String, metadata: MediaProcesserImport.MetadataImport): Int? {
+        val type = metadata.mediaType.name.lowercase()
 
         return withTransaction {
             CatalogTable
@@ -116,20 +113,21 @@ class ImportContentService {
     }
 
     private fun insertCatalog(
-        import: MediaProcesserImport,
+        collection: String,
+        metadata: MediaProcesserImport.MetadataImport,
         genreIds: List<Int>,
         iid: Int?
     ): Int {
 
-        val type = import.metadata.mediaType.name.lowercase()
-        val collection = import.collection
-        val title = import.metadata.title
+        val type = metadata.mediaType.name.lowercase()
+        val collection = collection
+        val title = metadata.title
 
         return withTransaction {
             CatalogTable.insertAndGetId {
                 it[CatalogTable.title] = title
                 it[CatalogTable.collection] = collection
-                it[CatalogTable.cover] = import.metadata.cover
+                it[CatalogTable.cover] = metadata.cover
                 it[CatalogTable.type] = type
                 it[CatalogTable.genres] = genreIds.joinToString(",")
                 it[CatalogTable.iid] = iid
@@ -138,9 +136,7 @@ class ImportContentService {
         }.getOrThrow()
     }
 
-    private fun updateCoverIfMissing(catalogId: Int, import: MediaProcesserImport) {
-        val cover = import.metadata.cover ?: return
-
+    private fun updateCoverIfMissing(catalogId: Int, cover: String) {
         withTransaction {
             CatalogTable.update(
                 where = { (CatalogTable.id eq catalogId) and CatalogTable.cover.isNull() }
@@ -186,8 +182,8 @@ class ImportContentService {
     }
 
 
-    private fun resolveGenres(import: MediaProcesserImport): List<Int> {
-        val genres = import.metadata.genres
+    private fun resolveGenres(metadata: MediaProcesserImport.MetadataImport): List<Int> {
+        val genres = metadata.genres
         if (genres.isEmpty()) return emptyList()
 
         return withTransaction {
@@ -199,9 +195,9 @@ class ImportContentService {
         }.getOrElse { emptyList() }
     }
 
-    private fun upsertTitles(import: MediaProcesserImport) {
-        val master = import.metadata.title
-        val alternatives = import.metadata.alternativeTitles ?: emptyList()
+    private fun upsertTitles(metadata: MediaProcesserImport.MetadataImport) {
+        val master = metadata.title
+        val alternatives = metadata.alternativeTitles ?: emptyList()
 
         if (alternatives.isEmpty()) return
 
