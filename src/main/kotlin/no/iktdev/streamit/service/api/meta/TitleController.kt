@@ -19,7 +19,7 @@ class TitleController(
 
     @RequiresAuthentication(Scope.CatalogRead)
     @GetMapping("/search/{name}")
-    suspend fun searchForCollection(@PathVariable name: String): ResponseEntity<String?> {
+    fun searchForCollection(@PathVariable name: String): ResponseEntity<String?> {
         val masterTitle = titleSearchService.findMasterBySanitized(name, null, null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Title not found")
         val collection = CatalogTable.findCollectionFrom(masterTitle)

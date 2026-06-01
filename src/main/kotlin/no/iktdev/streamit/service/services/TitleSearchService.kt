@@ -20,7 +20,7 @@ class TitleSearchService {
             .trim()
     }
 
-    suspend fun findMasterBySanitized(raw: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
+    fun findMasterBySanitized(raw: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
         val sanitized = sanitizeTitle(raw)
 
         TitleTable
