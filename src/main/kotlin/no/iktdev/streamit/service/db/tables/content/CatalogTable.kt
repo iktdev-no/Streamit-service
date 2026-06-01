@@ -3,6 +3,7 @@ package no.iktdev.streamit.service.db.tables.content
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.statements.InsertStatement
@@ -138,6 +139,13 @@ object CatalogTable : IntIdTable(name = "CATALOG") {
             .orWhere { this@CatalogTable.collection like "%$keyword%" }
             .map { CatalogTableObject.fromRow(it) }
     } ?: emptyList()
+
+    fun findCollectionFrom(title: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
+        CatalogTable.select(CatalogTable.collection)
+            .where((CatalogTable.collection eq title) or (CatalogTable.title eq title))
+            .map { it[CatalogTable.collection] }
+            .singleOrNull()
+    }
 
 
 }
