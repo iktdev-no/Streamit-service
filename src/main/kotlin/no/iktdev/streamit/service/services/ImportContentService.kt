@@ -2,6 +2,7 @@ package no.iktdev.streamit.service.services
 
 import mu.KotlinLogging
 import no.iktdev.streamit.service.db.tables.content.CatalogTable
+import no.iktdev.streamit.service.db.tables.content.CatalogTable.iid
 import no.iktdev.streamit.service.db.tables.content.GenreTable
 import no.iktdev.streamit.service.db.tables.content.MovieTable
 import no.iktdev.streamit.service.db.tables.content.MovieTableObject
@@ -12,6 +13,7 @@ import no.iktdev.streamit.service.db.tables.content.TitleTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.dto.MediaProcesserImport
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.insertIgnoreAndGetId
 import org.jetbrains.exposed.sql.or
@@ -59,7 +61,7 @@ class ImportContentService {
         val genreIds = resolveGenres(import.metadata)
 
         // 4. Find or create catalog
-        val catalogId = findCatalogId(import.collection, import.metadata)
+        val catalogId = findCatalogId(import.collection, import.metadata, iid)
             ?: insertCatalog(import.collection, import.metadata, genreIds, iid)
 
         // 5. Update cover if missing
@@ -96,19 +98,22 @@ class ImportContentService {
 
 
 
-    private fun findCatalogId(collection: String, metadata: MediaProcesserImport.MetadataImport): Int? {
+    private fun findCatalogId(collection: String, metadata: MediaProcesserImport.MetadataImport, iid: Int?): Int? {
         val type = metadata.mediaType.name.lowercase()
 
         return withTransaction {
-            CatalogTable
-                .select(CatalogTable.id)
-                .where {
-                    (CatalogTable.collection eq collection) and
-                            (CatalogTable.type eq type)
-                }
-                .singleOrNull()
-                ?.get(CatalogTable.id)
-                ?.value
+            val query = CatalogTable.selectAll()
+                .where { (CatalogTable.collection eq collection) and (CatalogTable.type eq type) }
+
+            // Hvis det er en film, må vi også matche iid for å finne den spesifikke raden
+            // Hvis det er en serie, ser vi bare etter den generelle collection-raden
+            val finalQuery = if (metadata.mediaType == MediaProcesserImport.MediaType.Movie) {
+                query.andWhere { CatalogTable.iid eq iid }
+            } else {
+                query
+            }
+
+            finalQuery.singleOrNull()?.get(CatalogTable.id)?.value
         }.getOrNull()
     }
 
