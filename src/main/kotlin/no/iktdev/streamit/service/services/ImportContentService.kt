@@ -100,17 +100,15 @@ class ImportContentService {
 
     private fun findCatalogId(collection: String, metadata: MediaProcesserImport.MetadataImport, iid: Int?): Int? {
         val type = metadata.mediaType.name.lowercase()
+        val title = metadata.title
 
         return withTransaction {
             val query = CatalogTable.selectAll()
-                .where { (CatalogTable.collection eq collection) and (CatalogTable.type eq type) }
 
-            // Hvis det er en film, må vi også matche iid for å finne den spesifikke raden
-            // Hvis det er en serie, ser vi bare etter den generelle collection-raden
             val finalQuery = if (metadata.mediaType == MediaProcesserImport.MediaType.Movie) {
-                query.andWhere { CatalogTable.iid eq iid }
+                query.where { (CatalogTable.collection eq collection) and (CatalogTable.type eq type) and (CatalogTable.iid eq iid) }
             } else {
-                query
+                query.where { (CatalogTable.title eq title) and (CatalogTable.type eq type) }
             }
 
             finalQuery.singleOrNull()?.get(CatalogTable.id)?.value
@@ -123,13 +121,11 @@ class ImportContentService {
         genreIds: List<Int>,
         iid: Int?
     ): Int {
-
         val type = metadata.mediaType.name.lowercase()
-        val collection = collection
         val title = metadata.title
 
         return withTransaction {
-            CatalogTable.insertAndGetId {
+            val insertedId = CatalogTable.insertIgnoreAndGetId {
                 it[CatalogTable.title] = title
                 it[CatalogTable.collection] = collection
                 it[CatalogTable.cover] = metadata.cover
@@ -137,7 +133,10 @@ class ImportContentService {
                 it[CatalogTable.genres] = genreIds.joinToString(",")
                 it[CatalogTable.iid] = iid
                 it[CatalogTable.added] = LocalDateTime.now()
-            }.value
+            }?.value
+
+            insertedId ?: findCatalogId(collection, metadata, iid)
+            ?: throw IllegalStateException("Klarte hverken å sette inn eller finne catalog for $title")
         }.getOrThrow()
     }
 
