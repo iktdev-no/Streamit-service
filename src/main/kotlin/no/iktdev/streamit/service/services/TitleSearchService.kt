@@ -1,15 +1,19 @@
 package no.iktdev.streamit.service.services
 
+import mu.KotlinLogging
 import no.iktdev.streamit.service.db.tables.content.TitleTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.jetbrains.annotations.VisibleForTesting
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.springframework.stereotype.Service
 import java.text.Normalizer
 
 @Service
 class TitleSearchService {
+    val log = KotlinLogging.logger {}
+
 
     // 1. Normalisering (Bevarer og dekomponerer tegn)
     @VisibleForTesting
@@ -23,36 +27,59 @@ class TitleSearchService {
         return normalized.replace("\\p{M}".toRegex(), "")
     }
 
-    fun sanitizeTitle(input: String): String {
-        return input.normalize()
-            .lowercase()
-            .replace("’", "'")                 // fancy apostrof → normal
-            .replace("[^a-z0-9']".toRegex(), " ") // fjern alt unntatt bokstaver, tall og '
-            .replace("'s\\b".toRegex(), "")    // fjern possessive 's
-            .replace("'\\b".toRegex(), "")     // fjern apostrof på slutten av ord
-            .replace("\\s+".toRegex(), " ")    // normaliser whitespace
-            .trim()
-    }
-
     fun findMasterBySanitized(raw: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
-        val sanitized = sanitizeTitle(raw)
 
-        if (sanitized.isBlank()) {
+        if (raw.isBlank()) {
             return@withTransaction null
         }
 
-        TitleTable
+        val result = TitleTable
             .selectAll()
             .firstOrNull { row ->
-                val masterSan = sanitizeTitle(row[TitleTable.masterTitle])
-                val altSan = sanitizeTitle(row[TitleTable.alternativeTitle])
+                val masterSan = row[TitleTable.masterTitle]
+                val altSan = row[TitleTable.alternativeTitle]
 
-                masterSan == sanitized || altSan == sanitized
+                masterSan == raw || altSan == raw
             }
             ?.get(TitleTable.masterTitle)
+
+        log.info("Title search using $raw gave $result")
+
+        result
     }
 
+    fun batchSearch(names: List<String>, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
+        if (names.isEmpty()) return@withTransaction null
 
+        // Hent rader som matcher noen av navnene (enten som master eller alt)
+        val rows = TitleTable
+            .selectAll()
+            .map { row ->
+                val master = row[TitleTable.masterTitle]
+                val alt = row[TitleTable.alternativeTitle]
+                master to alt
+            }
+
+        // Tell opp treff per mastertittel basert på sanitering
+        val matchCounts = mutableMapOf<String, Int>()
+
+        for ((master, alt) in rows) {
+
+            // Sjekk om noen av våre søkenavn matcher denne radens master eller alt
+            for (sanName in names) {
+                if (master == sanName || alt == sanName) {
+                    matchCounts[master] = matchCounts.getOrDefault(master, 0) + 1
+                }
+            }
+        }
+
+        // Finn den mastertittelen som fikk flest treff
+        val bestMatch = matchCounts.maxByOrNull { it.value }?.key
+
+        log.info("Batch search for $names gave best match '$bestMatch' with counts: $matchCounts")
+
+        bestMatch
+    }
 
 
 }
