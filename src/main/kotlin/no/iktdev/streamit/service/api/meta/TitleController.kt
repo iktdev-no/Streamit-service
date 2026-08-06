@@ -40,8 +40,12 @@ class TitleController(
         val collection = CatalogTable.findCollectionFrom(title)
 
         return if (collection.isNullOrEmpty()) {
+            log.error { "Collection not found i catalog using $title" }
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Title not found")
-        } else ResponseEntity.status(HttpStatus.OK).body(collection)
+        } else {
+            log.info("Collection found $collection in catalog using $title")
+            ResponseEntity.status(HttpStatus.OK).body(collection)
+        }
     }
 
 }
