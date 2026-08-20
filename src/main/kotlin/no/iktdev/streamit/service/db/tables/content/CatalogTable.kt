@@ -1,6 +1,7 @@
 package no.iktdev.streamit.service.db.tables.content
 
 import no.iktdev.streamit.service.db.tables.util.withTransaction
+import no.iktdev.streamit.service.log
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -8,6 +9,7 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import java.time.LocalDateTime
+import kotlin.collections.getOrElse
 
 object CatalogTable : IntIdTable(name = "CATALOG") {
     val title: Column<String> = varchar("TITLE", 250)
@@ -140,11 +142,20 @@ object CatalogTable : IntIdTable(name = "CATALOG") {
             .map { CatalogTableObject.fromRow(it) }
     } ?: emptyList()
 
-    fun findCollectionFrom(title: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? = withTransaction(database, onError) {
-        CatalogTable.select(CatalogTable.collection)
-            .where((CatalogTable.collection eq title) or (CatalogTable.title eq title))
-            .map { it[CatalogTable.collection] }
-            .singleOrNull()
+    fun findCollectionFrom(title: String, database: Database? = null, onError: ((Exception) -> Unit)? = null): String? {
+        val out = withTransaction(database, onError) {
+            CatalogTable.select(CatalogTable.collection)
+                .where((CatalogTable.collection eq title) or (CatalogTable.title eq title))
+                .map { it[CatalogTable.collection] }
+                .toList()
+        } ?: emptyList()
+        if (out.size > 1) {
+            log.error("We got multiple collections from the title '$title'")
+            return null
+        } else if (out.isEmpty()) {
+            log.error { "We got no collection from the title '$title'" }
+        }
+        return out.singleOrNull()
     }
 
 
