@@ -27,19 +27,24 @@ class ImportContentService {
     private val log = KotlinLogging.logger {}
 
     fun importContent(import: MediaProcesserImport): Boolean {
-
         if (import.metadata != null) {
-            return fullImport(import)
-        }
-        import.media?.let { media ->
-            if (media.subtitles.isNotEmpty()) {
-                insertSubtitles(import.collection, media)
-                return true
+            return when (import.metadata.mediaType) {
+                MediaProcesserImport.MediaType.Movie, MediaProcesserImport.MediaType.Serie -> fullImport(import)
+                MediaProcesserImport.MediaType.Subtitle -> subtitleImport(import)
             }
         }
-        return false // metadata mangler og ingen subtitles → ingenting å gjøre
+        return subtitleImport(import)
+    }
+
+    fun subtitleImport(import: MediaProcesserImport): Boolean {
+        val media = import.media ?: return false
+        return if (media.subtitles.isNotEmpty()) {
+            insertSubtitles(import.collection, media)
+            true
+        } else false
 
     }
+
 
     fun fullImport(import: MediaProcesserImport): Boolean {
         // 1. Insert movie or serie → get iid (Int?) or fail
@@ -49,6 +54,9 @@ class ImportContentService {
                 val ok = insertSerie(import)
                 if (!ok) return false
                 null
+            }
+            MediaProcesserImport.MediaType.Subtitle -> {
+                return false
             }
         }
 

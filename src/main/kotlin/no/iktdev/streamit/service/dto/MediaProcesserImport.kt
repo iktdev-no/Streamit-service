@@ -40,6 +40,7 @@ data class MediaProcesserImport(
 
     enum class MediaType {
         Movie,
-        Serie
+        Serie,
+        Subtitle
     }
 }
