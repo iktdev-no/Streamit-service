@@ -46,30 +46,27 @@ class TitleSearchService {
 
         val normalizedNames = names.map { it.normalize() }.toSet()
 
-        val rows = TitleTable
-            .selectAll()
-            .map { row ->
-                val master = row[TitleTable.masterTitle]
-                val alt = row[TitleTable.alternativeTitle]
-                master to alt.normalize()
-                // Vi beholder original 'master' som nøkkel for å returnere den riktige tittelen,
-                // men sammenligner med en normalisert versjon av master og alt.
-            }
+        val rows = TitleTable.selectAll().map { row ->
+            row[TitleTable.masterTitle] to row[TitleTable.alternativeTitle]
+        }
 
-        // Tell opp treff per mastertittel basert på normalisert sanitering
+        // Tell opp treff per mastertittel
         val matchCounts = mutableMapOf<String, Int>()
 
         for ((master, alt) in rows) {
             val normalizedMaster = master.normalize()
+            val normalizedAlt = alt.normalize()
 
             for (sanName in normalizedNames) {
-                if (normalizedMaster == sanName || alt == sanName) {
+                // Hvis enten mastertittelen eller alternativtittelen matcher søkenavnet...
+                if (normalizedMaster == sanName || normalizedAlt == sanName) {
+                    // ...så øker vi poengsummen til MASTER-tittelen for denne raden!
                     matchCounts[master] = matchCounts.getOrDefault(master, 0) + 1
                 }
             }
         }
 
-        // Finn den mastertittelen som fikk flest treff
+        // Finn den mastertittelen som fikk flest poeng totalt på tvers av alle sine aliaser
         val bestMatch = matchCounts.maxByOrNull { it.value }?.key
 
         log.info("Batch search for $names gave best match '$bestMatch' with counts: $matchCounts")
