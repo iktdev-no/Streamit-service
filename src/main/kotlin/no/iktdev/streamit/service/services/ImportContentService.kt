@@ -116,7 +116,7 @@ class ImportContentService {
             val finalQuery = if (metadata.mediaType == MediaProcesserImport.MediaType.Movie) {
                 query.where { (CatalogTable.collection eq collection) and (CatalogTable.type eq type) and (CatalogTable.iid eq iid) }
             } else {
-                query.where { (CatalogTable.title eq title) and (CatalogTable.type eq type) }
+                query.where { ((CatalogTable.title eq title) and (CatalogTable.type eq type)) or ((CatalogTable.collection eq collection) and (CatalogTable.type eq type)) }
             }
 
             finalQuery.singleOrNull()?.get(CatalogTable.id)?.value
