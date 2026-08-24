@@ -120,7 +120,7 @@ class ImportContentService {
                 query.where { ((CatalogTable.title eq title) and (CatalogTable.type eq type)) or ((CatalogTable.collection eq collection) and (CatalogTable.type eq type)) }
             }
 
-            finalQuery.singleOrNull()?.get(CatalogTable.id)?.value
+            finalQuery.firstOrNull()?.get(CatalogTable.id)?.value
         }.getOrNull()
     }
 
