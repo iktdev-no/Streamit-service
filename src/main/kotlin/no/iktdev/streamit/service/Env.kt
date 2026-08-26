@@ -61,7 +61,10 @@ object Env {
     var serieAgeCap: String = System.getenv("SERIE_AGE") ?: "30d"
     var continueWatch: Int = System.getenv("CONTENT_CONTINUE")?.toInt() ?: 10
 
-    var jwtSecret: String? = System.getenv("JWT_SECRET") ?: "eO5zESo8livHiDWxwn+J5U7h5cAZPgWZr4JymG94zB0="
+    var jwtSecret: String? = System.getenv("JWT_SECRET") ?: run {
+        log.warn("JWT_SECRET is not set, default will be used!")
+        "eO5zESo8livHiDWxwn+J5U7h5cAZPgWZr4JymG94zB0="
+    }
     var jwtExpiry: String? = System.getenv("JWT_EXPIRY")
     var pfnsApiToken: String? = System.getenv("PFNS_API_TOKEN")
     var singleEntryPaths: Boolean = System.getenv("SINGLE_ENTRY_PATHS")?.toBoolean() ?: false
