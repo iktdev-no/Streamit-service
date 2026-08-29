@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 import kotlin.collections.getOrElse
 
 object CatalogTable : IntIdTable(name = "CATALOG") {
-    val title: Column<String> = varchar("TITLE", 250)
+    val title: Column<String> = varchar("TITLE", 500)
     var cover: Column<String?> = varchar("COVER", 250).nullable()
     var type: Column<String> = varchar("TYPE", 50)
-    var collection: Column<String> = varchar("COLLECTION", 250)
+    var collection: Column<String> = varchar("COLLECTION", 500)
     var iid: Column<Int?> = integer("IID").nullable()
     var genres: Column<String?> = varchar("GENRES", 24).nullable()
     val added: Column<LocalDateTime> = datetime("ADDED_AT").defaultExpression(CurrentDateTime)
