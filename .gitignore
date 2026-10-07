@@ -10,6 +10,7 @@ build/
 assets/
 tmp/
 conf/
+.run/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
