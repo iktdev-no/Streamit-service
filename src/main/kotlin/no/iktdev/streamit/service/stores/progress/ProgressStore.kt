@@ -11,8 +11,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.upsert
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 
 @Component
@@ -37,7 +35,7 @@ class ProgressStore(
                 ?.let {
                     Progress(
                         position = it[ProgressTableV2.position],
-                        played = it[ProgressTableV2.played]
+                        played = it[ProgressTableV2.played].toProgressInstant()
                     )
                 }
         }.getOrNull()
@@ -56,7 +54,7 @@ class ProgressStore(
                 .map {
                     Progress(
                         position = it[ProgressTableV2.position],
-                        played = it[ProgressTableV2.played]
+                        played = it[ProgressTableV2.played].toProgressInstant()
                     )
                 }
         }.getOrDefault(emptyList())
@@ -64,7 +62,7 @@ class ProgressStore(
 
     override fun getAfter(
         userId: UUID,
-        played: Long
+        played: java.time.Instant
     ): List<Progress> {
         val user = userStore.getByUid(userId)
             ?: return emptyList()
@@ -74,12 +72,12 @@ class ProgressStore(
                 .selectAll()
                 .where {
                     (ProgressTableV2.userId eq user.id) and
-                            (ProgressTableV2.played greater played)
+                    (ProgressTableV2.played greater played.toProgressDateTime())
                 }
                 .map {
                     Progress(
                         position = it[ProgressTableV2.position],
-                        played = it[ProgressTableV2.played]
+                        played = it[ProgressTableV2.played].toProgressInstant()
                     )
                 }
         }.getOrDefault(emptyList())
@@ -95,12 +93,7 @@ class ProgressStore(
 
         return withTransaction {
             // user.id er Long
-            ProgressTableV2.upsert(
-                keys = arrayOf(
-                    ProgressTableV2.userId,
-                    ProgressTableV2.videoId
-                )
-            ) {
+            ProgressTableV2.upsert {
                 it[ProgressTableV2.userId] =
                     EntityID(user.id, UserTableV2)
 
@@ -111,7 +104,7 @@ class ProgressStore(
                     progress.position
 
                 it[ProgressTableV2.played] =
-                    progress.played
+                    progress.played.toProgressDateTime()
 
             }
 

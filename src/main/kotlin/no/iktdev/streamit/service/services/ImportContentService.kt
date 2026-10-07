@@ -3,6 +3,7 @@ package no.iktdev.streamit.service.services
 import no.iktdev.streamit.service.model.shared.contentImport.CatalogMetadata
 import no.iktdev.streamit.service.model.shared.contentImport.Media
 import no.iktdev.streamit.service.model.shared.contentImport.MediaContent
+import no.iktdev.streamit.service.model.shared.contentImport.MediaType
 import no.iktdev.streamit.service.model.shared.contentImport.MediaImportV2
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import no.iktdev.streamit.service.stores.genre.IGenreStore
@@ -107,21 +108,22 @@ class ImportContentService(
             val video = videoStore.getByFile(content.videoFile)
                 ?: videoStore.insert(content.videoFile)
 
-            when (content) {
-                is MediaContent.Movie -> {
+            when (content.mediaType) {
+                MediaType.Movie -> {
                     movieStore.insert(
                         catalogId = catalogId,
                         videoId = video.id
                     )
                 }
 
-                is MediaContent.Episode -> {
+                MediaType.Episode -> {
+                    val episodeInfo = requireNotNull(content.episodeInfo)
                     serieStore.insert(
                         catalogId = catalogId,
                         videoId = video.id,
-                        season = content.season,
-                        episode = content.episode,
-                        title = content.title
+                        season = episodeInfo.season,
+                        episode = episodeInfo.episode,
+                        title = episodeInfo.title
                     )
                 }
             }

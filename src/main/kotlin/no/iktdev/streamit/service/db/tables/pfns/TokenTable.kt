@@ -2,14 +2,14 @@ package no.iktdev.streamit.service.db.tables.pfns
 
 import no.iktdev.streamit.service.model.internal.auth.AccessTokenObject
 import no.iktdev.streamit.service.toMD5
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
-object TokenTable :  IntIdTable(name = "TOKENS") {
+object TokenTable :  LongIdTable(name = "TOKENS") {
     val tokenId = varchar("TOKEN_ID", 32).uniqueIndex()
     val token = text("TOKEN")
     val createdAt = datetime("CREATED_AT").clientDefault { LocalDateTime.now() }

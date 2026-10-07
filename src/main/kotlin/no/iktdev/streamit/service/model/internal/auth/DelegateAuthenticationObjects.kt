@@ -1,6 +1,7 @@
 package no.iktdev.streamit.service.model.internal.auth
 
 import no.iktdev.streamit.service.toSHA256Hash
+import java.time.Instant
 import java.time.LocalDateTime
 
 data class AuthInitiateRequest(
@@ -32,7 +33,7 @@ data class MediaScopedAuthRequest(
 )
 
 data class RequestCreatedResponse(
-    val expiry: Long,
+    val expiry: Instant,
     val sessionId: String
 )
 

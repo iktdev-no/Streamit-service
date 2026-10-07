@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.db.queries
 
 import com.google.gson.Gson
 import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
-import no.iktdev.streamit.service.db.tables.util.toEpochSeconds
+import no.iktdev.streamit.service.db.tables.util.toUtcInstant
 import no.iktdev.streamit.service.model.internal.auth.DelegatedRequestData
 import no.iktdev.streamit.service.model.internal.auth.RequestDeviceInfo
 import org.jetbrains.exposed.sql.insertAndGetId
@@ -37,8 +37,8 @@ fun DelegatedAuthenticationTable.executeGetDelegatePendingRequestBy(pin: String)
                     RequestDeviceInfo::class.java
                 )
             },
-            created = it[DelegatedAuthenticationTable.created].toEpochSeconds(),
-            expires = it[DelegatedAuthenticationTable.expires].toEpochSeconds(),
+            created = it[DelegatedAuthenticationTable.created].toUtcInstant(),
+            expires = it[DelegatedAuthenticationTable.expires].toUtcInstant(),
             permitted = it[DelegatedAuthenticationTable.permitted],
             consumed = it[DelegatedAuthenticationTable.consumed],
             method = it[DelegatedAuthenticationTable.method],

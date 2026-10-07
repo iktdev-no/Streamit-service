@@ -6,7 +6,7 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.db.tables.util.executeWithStatus
 import no.iktdev.streamit.service.db.tables.util.isCausedByDuplicateError
 import no.iktdev.streamit.service.db.tables.util.isExposedSqlException
-import no.iktdev.streamit.service.db.tables.util.toEpochSeconds
+import no.iktdev.streamit.service.db.tables.util.toUtcInstant
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.doesEndpointRequireAuthorization
 import no.iktdev.streamit.service.getAuthorization
@@ -134,7 +134,7 @@ class AuthenticationController() {
     fun createDelegationRequestSession(data: AuthInitiateRequest, pinOrQr: DelegatedAuthenticationTable.AuthMethod, request: HttpServletRequest?): ResponseEntity<RequestCreatedResponse> {
         val ip = request?.getRequestersIp()
         val reqId = data.toRequestId()
-        var insertedId: Int? = null
+        var insertedId: Long? = null
         val success = executeWithStatus(onError = { e ->
             log.error {
                 "Failed to insert delegation request for ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${
@@ -176,7 +176,7 @@ class AuthenticationController() {
         }
         return ResponseEntity.ok(
             RequestCreatedResponse(
-                expiry = expires?.toEpochSeconds() ?: 0,
+                expiry = expires?.toUtcInstant() ?: java.time.Instant.EPOCH,
                 sessionId = reqId
             )
         )

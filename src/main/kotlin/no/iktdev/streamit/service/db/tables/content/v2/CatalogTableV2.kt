@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 object CatalogTableV2 : LongIdTable(name = "CATALOG") {
-    val store: Column<String> = varchar("STORE", 255)
+    val store: Column<String> = varchar("STORE", 500)
     val cover: Column<String?> = varchar("COVER", 500).nullable()
     val type: Column<ContentType> =
         enumerationByName("TYPE", 10, ContentType::class)

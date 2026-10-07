@@ -22,6 +22,7 @@ import no.iktdev.streamit.service.model.shared.content.Serie
 import no.iktdev.streamit.service.model.shared.content.Subtitle
 import no.iktdev.streamit.service.model.shared.content.Video
 import no.iktdev.streamit.service.stores.user.IUserStore
+import no.iktdev.streamit.service.stores.progress.toProgressInstant
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.springframework.stereotype.Component
@@ -308,7 +309,7 @@ class CatalogStore(
             row.getOrNull(ProgressTableV2.position)?.let {
                 Progress(
                     position = it,
-                    played = row[ProgressTableV2.played]
+                    played = row[ProgressTableV2.played].toProgressInstant()
                 )
             }
         } else {
@@ -370,7 +371,7 @@ class CatalogStore(
             row.getOrNull(ProgressTableV2.position)?.let {
                 Progress(
                     position = it,
-                    played = row[ProgressTableV2.played]
+                    played = row[ProgressTableV2.played].toProgressInstant()
                 )
             }
         } else {

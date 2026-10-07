@@ -18,6 +18,13 @@ data class MediaImportV2(
             require(it.content != null || it.subtitles.isNotEmpty()) {
                 "Media must contain content or subtitles"
             }
+            it.content?.let { content ->
+                if (content.mediaType == MediaType.Episode) {
+                    require(content.episodeInfo != null) {
+                        "Episode content requires episode information"
+                    }
+                }
+            }
         }
     }
 }
@@ -36,20 +43,19 @@ data class Media(
     val subtitles: List<SubtitleImport> = emptyList()
 )
 
-sealed interface MediaContent {
-    val videoFile: String
+enum class MediaType { Movie, Episode }
 
-    data class Movie(
-        override val videoFile: String
-    ) : MediaContent
+data class MediaContent(
+    val mediaType: MediaType,
+    val videoFile: String,
+    val episodeInfo: EpisodeInfo? = null
+)
 
-    data class Episode(
-        override val videoFile: String,
-        val season: Int,
-        val episode: Int,
-        val title: String? = null
-    ) : MediaContent
-}
+data class EpisodeInfo(
+    val season: Int,
+    val episode: Int,
+    val title: String? = null
+)
 
 data class SubtitleImport(
     val subtitleFile: String,

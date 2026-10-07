@@ -5,7 +5,6 @@ import no.iktdev.streamit.service.db.tables.content.v2.*
 import no.iktdev.streamit.service.model.shared.ImportReference
 import no.iktdev.streamit.service.model.shared.content.ContentType
 import no.iktdev.streamit.service.model.shared.contentImport.*
-import no.iktdev.streamit.service.services.ImportContentService
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
@@ -16,14 +15,11 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType as HttpMediaType
 
 class MediaImportControllerTest : TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
-
-    @Autowired
-    lateinit var importContentService: ImportContentService
 
     @AfterEach
     fun clearDatabaseTables() {
@@ -42,12 +38,12 @@ class MediaImportControllerTest : TestBaseWithDatabase() {
                 summaries = listOf(Summary("eng", "A hacker discovers reality is fake."))
             ),
             media = Media(
-                content = MediaContent.Movie("matrix.mkv"),
+                content = MediaContent(MediaType.Movie, "matrix.mkv"),
                 subtitles = listOf(SubtitleImport("matrix.en.srt", "eng", "srt"))
             )
         )
 
-        assertEquals(true, importContentService.import(payload))
+        assertEquals(HttpStatus.OK, postImport(payload).statusCode)
 
         transaction {
             val catalog = CatalogTableV2.selectAll().single()
@@ -75,17 +71,21 @@ class MediaImportControllerTest : TestBaseWithDatabase() {
             reference = ImportReference(store = "series"),
             metadata = CatalogMetadata(title = "Breaking Bad", type = ContentType.Serie)
         )
-        assertEquals(true, importContentService.import(createCatalog))
+        assertEquals(HttpStatus.OK, postImport(createCatalog).statusCode)
         val catalogId = transaction { CatalogTableV2.selectAll().single()[CatalogTableV2.id].value }
 
         val importEpisode = MediaImportV2(
             reference = ImportReference(catalogId = catalogId, store = "series"),
             media = Media(
-                content = MediaContent.Episode("breakingbad.s01e01.mkv", season = 1, episode = 1, title = "Pilot"),
+                content = MediaContent(
+                    mediaType = MediaType.Episode,
+                    videoFile = "breakingbad.s01e01.mkv",
+                    episodeInfo = EpisodeInfo(season = 1, episode = 1, title = "Pilot")
+                ),
                 subtitles = listOf(SubtitleImport("bb.en.srt", "eng", "srt"))
             )
         )
-        assertEquals(true, importContentService.import(importEpisode))
+        assertEquals(HttpStatus.OK, postImport(importEpisode).statusCode)
 
         transaction {
             val episode = SerieTableV2.selectAll().single()
@@ -125,7 +125,7 @@ class MediaImportControllerTest : TestBaseWithDatabase() {
     private fun postImport(payload: MediaImportV2, secure: Boolean = false) =
         restTemplate.postForEntity(
             "/${if (secure) "secure" else "open"}/api/media/import/import",
-            HttpEntity(payload, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
+            HttpEntity(payload, HttpHeaders().apply { contentType = HttpMediaType.APPLICATION_JSON }),
             Void::class.java
         )
 }

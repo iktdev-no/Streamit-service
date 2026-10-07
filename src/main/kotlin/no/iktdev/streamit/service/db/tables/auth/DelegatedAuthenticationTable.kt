@@ -1,11 +1,11 @@
 package no.iktdev.streamit.service.db.tables.auth
 
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-object DelegatedAuthenticationTable: IntIdTable(name = "DELEGATED_AUTHENTICATION") {
+object DelegatedAuthenticationTable: LongIdTable(name = "DELEGATED_AUTHENTICATION") {
     val pin: Column<String> = varchar("PIN", 8)
     val requesterId: Column<String> = char("REQUESTER_ID", 64)
     val deviceInfo: Column<String> = varchar("DEVICE_INFO", 256)
@@ -24,4 +24,3 @@ object DelegatedAuthenticationTable: IntIdTable(name = "DELEGATED_AUTHENTICATION
         PIN, QR
     }
 }
-
