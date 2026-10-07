@@ -8,6 +8,7 @@ import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
 import no.iktdev.streamit.service.db.tables.content.v2.CatalogTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.CatalogTitleTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.CatalogGenreTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.ContinueWatchTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.FavoritesTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.GenreTableV2
@@ -16,6 +17,7 @@ import no.iktdev.streamit.service.db.tables.content.v2.ProgressTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.SerieTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.SubtitleTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.SummaryTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.VideoTableV2
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
 import no.iktdev.streamit.service.db.tables.info.DataAudioTable
 import no.iktdev.streamit.service.db.tables.info.DataVideoTable
@@ -90,6 +92,8 @@ abstract class TestBaseWithDatabase: TestBase() {
                 "DELEGATED_AUTHENTICATION",
                 "REGISTERED_DEVICES",
                 "CATALOG",
+                "CATALOG_TITLE",
+                "CATALOG_GENRE",
                 "CONTINUE_WATCH",
                 "FAVORITES",
                 "GENRE",
@@ -98,7 +102,7 @@ abstract class TestBaseWithDatabase: TestBase() {
                 "SERIE",
                 "SUBTITLE",
                 "SUMMARY",
-                "TITLES",
+                "VIDEO",
                 "CAST_ERROR",
                 "USERS",
                 "PROFILE_IMAGE",
@@ -128,16 +132,18 @@ abstract class TestBaseWithDatabase: TestBase() {
         TokenTable.deleteAll()
         DelegatedAuthenticationTable.deleteAll()
         RegisteredDevicesTable.deleteAll()
-        CatalogTableV2.deleteAll()
         ContinueWatchTableV2.deleteAll()
         FavoritesTableV2.deleteAll()
-        GenreTableV2.deleteAll()
-        MovieTableV2.deleteAll()
         ProgressTableV2.deleteAll()
         SerieTableV2.deleteAll()
         SubtitleTableV2.deleteAll()
         SummaryTableV2.deleteAll()
+        MovieTableV2.deleteAll()
         CatalogTitleTableV2.deleteAll()
+        CatalogGenreTableV2.deleteAll()
+        CatalogTableV2.deleteAll()
+        GenreTableV2.deleteAll()
+        VideoTableV2.deleteAll()
         CastErrorTable.deleteAll()
         UserTable.deleteAll()
         ProfileImageTable.deleteAll()

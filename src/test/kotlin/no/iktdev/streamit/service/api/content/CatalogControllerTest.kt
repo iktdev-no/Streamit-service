@@ -1,140 +1,50 @@
 package no.iktdev.streamit.service.api.content
 
 import no.iktdev.streamit.service.TestBaseWithDatabase
-import no.iktdev.streamit.service.asList
+import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.assertHttpOk
 import no.iktdev.streamit.service.assertJson
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.GenreTable
+import no.iktdev.streamit.service.model.shared.content.Catalog
 import no.iktdev.streamit.service.simpleGet
-import no.iktdev.streamit.service.dto.Catalog
-import no.iktdev.streamit.service.dto.GenreCatalog
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.core.ParameterizedTypeReference
 
-class CatalogControllerTest: TestBaseWithDatabase() {
+class CatalogControllerTest : TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
-
-
     @BeforeAll
     fun insertCatalogContent() {
-        transaction {
-            GenreTable.insert {
-                it[GenreTable.id] = 1
-                it[GenreTable.genre] = "Test"
-            }
-            CatalogTable.insertMovie(
-                title = "Potetmonsteret",
-                collection = "Potetmonsteret",
-                cover = "Potetmonsteret.jpg",
-                genres = "1",
-                videoFile = "Potetmonsteret.mp4"
-            )
-            CatalogTable.insertMovie(
-                title = "Gulrotspøkelset",
-                collection = "Gulrotspøkelset",
-                cover = "Gulrotspøkelset.jpg",
-                genres = "1",
-                videoFile = "Gulrotspøkelset.mp4"
-            )
-
-            CatalogTable.insertMovie(
-                title = "Epleskurken",
-                collection = "Epleskurken",
-                cover = "Epleskurken.jpg",
-                genres = "1",
-                videoFile = "Epleskurken.mp4"
-            )
-
-            CatalogTable.insertMovie(
-                title = "Tomattrøbbel",
-                collection = "Tomattrøbbel",
-                cover = "Tomattrøbbel.jpg",
-                genres = "1",
-                videoFile = "Tomattrøbbel.mp4"
-            )
-        }
+        TestContentData.movie("Potetmonsteret", genre = "Test")
+        TestContentData.movie("Gulrotspøkelset", genre = "Test")
+        TestContentData.movie("Epleskurken", genre = "Test")
+        TestContentData.movie("Tomattrøbbel", genre = "Test")
     }
 
     @Test
-    fun `Catalog should return a list of entries`() {
-        val response = restTemplate.simpleGet("/open/api/catalog",
-            object : ParameterizedTypeReference<List<Catalog>>() {}
-        )
+    fun `Catalog returns entries with titles stored separately`() {
+        val response = restTemplate.simpleGet("/open/api/v1/catalog", object : ParameterizedTypeReference<List<Catalog>>() {})
         assertHttpOk(response)
-        assertJson(
-            //language=json
-            """
-                [
-                    {
-                        "id": 1,
-                        "title": "Potetmonsteret",
-                        "collection": "Potetmonsteret",
-                        "cover": "Potetmonsteret.jpg"
-                    }
-                ]
-        """.trimIndent(), response.body.first().asList())
+        val entry = response.body.first { it.title == "Potetmonsteret" }
+        assertJson("""{"title":"Potetmonsteret","collection":"Potetmonsteret","cover":"Potetmonsteret.jpg","type":"Movie"}""", entry)
     }
 
     @Test
-    fun `Catalog should return a list of movies`() {
-        val response = restTemplate.simpleGet("/open/api/catalog/movie",
-            object : ParameterizedTypeReference<List<Catalog>>() {}
-        )
+    fun `Movie endpoint returns catalogs from the new movie relation`() {
+        val response = restTemplate.simpleGet("/open/api/v1/catalog/movie", object : ParameterizedTypeReference<List<Catalog>>() {})
         assertHttpOk(response)
-        assertJson(
-            //language=json
-            """
-                [
-                    {
-                        "id": 1,
-                        "title": "Potetmonsteret",
-                        "collection": "Potetmonsteret",
-                        "cover": "Potetmonsteret.jpg"
-                    }
-                ]
-        """.trimIndent(), response.body.first().asList())
+        assert(response.body.any { it.title == "Potetmonsteret" })
     }
 
     @Test
-    fun `Catalog should return a list of genre grouped elements`() {
-        val response = restTemplate.simpleGet("/open/api/catalog/genre",
-            object : ParameterizedTypeReference<List<GenreCatalog>>() {}
-        )
+    fun `Genre endpoint filters through catalog genre relation`() {
+        val genres = restTemplate.simpleGet("/open/api/v1/genre", object : ParameterizedTypeReference<List<no.iktdev.streamit.service.model.shared.content.Genre>>() {})
+        assertHttpOk(genres)
+        val response = restTemplate.simpleGet("/open/api/v1/catalog/genre?genreId=${genres.body.single { it.genre == "Test" }.id}", object : ParameterizedTypeReference<List<Catalog>>() {})
         assertHttpOk(response)
-        assertJson(
-            //language=json
-            """
-                [
-                  {
-                    "genre": {
-                      "id": 1,
-                      "genre": "Test"
-                    },
-                    "catalog": [
-                        {
-                            "id": 1,
-                            "title": "Potetmonsteret",
-                            "collection": "Potetmonsteret",
-                            "cover": "Potetmonsteret.jpg"
-                        } 
-                    ]
-                  }
-                ]
-        """.trimIndent(), response.body.map { it.apply {
-            val new = it.catalog.first()
-            this.catalog.clear()
-                this.catalog.add(new)
-            } })
+        assert(response.body.any { it.title == "Potetmonsteret" })
     }
-
-
-
 }

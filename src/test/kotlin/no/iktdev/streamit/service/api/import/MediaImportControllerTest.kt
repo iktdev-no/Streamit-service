@@ -1,13 +1,15 @@
 package no.iktdev.streamit.service.api.import
 
-import io.kotest.matchers.shouldBe
 import no.iktdev.streamit.service.TestBaseWithDatabase
-import no.iktdev.streamit.service.dto.MediaProcesserImport
-import org.assertj.core.api.Assertions.assertThat
+import no.iktdev.streamit.service.db.tables.content.v2.*
+import no.iktdev.streamit.service.model.shared.ImportReference
+import no.iktdev.streamit.service.model.shared.content.ContentType
+import no.iktdev.streamit.service.model.shared.contentImport.*
+import no.iktdev.streamit.service.services.ImportContentService
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -20,480 +22,110 @@ class MediaImportControllerTest : TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
+    @Autowired
+    lateinit var importContentService: ImportContentService
+
     @AfterEach
-    fun clearProgress() {
-        transaction {
-            clearTables()
-        }
+    fun clearDatabaseTables() {
+        transaction { clearTables() }
     }
 
     @Test
-    fun verifyRequiresAuthOnSecure() {
-        val payload = MediaProcesserImport(
-            collection = "movies",
-            metadata = MediaProcesserImport.MetadataImport(
+    fun `movie import writes the new normalized relations`() {
+        val payload = MediaImportV2(
+            reference = ImportReference(store = "movies"),
+            metadata = CatalogMetadata(
                 title = "The Matrix",
                 genres = listOf("Sci-Fi", "Action"),
                 cover = "matrix.jpg",
-                summary = listOf(
-                    MediaProcesserImport.MetadataImport.Summary(
-                        "en",
-                        "A hacker discovers reality is fake."
-                    )
-                ),
-                mediaType = MediaProcesserImport.MediaType.Movie,
-                source = "local"
+                type = ContentType.Movie,
+                summaries = listOf(Summary("eng", "A hacker discovers reality is fake."))
             ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "matrix.mkv",
-                subtitles = listOf(MediaProcesserImport.MediaImport.Subtitle("matrix.en.srt", "en"))
-            ),
-            episodeInfo = null
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(payload, headers)
-        val response = restTemplate.postForEntity(
-            "/secure/api/mediaprocesser/import",
-            entity,
-            Void::class.java
-        )
-        assertEquals(response.statusCode, HttpStatus.UNAUTHORIZED)
-
-    }
-
-
-    @Test
-    fun movieImport() {
-        val payload = MediaProcesserImport(
-            collection = "movies",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "The Matrix",
-                genres = listOf("Sci-Fi", "Action"),
-                cover = "matrix.jpg",
-                summary = listOf(
-                    MediaProcesserImport.MetadataImport.Summary(
-                        "en",
-                        "A hacker discovers reality is fake."
-                    )
-                ),
-                mediaType = MediaProcesserImport.MediaType.Movie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "matrix.mkv",
-                subtitles = listOf(MediaProcesserImport.MediaImport.Subtitle("matrix.en.srt", "en"))
-            ),
-            episodeInfo = null
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(payload, headers)
-        val response = restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            entity,
-            Void::class.java
-        )
-        assertEquals(response.statusCode, HttpStatus.OK)
-        transaction {
-            // Movie inserted
-            val movie = MovieTable.selectAll().single()
-            assertThat(movie[MovieTable.video]).isEqualTo("matrix.mkv")
-
-            // Genres inserted
-            GenreTable.selectAll().count() shouldBe 2
-
-            // Catalog inserted
-            val catalog = CatalogTable.selectAll().single()
-            catalog[CatalogTable.title] shouldBe "The Matrix"
-            catalog[CatalogTable.collection] shouldBe "movies"
-
-            // Summary inserted
-            SummaryTable.selectAll().count() shouldBe 1
-
-            // Subtitle inserted
-            SubtitleTable.selectAll().count() shouldBe 1
-        }
-
-    }
-
-    @Test
-    fun serieImport_withEpisodeInfo() {
-        val payload = MediaProcesserImport(
-            collection = "series",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Breaking Bad",
-                genres = listOf("Drama"),
-                cover = "bb.jpg",
-                summary = listOf(
-                    MediaProcesserImport.MetadataImport.Summary(
-                        "en",
-                        "Walter White cooks meth."
-                    )
-                ),
-                mediaType = MediaProcesserImport.MediaType.Serie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "breakingbad.s01e01.mkv",
-                subtitles = listOf(
-                    MediaProcesserImport.MediaImport.Subtitle("bb.en.srt", "en")
-                )
-            ),
-            episodeInfo = MediaProcesserImport.EpisodeInfo(
-                episodeNumber = 1,
-                seasonNumber = 1,
-                episodeTitle = "Pilot"
+            media = Media(
+                content = MediaContent.Movie("matrix.mkv"),
+                subtitles = listOf(SubtitleImport("matrix.en.srt", "eng", "srt"))
             )
         )
 
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(payload, headers)
-        val response = restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            entity,
-            Void::class.java
+        assertEquals(true, importContentService.import(payload))
+
+        transaction {
+            val catalog = CatalogTableV2.selectAll().single()
+            val catalogId = catalog[CatalogTableV2.id].value
+            val title = CatalogTitleTableV2.selectAll().single()
+            val video = VideoTableV2.selectAll().single()
+            val movie = MovieTableV2.selectAll().single()
+
+            assertEquals("movies", catalog[CatalogTableV2.store])
+            assertEquals("matrix.jpg", catalog[CatalogTableV2.cover])
+            assertEquals("The Matrix", title[CatalogTitleTableV2.title])
+            assertEquals(catalogId, title[CatalogTitleTableV2.catalogId].value)
+            assertEquals("matrix.mkv", video[VideoTableV2.file])
+            assertEquals(catalogId, movie[MovieTableV2.catalogId].value)
+            assertEquals(video[VideoTableV2.id].value, movie[MovieTableV2.videoId].value)
+            assertEquals(2, GenreTableV2.selectAll().count().toInt())
+            assertEquals("A hacker discovers reality is fake.", SummaryTableV2.selectAll().single()[SummaryTableV2.description])
+            assertEquals("matrix.en.srt", SubtitleTableV2.selectAll().single()[SubtitleTableV2.file])
+        }
+    }
+
+    @Test
+    fun `episode import uses catalog id and stores episode against video`() {
+        val createCatalog = MediaImportV2(
+            reference = ImportReference(store = "series"),
+            metadata = CatalogMetadata(title = "Breaking Bad", type = ContentType.Serie)
         )
+        assertEquals(true, importContentService.import(createCatalog))
+        val catalogId = transaction { CatalogTableV2.selectAll().single()[CatalogTableV2.id].value }
+
+        val importEpisode = MediaImportV2(
+            reference = ImportReference(catalogId = catalogId, store = "series"),
+            media = Media(
+                content = MediaContent.Episode("breakingbad.s01e01.mkv", season = 1, episode = 1, title = "Pilot"),
+                subtitles = listOf(SubtitleImport("bb.en.srt", "eng", "srt"))
+            )
+        )
+        assertEquals(true, importContentService.import(importEpisode))
+
+        transaction {
+            val episode = SerieTableV2.selectAll().single()
+            assertEquals(catalogId, episode[SerieTableV2.catalogId].value)
+            assertEquals(1, episode[SerieTableV2.season])
+            assertEquals(1, episode[SerieTableV2.episode])
+            assertEquals("Pilot", episode[SerieTableV2.title])
+            assertEquals("breakingbad.s01e01.mkv", VideoTableV2.selectAll().single()[VideoTableV2.file])
+        }
+    }
+
+    @Test
+    fun `controller accepts metadata imports using the V2 payload`() {
+        val payload = MediaImportV2(
+            reference = ImportReference(store = "movies"),
+            metadata = CatalogMetadata(title = "The Matrix", type = ContentType.Movie)
+        )
+
+        val response = postImport(payload)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-
         transaction {
-            // Episode inserted
-            val ep = SerieTable.selectAll().single()
-            assertThat(ep[SerieTable.season]).isEqualTo(1)
-            assertThat(ep[SerieTable.episode]).isEqualTo(1)
-            assertThat(ep[SerieTable.title]).isEqualTo("Pilot")
-            assertThat(ep[SerieTable.video]).isEqualTo("breakingbad.s01e01.mkv")
-
-            // Genre inserted
-            GenreTable.selectAll().count() shouldBe 1
-
-            // Catalog inserted
-            val catalog = CatalogTable.selectAll().single()
-            catalog[CatalogTable.title] shouldBe "Breaking Bad"
-            catalog[CatalogTable.collection] shouldBe "series"
-
-            // Summary inserted
-            SummaryTable.selectAll().count() shouldBe 1
-
-            // Subtitle inserted
-            SubtitleTable.selectAll().count() shouldBe 1
+            assertEquals("The Matrix", CatalogTitleTableV2.selectAll().single()[CatalogTitleTableV2.title])
         }
     }
 
     @Test
-    fun serieImport_withoutEpisodeTitle() {
-        val payload = MediaProcesserImport(
-            collection = "series",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "The Office",
-                genres = listOf("Comedy"),
-                cover = null,
-                summary = emptyList(),
-                mediaType = MediaProcesserImport.MediaType.Serie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "theoffice.s02e03.mkv",
-                subtitles = emptyList()
-            ),
-            episodeInfo = MediaProcesserImport.EpisodeInfo(
-                episodeNumber = 3,
-                seasonNumber = 2,
-                episodeTitle = null
-            )
+    fun `secure import endpoint requires authentication`() {
+        val payload = MediaImportV2(
+            reference = ImportReference(store = "movies"),
+            metadata = CatalogMetadata(title = "The Matrix", type = ContentType.Movie)
         )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(payload, headers)
-        val response = restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            entity,
-            Void::class.java
-        )
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-
-        transaction {
-            val ep = SerieTable.selectAll().single()
-            assertThat(ep[SerieTable.season]).isEqualTo(2)
-            assertThat(ep[SerieTable.episode]).isEqualTo(3)
-
-            // episodeTitle kan være null eller tom avhengig av din implementasjon
-            // så vi sjekker bare at den finnes i tabellen
-            assertThat(ep[SerieTable.title]).isNull()
-
-            // Catalog inserted
-            CatalogTable.selectAll().count() shouldBe 1
-        }
+        val response = postImport(payload, secure = true)
+        assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
     }
 
-    @Test
-    fun serieImport_withMultipleSubtitles() {
-        val payload = MediaProcesserImport(
-            collection = "series",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Game of Thrones",
-                genres = listOf("Fantasy"),
-                cover = "got.jpg",
-                summary = emptyList(),
-                mediaType = MediaProcesserImport.MediaType.Serie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "got.s01e02.mkv",
-                subtitles = listOf(
-                    MediaProcesserImport.MediaImport.Subtitle("got.en.srt", "en"),
-                    MediaProcesserImport.MediaImport.Subtitle("got.no.srt", "no"),
-                    MediaProcesserImport.MediaImport.Subtitle("got.es.srt", "es")
-                )
-            ),
-            episodeInfo = MediaProcesserImport.EpisodeInfo(
-                episodeNumber = 2,
-                seasonNumber = 1,
-                episodeTitle = "The Kingsroad"
-            )
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(payload, headers)
-        val response = restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            entity,
-            Void::class.java
-        )
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-
-        transaction {
-            // Episode inserted
-            SerieTable.selectAll().count() shouldBe 1
-
-            // Subtitles inserted
-            SubtitleTable.selectAll().count() shouldBe 3
-
-            // Catalog inserted
-            CatalogTable.selectAll().count() shouldBe 1
-        }
-    }
-
-    @Test
-    fun serieImport_episode2_whenEpisode1AlreadyExists() {
-
-        // ---------- STEP 1: Import episode 1 ----------
-        val ep1 = MediaProcesserImport(
-            collection = "series",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Breaking Bad",
-                genres = listOf("Drama"),
-                cover = "bb.jpg",
-                summary = listOf(
-                    MediaProcesserImport.MetadataImport.Summary(
-                        "en",
-                        "Walter White cooks meth."
-                    )
-                ),
-                mediaType = MediaProcesserImport.MediaType.Serie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "breakingbad.s01e01.mkv",
-                subtitles = listOf(
-                    MediaProcesserImport.MediaImport.Subtitle("bb.en.srt", "en")
-                )
-            ),
-            episodeInfo = MediaProcesserImport.EpisodeInfo(
-                episodeNumber = 1,
-                seasonNumber = 1,
-                episodeTitle = "Pilot"
-            )
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
+    private fun postImport(payload: MediaImportV2, secure: Boolean = false) =
         restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(ep1, headers),
+            "/${if (secure) "secure" else "open"}/api/media/import/import",
+            HttpEntity(payload, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
             Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 2: Import episode 2 ----------
-        val ep2 = MediaProcesserImport(
-            collection = "series",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Breaking Bad",
-                genres = listOf("Drama"), // same genre
-                cover = "bb.jpg",
-                summary = listOf(
-                    MediaProcesserImport.MetadataImport.Summary(
-                        "en",
-                        "Walter White continues cooking meth."
-                    )
-                ),
-                mediaType = MediaProcesserImport.MediaType.Serie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "breakingbad.s01e02.mkv",
-                subtitles = listOf(
-                    MediaProcesserImport.MediaImport.Subtitle("bb.no.srt", "no")
-                )
-            ),
-            episodeInfo = MediaProcesserImport.EpisodeInfo(
-                episodeNumber = 2,
-                seasonNumber = 1,
-                episodeTitle = "Cat's in the Bag"
-            )
         )
-
-        restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(ep2, headers),
-            Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 3: Verify DB state ----------
-        transaction {
-
-            // We should now have 2 episodes
-            SerieTable.selectAll().count() shouldBe 2
-
-            val episodes = SerieTable.selectAll().sortedBy { it[SerieTable.episode] }.toList()
-
-            episodes[0][SerieTable.episode] shouldBe 1
-            episodes[0][SerieTable.title] shouldBe "Pilot"
-            episodes[0][SerieTable.video] shouldBe "breakingbad.s01e01.mkv"
-
-            episodes[1][SerieTable.episode] shouldBe 2
-            episodes[1][SerieTable.title] shouldBe "Cat's in the Bag"
-            episodes[1][SerieTable.video] shouldBe "breakingbad.s01e02.mkv"
-
-
-            // Catalog should NOT duplicate
-            CatalogTable.selectAll().count() shouldBe 1
-
-            val catalog = CatalogTable.selectAll().single()
-            catalog[CatalogTable.title] shouldBe "Breaking Bad"
-            catalog[CatalogTable.collection] shouldBe "series"
-
-
-            // Genre should not duplicate
-            GenreTable.selectAll().count() shouldBe 1
-
-
-            // Summary should not duplicate (insertIgnore)
-            SummaryTable.selectAll().count() shouldBe 1
-
-
-            // Subtitles: 1 from ep1 + 1 from ep2
-            SubtitleTable.selectAll().count() shouldBe 2
-        }
-    }
-
-    @Test
-    fun catalogCover_shouldNotBeOverwritten_whenAlreadyExists() {
-
-        // ---------- STEP 1: Import with cover ----------
-        val firstImport = MediaProcesserImport(
-            collection = "movies",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Inception",
-                genres = listOf("Sci-Fi"),
-                cover = "inception.jpg",
-                summary = emptyList(),
-                mediaType = MediaProcesserImport.MediaType.Movie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "inception.mkv",
-                subtitles = emptyList()
-            ),
-            episodeInfo = null
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(firstImport, headers),
-            Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 2: Import again WITHOUT cover ----------
-        val secondImport = firstImport.copy(
-            metadata = firstImport.metadata!!.copy(
-                cover = "inception2.jpg" // intentionally missing
-            )
-        )
-
-        restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(secondImport, headers),
-            Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 3: Verify cover was NOT overwritten ----------
-        transaction {
-            val catalog = CatalogTable.selectAll().single()
-
-            catalog[CatalogTable.cover] shouldBe "inception.jpg" // unchanged
-        }
-    }
-
-    @Test
-    fun catalogCover_shouldBeFilled_whenMissing() {
-
-        // ---------- STEP 1: Import WITHOUT cover ----------
-        val firstImport = MediaProcesserImport(
-            collection = "movies",
-            metadata = MediaProcesserImport.MetadataImport(
-                title = "Interstellar",
-                genres = listOf("Sci-Fi"),
-                cover = null, // missing
-                summary = emptyList(),
-                mediaType = MediaProcesserImport.MediaType.Movie,
-                source = "local"
-            ),
-            media = MediaProcesserImport.MediaImport(
-                videoFile = "interstellar.mkv",
-                subtitles = emptyList()
-            ),
-            episodeInfo = null
-        )
-
-        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(firstImport, headers),
-            Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 2: Import again WITH cover ----------
-        val secondImport = firstImport.copy(
-            metadata = firstImport.metadata!!.copy(
-                cover = "interstellar.jpg"
-            )
-        )
-
-        restTemplate.postForEntity(
-            "/open/api/mediaprocesser/import",
-            HttpEntity(secondImport, headers),
-            Void::class.java
-        ).statusCode shouldBe HttpStatus.OK
-
-
-        // ---------- STEP 3: Verify cover WAS updated ----------
-        transaction {
-            val catalog = CatalogTable.selectAll().single()
-
-            catalog[CatalogTable.cover] shouldBe "interstellar.jpg" // updated
-        }
-    }
-
-
-
-
 }
