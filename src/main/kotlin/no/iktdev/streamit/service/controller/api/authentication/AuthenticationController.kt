@@ -1,29 +1,19 @@
 package no.iktdev.streamit.service.controller.api.authentication
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
-import no.iktdev.streamit.service.db.tables.util.executeWithStatus
-import no.iktdev.streamit.service.db.tables.util.isCausedByDuplicateError
-import no.iktdev.streamit.service.db.tables.util.isExposedSqlException
-import no.iktdev.streamit.service.db.tables.util.toUtcInstant
-import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.doesEndpointRequireAuthorization
 import no.iktdev.streamit.service.getAuthorization
 import no.iktdev.streamit.service.getRequestersIp
 import no.iktdev.streamit.service.services.TokenState
 import no.iktdev.streamit.service.services.TokenStateCacheService
+import no.iktdev.streamit.service.stores.authentication.IDelegatedAuthenticationStore
 import no.iktdev.streamit.service.auth.Authentication
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.auth.castScope
-import no.iktdev.streamit.service.db.queries.executeGetDelegatePendingRequestBy
-import no.iktdev.streamit.service.db.queries.executeInsertOrUpdate
-import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,15 +24,17 @@ import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.debugLog
 import no.iktdev.streamit.service.model.internal.auth.AuthInitiateRequest
 import no.iktdev.streamit.service.model.internal.auth.DelegatedRequestData
-import no.iktdev.streamit.service.model.internal.auth.InternalDelegatedRequestData
 import no.iktdev.streamit.service.model.internal.auth.MediaScopedAuthRequest
 import no.iktdev.streamit.service.model.internal.auth.PermitRequestData
 import no.iktdev.streamit.service.model.internal.auth.RequestCreatedResponse
 import no.iktdev.streamit.service.model.internal.auth.RequestDeviceInfo
 
 @ApiRestController
+@Tag(name = "Authentication", description = "Device token issuance, validation, and PIN/QR authorization flows")
 @RequestMapping("/auth")
-class AuthenticationController() {
+class AuthenticationController(
+    private val delegatedAuthenticationStore: IDelegatedAuthenticationStore
+) {
     @Autowired lateinit var tokenStateCacheService: TokenStateCacheService
 
     val auth = Authentication()
@@ -134,49 +126,22 @@ class AuthenticationController() {
     fun createDelegationRequestSession(data: AuthInitiateRequest, pinOrQr: DelegatedAuthenticationTable.AuthMethod, request: HttpServletRequest?): ResponseEntity<RequestCreatedResponse> {
         val ip = request?.getRequestersIp()
         val reqId = data.toRequestId()
-        var insertedId: Long? = null
-        val success = executeWithStatus(onError = { e ->
-            log.error {
-                "Failed to insert delegation request for ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${
-                    Gson().toJson(
-                        data
-                    )
-                }"
+        val expires = delegatedAuthenticationStore.createRequest(
+            pin = data.pin,
+            requesterId = reqId,
+            deviceInfo = data.deviceInfo,
+            method = pinOrQr,
+            ipAddress = ip
+        ).getOrElse { error ->
+            log.error(error) {
+                "Failed to insert delegation request for ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip"
             }
-            val isCuasedByDuplication =
-                (e.isExposedSqlException() && (e as ExposedSQLException).isCausedByDuplicateError())
-            if (isCuasedByDuplication) {
-                log.error { "(Confirmed) Duplicate key violation for request ID: $reqId. This might be a retry." }
-            } else if (e.message.orEmpty().contains("Duplicate entry")) {
-                log.warn { "Duplicate key violation for request ID: $reqId. This might be a retry." }
-            } else {
-                e.printStackTrace()
-            }
-        }) {
-            insertedId = DelegatedAuthenticationTable.executeInsertOrUpdate(
-                pin = data.pin,
-                requestId = reqId,
-                deviceInfo = Gson().toJson(data.deviceInfo),
-                method = pinOrQr,
-                ip = ip
-            ).value
-        }
-        if (!success) {
             return ResponseEntity.unprocessableEntity().build()
         }
-        val expires = withTransaction {
-            DelegatedAuthenticationTable.selectAll()
-                .where {
-                    DelegatedAuthenticationTable.id eq insertedId
-                }.map { it[DelegatedAuthenticationTable.expires] }.firstOrNull()
-        }.getOrNull()
         log.info { "Successfully inserted delegate request for requestId: $reqId with data ${data.deviceInfo.name.ifEmpty { reqId }} on $pinOrQr from $ip\n ${Gson().toJson(data)}" }
-        if (expires == null) {
-            log.error { "Expiry is null!" }
-        }
         return ResponseEntity.ok(
             RequestCreatedResponse(
-                expiry = expires?.toUtcInstant() ?: java.time.Instant.EPOCH,
+                expiry = expires,
                 sessionId = reqId
             )
         )
@@ -186,7 +151,7 @@ class AuthenticationController() {
     @GetMapping(value = ["/delegate/request/pending/{pin}/info"])
     @RequiresAuthentication(Scope.AuthorizationPermit)
     fun getPendingRequestOnPIN(@PathVariable pin: String): ResponseEntity<DelegatedRequestData> {
-        val data = DelegatedAuthenticationTable.executeGetDelegatePendingRequestBy(pin)
+        val data = delegatedAuthenticationStore.getPendingRequest(pin)
         if (data == null) {
             return ResponseEntity.notFound().build()
         }
@@ -197,30 +162,7 @@ class AuthenticationController() {
     @GetMapping(value = ["/delegate/request/pending/{pin}/permitted/{session}"])
     @RequiresAuthentication(Scope.None)
     fun getPermittedStatusAndToken(@PathVariable pin: String, @PathVariable session: String, request: HttpServletRequest? = null): ResponseEntity<String> {
-        val result = try {
-            transaction {
-                DelegatedAuthenticationTable.selectAll()
-                    .where {
-                        (DelegatedAuthenticationTable.pin eq pin) and
-                                (DelegatedAuthenticationTable.requesterId eq session)
-                    }
-                .firstNotNullOfOrNull {
-                    InternalDelegatedRequestData(
-                        pin = it[DelegatedAuthenticationTable.pin],
-                        requesterId = it[DelegatedAuthenticationTable.requesterId],
-                        created = it[DelegatedAuthenticationTable.created],
-                        expires = it[DelegatedAuthenticationTable.expires],
-                        consumed = it[DelegatedAuthenticationTable.consumed],
-                        permitted = it[DelegatedAuthenticationTable.permitted],
-                        ipaddress = it[DelegatedAuthenticationTable.ipaddress]
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return ResponseEntity.internalServerError().build()
-        }
-
+        val result = delegatedAuthenticationStore.getRequestStatus(pin, session)
         if (result == null) {
             return ResponseEntity.notFound().build()
         }
@@ -242,17 +184,9 @@ class AuthenticationController() {
         } else if (!result.permitted) {
             log.info { "Authorization needs to be granted.." }
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)
+        } else if (!delegatedAuthenticationStore.consumeIfPermitted(pin, session, request.getRequestersIp())) {
+            ResponseEntity.status(HttpStatus.GONE).body(null)
         } else {
-            result.let {  consumable ->
-                transaction {
-                    DelegatedAuthenticationTable.update({
-                        (DelegatedAuthenticationTable.requesterId eq consumable.requesterId) and
-                                (DelegatedAuthenticationTable.pin eq consumable.pin)
-                    }) {
-                        it[consumed] = true
-                    }
-                }
-            }
             ResponseEntity.ok(auth.createJwt(null))
         }
     }
@@ -260,14 +194,7 @@ class AuthenticationController() {
     @PostMapping(value = ["/delegate/request/{session}/{pin}/permit"])
     @RequiresAuthentication(Scope.AuthorizationPermit)
     fun permitDelegationRequest(@RequestBody permitData: PermitRequestData, @PathVariable session: String, @PathVariable pin: String): ResponseEntity<String> {
-        val success = executeWithStatus {
-            DelegatedAuthenticationTable.update({
-                (DelegatedAuthenticationTable.requesterId eq session) and
-                        (DelegatedAuthenticationTable.pin eq pin)
-            }) {
-                it[permitted] = true
-            }
-        }
+        val success = delegatedAuthenticationStore.permit(pin, session)
         return if (success) {
             ResponseEntity.ok().build()
         } else {

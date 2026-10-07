@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
 import no.iktdev.streamit.service.auth.RequiresAuthentication
@@ -17,6 +18,7 @@ import javax.imageio.ImageIO
 import jakarta.servlet.http.HttpServletRequest
 
 @ApiRestController
+@Tag(name = "Server", description = "Server status, metadata, and client capabilities")
 @RequestMapping()
 class GeneralController(
     @Autowired val config: ConfigValueService
@@ -35,11 +37,13 @@ class GeneralController(
     }
 
     @GetMapping("/capabilities")
+    @RequiresAuthentication(Scope.None)
     fun capabilities(): ResponseEntity<CapabilitiesObject> {
         return ResponseEntity.ok().body(CapabilitiesObject)
     }
 
     @GetMapping("/info/id")
+    @RequiresAuthentication(Scope.None)
     fun serverId(): ResponseEntity<String> {
         val serverId = config.serverId
         return if (serverId.isNullOrBlank()) {
@@ -50,12 +54,14 @@ class GeneralController(
     }
 
     @GetMapping("/info/server")
+    @RequiresAuthentication(Scope.None)
     fun serverInfo(): ResponseEntity<Server?> {
         val server = config.server ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
         return ResponseEntity.ok(server)
     }
 
     @GetMapping("/info/serverqr")
+    @RequiresAuthentication(Scope.None)
     fun serverQR(): ResponseEntity<ByteArray> {
 
         val image = config.generateQRCode()

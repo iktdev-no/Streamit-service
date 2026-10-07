@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.content
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
@@ -14,6 +15,7 @@ import java.time.Instant
 import java.util.UUID
 
 @ApiRestController
+@Tag(name = "Progress", description = "Read and update per-device viewing progress")
 @RequestMapping(value = ["/v1/video/progress"])
 class VideoProgressController(
     private val progressStore: IProgressStore

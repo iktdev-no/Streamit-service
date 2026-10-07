@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.content
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.Env
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
+@Tag(name = "Assets", description = "List client-accessible media assets")
 @RequestMapping("/v1/assets")
 class AssetsApiController {
     val log = KotlinLogging.logger {}

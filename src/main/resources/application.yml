@@ -8,8 +8,14 @@ spring:
     baseline-on-migrate: false
 
 springdoc:
+  api-docs:
+    enabled: true
   swagger-ui:
     path: /open/swagger-ui
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
 
 logging:
   level:

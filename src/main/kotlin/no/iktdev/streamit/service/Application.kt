@@ -62,7 +62,15 @@ class InterceptorConfiguration(
             log.info("Adding ${it.javaClass.simpleName}")
             registry.addInterceptor(it)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/stream/**")
+                .excludePathPatterns(
+                    "/stream/**",
+                    "/open/swagger-ui",
+                    "/open/swagger-ui/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml"
+                )
         }
         mediaInterceptor.let {
             log.info("Adding ${it.javaClass.simpleName}")
@@ -155,4 +163,3 @@ class PathDefiner : Filter {
         }
     }
 }
-

@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.user
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @ApiRestController
+@Tag(name = "Users", description = "User profiles and identity lookup")
 @RequestMapping("/user")
 class UserController(
     private val users: IUserStore

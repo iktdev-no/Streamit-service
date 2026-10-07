@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.import
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
+@Tag(name = "Media import", description = "Import and upsert media catalog information")
 @RequestMapping("/media/import")
 class MediaImportController(
     private val importContentService: ImportContentService

@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.meta
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
+@Tag(name = "Remote configuration", description = "Remote server configuration management")
 @RequestMapping("/remote")
 class RemoteController(
     private val  service: PfnsClientService,

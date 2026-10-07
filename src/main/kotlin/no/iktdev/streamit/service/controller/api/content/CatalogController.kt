@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.content
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.Env
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
 
 @ApiRestController
+@Tag(name = "Catalog", description = "Browse movies, series, episodes, and catalog changes")
 @RequestMapping("/v1/catalog")
 class CatalogController(
     private val catalog: ICatalogStore

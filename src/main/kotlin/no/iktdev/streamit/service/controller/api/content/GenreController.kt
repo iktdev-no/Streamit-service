@@ -1,5 +1,6 @@
 package no.iktdev.streamit.service.controller.api.content
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
+@Tag(name = "Genres", description = "Browse genres and their catalog items")
 @RequestMapping("/v1/genre")
 class GenreController(
     private val genres: IGenreStore
