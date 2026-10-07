@@ -3,9 +3,7 @@ package no.iktdev.streamit.service.api.content
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.assertHttpOk
 import no.iktdev.streamit.service.assertJson
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.GenreTable
-import no.iktdev.streamit.service.dto.Catalog
+import no.iktdev.streamit.service.model.shared.content.Catalog
 import no.iktdev.streamit.service.simpleGet
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction

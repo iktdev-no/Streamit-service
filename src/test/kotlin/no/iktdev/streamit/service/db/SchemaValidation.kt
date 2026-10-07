@@ -3,16 +3,6 @@ package no.iktdev.streamit.service.db
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.ContinueWatchTable
-import no.iktdev.streamit.service.db.tables.content.FavoriteTable
-import no.iktdev.streamit.service.db.tables.content.GenreTable
-import no.iktdev.streamit.service.db.tables.content.MovieTable
-import no.iktdev.streamit.service.db.tables.content.ProgressTable
-import no.iktdev.streamit.service.db.tables.content.SerieTable
-import no.iktdev.streamit.service.db.tables.content.SubtitleTable
-import no.iktdev.streamit.service.db.tables.content.SummaryTable
-import no.iktdev.streamit.service.db.tables.content.TitleTable
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
 import no.iktdev.streamit.service.db.tables.info.DataAudioTable
 import no.iktdev.streamit.service.db.tables.info.DataVideoTable

@@ -3,15 +3,11 @@ package no.iktdev.streamit.service.db.queries
 import com.google.gson.Gson
 import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.db.tables.util.toEpochSeconds
-import no.iktdev.streamit.service.dto.auth.DelegatedRequestData
-import no.iktdev.streamit.service.dto.auth.RequestDeviceInfo
-import org.jetbrains.exposed.sql.and
+import no.iktdev.streamit.service.model.internal.auth.DelegatedRequestData
+import no.iktdev.streamit.service.model.internal.auth.RequestDeviceInfo
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 fun DelegatedAuthenticationTable.executeInsertOrUpdate(
     pin: String,

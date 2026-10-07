@@ -4,7 +4,7 @@ import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.generateInvalidJwt
 import no.iktdev.streamit.service.auth.Authentication
 import no.iktdev.streamit.service.auth.castScope
-import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
+import no.iktdev.streamit.service.model.internal.auth.MediaScopedAuthRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

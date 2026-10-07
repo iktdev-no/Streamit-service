@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.db.tables.pfns
 
-import no.iktdev.streamit.service.dto.auth.AccessTokenObject
+import no.iktdev.streamit.service.model.internal.auth.AccessTokenObject
 import no.iktdev.streamit.service.toMD5
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.insert

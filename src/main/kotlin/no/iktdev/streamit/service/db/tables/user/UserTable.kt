@@ -1,7 +1,6 @@
 package no.iktdev.streamit.service.db.tables.user
 
 import no.iktdev.streamit.service.db.tables.util.UpsertResult
-import no.iktdev.streamit.service.dto.User
 import org.jetbrains.exposed.sql.*
 
 object UserTable : Table(name = "USERS") {

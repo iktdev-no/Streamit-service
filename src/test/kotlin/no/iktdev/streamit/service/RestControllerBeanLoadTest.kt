@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service
 
-import no.iktdev.streamit.service.api.authentication.AuthenticationController
+import no.iktdev.streamit.service.controller.api.authentication.AuthenticationController
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

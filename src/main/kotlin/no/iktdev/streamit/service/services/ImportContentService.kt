@@ -1,254 +1,139 @@
 package no.iktdev.streamit.service.services
 
-import mu.KotlinLogging
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.CatalogTable.iid
-import no.iktdev.streamit.service.db.tables.content.GenreTable
-import no.iktdev.streamit.service.db.tables.content.MovieTable
-import no.iktdev.streamit.service.db.tables.content.MovieTableObject
-import no.iktdev.streamit.service.db.tables.content.SerieTable
-import no.iktdev.streamit.service.db.tables.content.SubtitleTable
-import no.iktdev.streamit.service.db.tables.content.SummaryTable
-import no.iktdev.streamit.service.db.tables.content.TitleTable
-import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.dto.MediaProcesserImport
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.insertIgnoreAndGetId
-import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.update
+import no.iktdev.streamit.service.model.shared.contentImport.CatalogMetadata
+import no.iktdev.streamit.service.model.shared.contentImport.Media
+import no.iktdev.streamit.service.model.shared.contentImport.MediaContent
+import no.iktdev.streamit.service.model.shared.contentImport.MediaImportV2
+import no.iktdev.streamit.service.stores.catalog.ICatalogStore
+import no.iktdev.streamit.service.stores.genre.IGenreStore
+import no.iktdev.streamit.service.stores.movie.IMovieStore
+import no.iktdev.streamit.service.stores.serie.ISerieStore
+import no.iktdev.streamit.service.stores.subtitle.ISubtitleStore
+import no.iktdev.streamit.service.stores.summary.ISummaryStore
+import no.iktdev.streamit.service.stores.title.ITitleStore
+import no.iktdev.streamit.service.stores.video.IVideoStore
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
-class ImportContentService {
-    private val log = KotlinLogging.logger {}
+class ImportContentService(
+    private val catalogStore: ICatalogStore,
+    private val titleStore: ITitleStore,
+    private val genreStore: IGenreStore,
+    private val summaryStore: ISummaryStore,
+    private val videoStore: IVideoStore,
+    private val movieStore: IMovieStore,
+    private val serieStore: ISerieStore,
+    private val subtitleStore: ISubtitleStore,
+) {
 
-    fun importContent(import: MediaProcesserImport): Boolean {
-        if (import.metadata != null) {
-            return when (import.metadata.mediaType) {
-                MediaProcesserImport.MediaType.Movie, MediaProcesserImport.MediaType.Serie -> fullImport(import)
-                MediaProcesserImport.MediaType.Subtitle -> subtitleImport(import)
-            }
-        }
-        return subtitleImport(import)
-    }
+    fun import(input: MediaImportV2): Boolean {
+        input.validate()
 
-    fun subtitleImport(import: MediaProcesserImport): Boolean {
-        val media = import.media ?: return false
-        return if (media.subtitles.isNotEmpty()) {
-            insertSubtitles(import.collection, media)
-            true
-        } else false
+        val catalogId = resolveCatalog(input)
 
-    }
-
-
-    fun fullImport(import: MediaProcesserImport): Boolean {
-        // 1. Insert movie or serie → get iid (Int?) or fail
-        val iid: Int? = when (import.metadata!!.mediaType) {
-            MediaProcesserImport.MediaType.Movie -> insertMovieAndGetId(import)
-            MediaProcesserImport.MediaType.Serie -> {
-                val ok = insertSerie(import)
-                if (!ok) return false
-                null
-            }
-            MediaProcesserImport.MediaType.Subtitle -> {
-                return false
-            }
+        input.metadata?.let {
+            importMetadata(catalogId, it)
         }
 
-        // 2. Insert subtitles
-        import.media?.run {
-            insertSubtitles(import.collection, import.media)
+        input.media?.let {
+            importMedia(catalogId, it)
         }
-
-        // 3. Resolve genres
-        val genreIds = resolveGenres(import.metadata)
-
-        // 4. Find or create catalog
-        val catalogId = findCatalogId(import.collection, import.metadata, iid)
-            ?: insertCatalog(import.collection, import.metadata, genreIds, iid)
-
-        // 5. Update cover if missing
-        import.metadata.cover?.let { cover ->
-            updateCoverIfMissing(catalogId, cover)
-        }
-
-        // 6. Insert summaries
-        import.metadata.summary.forEach { summary ->
-            withTransaction {
-                SummaryTable.insertIgnore(catalogId, summary.language, summary.description)
-            }
-        }
-
-        // 7. Insert titles (master + alternatives)
-        upsertTitles(import.metadata)
 
         return true
     }
 
-
-    fun insertSubtitles(collection: String, media: MediaProcesserImport.MediaImport) {
-        media.subtitles.forEach { subtitle ->
-            withTransaction {
-                SubtitleTable.insertAndIgnore(
-                    collection,
-                    subtitle.language,
-                    subtitle.subtitleFile,
-                    media.videoFile ?: subtitle.subtitleFile
-                )
-            }.onFailure { log.error("Error while importing subtitle $subtitle", it) }
+    private fun resolveCatalog(input: MediaImportV2): Long {
+        input.reference?.catalogId?.let {
+            return it
         }
-    }
 
-
-
-    private fun findCatalogId(collection: String, metadata: MediaProcesserImport.MetadataImport, iid: Int?): Int? {
-        val type = metadata.mediaType.name.lowercase()
-        val title = metadata.title
-
-        return withTransaction {
-            val query = CatalogTable.selectAll()
-
-            val finalQuery = if (metadata.mediaType == MediaProcesserImport.MediaType.Movie) {
-                query.where { (CatalogTable.collection eq collection) and (CatalogTable.type eq type) and (CatalogTable.iid eq iid) }
-            } else {
-                log.info { "Using query with filter on collection $collection and title $title with type $type" }
-                query.where { ((CatalogTable.title eq title) and (CatalogTable.type eq type)) or ((CatalogTable.collection eq collection) and (CatalogTable.type eq type)) }
-            }
-
-            finalQuery.firstOrNull()?.get(CatalogTable.id)?.value
-        }.getOrNull()
-    }
-
-    private fun insertCatalog(
-        collection: String,
-        metadata: MediaProcesserImport.MetadataImport,
-        genreIds: List<Int>,
-        iid: Int?
-    ): Int {
-        val type = metadata.mediaType.name.lowercase()
-        val title = metadata.title
-
-        return withTransaction {
-            val insertedId = CatalogTable.insertIgnoreAndGetId {
-                it[CatalogTable.title] = title
-                it[CatalogTable.collection] = collection
-                it[CatalogTable.cover] = metadata.cover
-                it[CatalogTable.type] = type
-                it[CatalogTable.genres] = genreIds.joinToString(",")
-                it[CatalogTable.iid] = iid
-                it[CatalogTable.added] = LocalDateTime.now()
-            }?.value
-
-            insertedId ?: findCatalogId(collection, metadata, iid)
-            ?: throw IllegalStateException("Klarte hverken å sette inn eller finne catalog for $title")
-        }.getOrThrow()
-    }
-
-    private fun updateCoverIfMissing(catalogId: Int, cover: String) {
-        withTransaction {
-            CatalogTable.update(
-                where = { (CatalogTable.id eq catalogId) and CatalogTable.cover.isNull() }
-            ) {
-                it[CatalogTable.cover] = cover
-            }
+        val metadata = requireNotNull(input.metadata) {
+            "Metadata is required when creating a new catalog"
         }
+
+        return catalogStore.insert(
+            store = requireNotNull(input.reference).store,
+            type = metadata.type,
+            cover = metadata.cover
+        )
     }
 
-    private fun insertMovieAndGetId(import: MediaProcesserImport): Int {
-        if (import.media?.videoFile == null) {
-            throw IllegalArgumentException("Missing video file!")
-        }
-        val exists = withTransaction {
-            MovieTable.selectAll()
-                .where { MovieTable.video eq import.media.videoFile }
-                .singleOrNull()?.let { MovieTableObject.fromRow(it) }
-        }.getOrNull()?.id
-        if (exists != null) {
-            return exists
-        }
-        return withTransaction {
-            MovieTable.insertMovie(import.media.videoFile)
-        }.getOrThrow()!!.value
-    }
-
-    private fun insertSerie(import: MediaProcesserImport): Boolean {
-        val episodeInfo = import.episodeInfo
-            ?: throw IllegalStateException("Episode info not available, required for series type")
-        val video = import.media!!.videoFile
-            ?: throw IllegalStateException("Video file not available, required for series type")
-
-        val result = withTransaction {
-            SerieTable.insertSerie(
-                title = episodeInfo.episodeTitle,
-                collection = import.collection,
-                episode = episodeInfo.episodeNumber,
-                season = episodeInfo.seasonNumber,
-                videoFile = video
+    private fun importMetadata(
+        catalogId: Long,
+        metadata: CatalogMetadata
+    ) {
+        metadata.title?.let { title ->
+            titleStore.insert(
+                catalogId = catalogId,
+                title = title,
+                language = "eng",
+                preferred = true
             )
         }
-        return result.isSuccess
-    }
 
+        metadata.alternativeTitles.forEach { title ->
+            titleStore.insert(
+                catalogId = catalogId,
+                title = title,
+                language = "eng",
+                preferred = false
+            )
+        }
 
-    private fun resolveGenres(metadata: MediaProcesserImport.MetadataImport): List<Int> {
-        val genres = metadata.genres
-        if (genres.isEmpty()) return emptyList()
+        metadata.genres.forEach { genreName ->
+            genreStore.getOrInsert(genreName)
+        }
 
-        return withTransaction {
-            genres.mapNotNull { genre ->
-                GenreTable.insertIgnoreAndGetId {
-                    it[GenreTable.genre] = genre
-                }?.value
-            }
-        }.getOrElse { emptyList() }
-    }
+        metadata.summaries.forEach { summary ->
+            summaryStore.insert(
+                catalogId = catalogId,
+                description = summary.description,
+                language = summary.language
+            )
+        }
 
-    private fun upsertTitles(metadata: MediaProcesserImport.MetadataImport) {
-        val master = metadata.title
-        val alternatives = metadata.alternativeTitles ?: emptyList()
-
-        if (alternatives.isEmpty()) return
-
-        withTransaction {
-            // 1. Finn eksisterende masterTitle hvis noen av titlene finnes
-            val allTitles = listOf(master) + alternatives
-
-            val existing = TitleTable
-                .select(TitleTable.masterTitle, TitleTable.alternativeTitle)
-                .where {
-                    (TitleTable.masterTitle inList allTitles) or
-                            (TitleTable.alternativeTitle inList allTitles)
-                }
-                .firstOrNull()
-
-            val resolvedMaster: String = if (existing != null) {
-                existing[TitleTable.masterTitle]
-            } else {
-                master
-            }
-
-            // 2. Sett inn alle alternative titler som ikke finnes fra før
-            alternatives.forEach { alt ->
-                TitleTable.insertIgnoreAndGetId {
-                    it[TitleTable.masterTitle] = resolvedMaster
-                    it[TitleTable.alternativeTitle] = alt
-                }
-            }
-
-            // 3. Hvis ingen eksisterende rad ble funnet, må vi også lagre masterTitle selv
-            if (existing == null) {
-                TitleTable.insertIgnoreAndGetId {
-                    it[TitleTable.masterTitle] = resolvedMaster
-                    it[TitleTable.alternativeTitle] = master
-                }
-            }
+        metadata.cover?.let { cover ->
+            catalogStore.updateCover(catalogId, cover)
         }
     }
 
+    private fun importMedia(
+        catalogId: Long,
+        media: Media
+    ) {
+        val content = media.content
 
+        if (content != null) {
+            val video = videoStore.getByFile(content.videoFile)
+                ?: videoStore.insert(content.videoFile)
+
+            when (content) {
+                is MediaContent.Movie -> {
+                    movieStore.insert(
+                        catalogId = catalogId,
+                        videoId = video.id
+                    )
+                }
+
+                is MediaContent.Episode -> {
+                    serieStore.insert(
+                        catalogId = catalogId,
+                        videoId = video.id,
+                        season = content.season,
+                        episode = content.episode,
+                        title = content.title
+                    )
+                }
+            }
+
+            media.subtitles.forEach { subtitle ->
+                subtitleStore.insert(
+                    videoId = video.id,
+                    language = subtitle.language,
+                    format = subtitle.format,
+                    file = subtitle.subtitleFile
+                )
+            }
+        }
+    }
 }
