@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.model.internal.pfns
 
-import no.iktdev.streamit.service.dto.Server
+import no.iktdev.streamit.service.model.shared.Server
 
 data class ServerConfigPushObject(
     val receiverId: String,

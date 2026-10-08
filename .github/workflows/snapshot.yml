@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build-service:
     runs-on: ubuntu-latest
@@ -37,11 +40,39 @@ jobs:
           ./gradlew test
 
 
-      - name: Build Spring Boot
+      - name: Build Spring Boot and TypeScript definitions
         run: |
           chmod +x ./gradlew
-          ./gradlew bootJar
+          ./gradlew bootJar generateTs
           echo "Build completed"          
+
+      - name: Export OpenAPI specification
+        env:
+          DATABASE_TYPE: H2
+          DATABASE_NAME: openapi
+          DATABASE_USERNAME: sa
+          DATABASE_PASSWORD: ""
+          CONFIG_FOLDER: /tmp/streamit-config
+          AVAHI_SERVICE_FOLDER: /tmp/streamit-avahi-disabled
+          ASSETS_FOLDER: /tmp/streamit-assets
+        run: |
+          mkdir -p ./build/release-assets
+          java -jar ./build/libs/app.jar --spring.flyway.enabled=false --server.address=127.0.0.1 > /tmp/streamit-openapi.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:8080/v3/api-docs.yaml \
+              --output ./build/release-assets/openapi.yaml; then
+              break
+            fi
+            sleep 2
+          done
+
+          test -s ./build/release-assets/openapi.yaml || {
+            cat /tmp/streamit-openapi.log
+            exit 1
+          }
 
       - name: Set version output
         id: set_version
@@ -61,6 +92,26 @@ jobs:
           overwrite: true
           name: bootJar
           path: ./build/libs/app.jar
+
+      - name: Publish snapshot pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          snapshot_tag="snapshot-${GITHUB_SHA::12}"
+          assets=(
+            "./build/libs/app.jar#streamit-service-${snapshot_tag}.jar"
+            ./build/release-assets/types.d.ts
+            ./build/release-assets/openapi.yaml
+          )
+
+          if gh release view "$snapshot_tag" >/dev/null 2>&1; then
+            gh release upload "$snapshot_tag" "${assets[@]}" --clobber
+          else
+            gh release create "$snapshot_tag" "${assets[@]}" \
+              --prerelease \
+              --title "Snapshot ${GITHUB_SHA::12}" \
+              --notes "Automated snapshot build from commit ${GITHUB_SHA}."
+          fi
 
   docker-build:
     name: Build and Push Docker Image

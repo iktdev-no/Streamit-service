@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.stores.device
 
 import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.dto.RegisterDeviceData
+import no.iktdev.streamit.service.model.shared.RegisterDeviceData
 import org.jetbrains.exposed.sql.insert
 import org.springframework.stereotype.Component
 

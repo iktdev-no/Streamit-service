@@ -1,13 +1,11 @@
 package no.iktdev.streamit.service.controller.api.meta
 
 import io.swagger.v3.oas.annotations.tags.Tag
-import com.google.gson.Gson
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
-import no.iktdev.streamit.service.dto.CastError
-import no.iktdev.streamit.service.dto.Response
+import no.iktdev.streamit.service.model.shared.CastError
 import no.iktdev.streamit.service.db.queries.executeInsert
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,7 +22,7 @@ class CastErrorController {
     @PostMapping("/error")
     @RequiresAuthentication(Scope.None)
     @ResponseStatus(HttpStatus.OK)
-    fun uploadedCastError(@RequestBody data: CastError) : ResponseEntity<String> {
+    fun uploadedCastError(@RequestBody data: CastError): ResponseEntity<Nothing> {
         CastErrorTable.executeInsert(
             deviceOsVersion = data.deviceAndroidVersion,
             castDeviceName = data.castDeviceName,
@@ -35,7 +33,7 @@ class CastErrorController {
             deviceManufacturer = data.deviceManufacturer,
             error = data.error
         )
-        return ResponseEntity.ok(Gson().toJson(Response()))
+        return ResponseEntity.status(HttpStatus.CREATED).body(null)
     }
 
 

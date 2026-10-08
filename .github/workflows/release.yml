@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   build-service:
     runs-on: ubuntu-latest
@@ -30,11 +33,39 @@ jobs:
           restore-keys: |
             build-
 
-      - name: Build Spring Boot
+      - name: Build Spring Boot and TypeScript definitions
         run: |
           chmod +x ./gradlew
-          ./gradlew bootJar
+          ./gradlew bootJar generateTs
           echo "Build completed"          
+
+      - name: Export OpenAPI specification
+        env:
+          DATABASE_TYPE: H2
+          DATABASE_NAME: openapi
+          DATABASE_USERNAME: sa
+          DATABASE_PASSWORD: ""
+          CONFIG_FOLDER: /tmp/streamit-config
+          AVAHI_SERVICE_FOLDER: /tmp/streamit-avahi-disabled
+          ASSETS_FOLDER: /tmp/streamit-assets
+        run: |
+          mkdir -p ./build/release-assets
+          java -jar ./build/libs/app.jar --spring.flyway.enabled=false --server.address=127.0.0.1 > /tmp/streamit-openapi.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error http://127.0.0.1:8080/v3/api-docs.yaml \
+              --output ./build/release-assets/openapi.yaml; then
+              break
+            fi
+            sleep 2
+          done
+
+          test -s ./build/release-assets/openapi.yaml || {
+            cat /tmp/streamit-openapi.log
+            exit 1
+          }
 
       - name: Set version output
         id: set_version
@@ -54,6 +85,16 @@ jobs:
           overwrite: true
           name: bootJar
           path: ./build/libs/app.jar
+
+      - name: Attach release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            ./build/libs/app.jar#streamit-service-${{ steps.set_version.outputs.version }}.jar \
+            ./build/release-assets/types.d.ts \
+            ./build/release-assets/openapi.yaml \
+            --clobber
 
   docker-build:
     name: Build and Push Docker Image

@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.7" // Oppdatert til å matche Boot 3.4
+    id("no.iktdev.ts-gen")
 }
 
 group = "no.iktdev.streamit"
@@ -24,6 +25,7 @@ repositories {
 }
 
 val exposedVersion = "0.61.0"
+val tsGenVersion: String by project
 
 dependencies {
     implementation(kotlin("script-runtime"))
@@ -67,6 +69,9 @@ dependencies {
 
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.sksamuel.aedile:aedile-core:3.0.0")
+
+    implementation("no.iktdev:ts-gen:$tsGenVersion")
+
 
     // --- TESTING ---
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
@@ -139,4 +144,9 @@ tasks.register("printVersion") {
     doLast {
         println(project.version)
     }
+}
+
+tsGenerator {
+    packageName.set("no.iktdev.streamit.service.model.shared")
+    outputFile.set(layout.buildDirectory.file("release-assets/types.d.ts").get().asFile)
 }

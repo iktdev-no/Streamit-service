@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.dto
+package no.iktdev.streamit.service.model.shared
 
 data class CastError(
     val file: String,

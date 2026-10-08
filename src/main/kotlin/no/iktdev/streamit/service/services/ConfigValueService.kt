@@ -7,17 +7,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.streamit.service.Env
-import no.iktdev.streamit.service.dto.Server
+import no.iktdev.streamit.service.model.shared.Server
 import org.springframework.stereotype.Service
-import org.w3c.dom.Document
 import java.awt.image.BufferedImage
-import java.security.MessageDigest
 import java.util.UUID
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.transform.OutputKeys
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
 
 @Service
 class ConfigValueService {

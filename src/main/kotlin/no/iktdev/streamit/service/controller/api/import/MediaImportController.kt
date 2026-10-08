@@ -5,7 +5,6 @@ import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.dto.MediaProcesserImport
 import no.iktdev.streamit.service.model.shared.contentImport.MediaImportV2
 import no.iktdev.streamit.service.services.ImportContentService
 import org.springframework.http.HttpStatus

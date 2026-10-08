@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.services
 
 import mu.KotlinLogging
 import no.iktdev.streamit.service.Env
-import no.iktdev.streamit.service.dto.CapabilitiesObject
+import no.iktdev.streamit.service.model.shared.CapabilitiesObject
 import no.iktdev.streamit.service.model.internal.pfns.PfnsRemoteServerObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity

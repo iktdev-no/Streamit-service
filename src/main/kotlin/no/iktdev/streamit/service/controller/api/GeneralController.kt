@@ -5,9 +5,9 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.dto.CapabilitiesObject
+import no.iktdev.streamit.service.model.shared.CapabilitiesObject
 import no.iktdev.streamit.service.model.shared.Heartbeat
-import no.iktdev.streamit.service.dto.Server
+import no.iktdev.streamit.service.model.shared.Server
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
