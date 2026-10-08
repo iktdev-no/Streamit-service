@@ -61,23 +61,47 @@ jobs:
           AVAHI_SERVICE_FOLDER: /tmp/streamit-avahi-disabled
           ASSETS_FOLDER: /tmp/streamit-assets
         run: |
+          set -euo pipefail
           mkdir -p ./build/release-assets
           java -jar ./build/libs/app.jar --spring.flyway.enabled=false --server.address=127.0.0.1 > /tmp/streamit-openapi.log 2>&1 &
           app_pid=$!
           trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          spec_file=./build/release-assets/openapi.yaml
+          curl_error=/tmp/streamit-openapi-curl.log
+          export_succeeded=false
+          http_status=000
+          curl_exit=0
 
           for attempt in $(seq 1 60); do
-            if curl --fail --silent --show-error http://127.0.0.1:8080/v3/api-docs.yaml \
-              --output ./build/release-assets/openapi.yaml; then
+            curl_exit=0
+            http_status=$(curl --silent --show-error --max-time 10 \
+              --output "$spec_file" --write-out '%{http_code}' \
+              http://127.0.0.1:8080/v3/api-docs.yaml 2>"$curl_error") || curl_exit=$?
+
+            if [[ "$curl_exit" -eq 0 && "$http_status" == "200" ]] && grep -Eq '^openapi:[[:space:]]' "$spec_file"; then
+              echo "OpenAPI export succeeded: HTTP $http_status, $(wc -c < "$spec_file") bytes at $spec_file"
+              export_succeeded=true
+              break
+            fi
+
+            if [[ "$curl_exit" -eq 0 && "$http_status" != "000" && "$http_status" -lt 500 ]]; then
+              echo "OpenAPI export got HTTP $http_status; stopping retries."
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              echo "OpenAPI export stopped because the application process exited."
               break
             fi
             sleep 2
           done
 
-          test -s ./build/release-assets/openapi.yaml || {
+          if [[ "$export_succeeded" != true ]]; then
+            echo "::error::OpenAPI export failed (curl exit $curl_exit, HTTP $http_status)."
+            [[ -f "$curl_error" ]] && cat "$curl_error"
+            [[ -f "$spec_file" ]] && head -40 "$spec_file"
             cat /tmp/streamit-openapi.log
             exit 1
-          }
+          fi
 
       - name: Set version output
         id: set_version
@@ -97,6 +121,16 @@ jobs:
           overwrite: true
           name: bootJar
           path: ./build/libs/app.jar
+
+      - name: Upload API definition artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          retention-days: 90
+          overwrite: true
+          name: api-definitions
+          path: |
+            ./build/release-assets/types.d.ts
+            ./build/release-assets/openapi.yaml
 
       - name: Publish snapshot pre-release
         env:
