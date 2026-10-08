@@ -52,7 +52,7 @@ class AuthenticationController(
         return if (isValid) {
             ResponseEntity.status(200).body(true)
         } else {
-            ResponseEntity.status(405).body(false)
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false)
         }
     }
 

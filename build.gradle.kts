@@ -36,7 +36,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
 
     // Oppdatert til v2.x som er påkrevd for Spring Boot 3.x / Jakarta EE
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

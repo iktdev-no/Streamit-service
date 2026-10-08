@@ -14,6 +14,14 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
+    @Test
+    fun `OpenAPI yaml endpoint is available without device authentication`() {
+        val response = restTemplate.getForEntity("/v3/api-docs.yaml", String::class.java)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body).contains("openapi:")
+    }
+
 
     // 2. Sikkert endepunkt med gyldig JWT
     @Test
