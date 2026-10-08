@@ -5,7 +5,6 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import mu.KotlinLogging
-import no.iktdev.exfl.using
 import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.model.shared.Server
 import org.springframework.stereotype.Service
@@ -29,7 +28,7 @@ class ConfigValueService {
 
 
     fun loadConfiguration() {
-        val serverIdFile = Env.getConfigFolder().using("id")
+        val serverIdFile = Env.getConfigFolder().resolve("id")
 
         if (!Env.getConfigFolder().exists()) {
             Env.getConfigFolder().mkdirs()
@@ -46,10 +45,10 @@ class ConfigValueService {
         }
 
 
-        val avahiServiceFolder = if (Env.getAvahiServiceFolder().exists()) Env.getAvahiServiceFolder() else Env.getConfigFolder().using("avahi")
+        val avahiServiceFolder = if (Env.getAvahiServiceFolder().exists()) Env.getAvahiServiceFolder() else Env.getConfigFolder().resolve("avahi")
         if (avahiServiceFolder.exists()) {
             val avahiContent = generateAvahi()
-            val avahiFile = avahiServiceFolder.using("streamit_${serverId}.service")
+            val avahiFile = avahiServiceFolder.resolve("streamit_${serverId}.service")
             if (!avahiFile.exists()) {
                 avahiFile.createNewFile()
             }

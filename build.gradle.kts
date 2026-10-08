@@ -45,8 +45,6 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0") // Oppdatert til moderne versjon
     implementation("com.google.code.gson:gson:2.11.0") // Matcher nyere JVM-er bedre
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-
     // Database stuff
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
