@@ -2,8 +2,7 @@ name: Snapshot builds
 
 on:
   push:
-    branches:
-      - master
+    branches: ['**']
 
 permissions:
   contents: write

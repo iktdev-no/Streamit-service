@@ -114,7 +114,7 @@ fun findLatestTag(): String {
 
 fun isSnapshotBuild(): Boolean {
     val ref = System.getenv("GITHUB_REF") ?: ""
-    return ref.endsWith("/master") || ref.endsWith("/main")
+    return ref.startsWith("refs/heads/")
 }
 
 fun getCommitsSinceTag(tag: String): Int {
