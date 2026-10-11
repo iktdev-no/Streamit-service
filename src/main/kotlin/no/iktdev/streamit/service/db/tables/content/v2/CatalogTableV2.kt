@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.db.tables.content.v2
 
-import no.iktdev.streamit.service.model.shared.content.ContentType
+import no.iktdev.streamit.service.model.shared.ContentType
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.datetime

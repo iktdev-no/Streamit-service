@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.model.shared.content
+package no.iktdev.streamit.service.model.shared.consumer
 
 data class Title(
     val id: Int,

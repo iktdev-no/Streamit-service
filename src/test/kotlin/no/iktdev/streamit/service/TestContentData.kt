@@ -1,7 +1,7 @@
 package no.iktdev.streamit.service
 
 import no.iktdev.streamit.service.db.tables.content.v2.*
-import no.iktdev.streamit.service.model.shared.content.ContentType
+import no.iktdev.streamit.service.model.shared.ContentType
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 

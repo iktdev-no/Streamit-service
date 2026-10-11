@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.stores.genre
 
-import no.iktdev.streamit.service.model.shared.content.Genre
+import no.iktdev.streamit.service.model.shared.consumer.Genre
 
 interface IGenreStore {
     fun getById(id: Long): Genre?

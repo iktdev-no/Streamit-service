@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service
 
-import no.iktdev.streamit.service.model.shared.Heartbeat
+import no.iktdev.streamit.service.model.shared.consumer.Heartbeat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate

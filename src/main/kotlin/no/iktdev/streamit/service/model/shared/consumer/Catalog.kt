@@ -1,9 +1,6 @@
-package no.iktdev.streamit.service.model.shared.content
+package no.iktdev.streamit.service.model.shared.consumer
 
-enum class ContentType {
-    Movie,
-    Serie,
-}
+import no.iktdev.streamit.service.model.shared.ContentType
 
 
 open class Catalog(

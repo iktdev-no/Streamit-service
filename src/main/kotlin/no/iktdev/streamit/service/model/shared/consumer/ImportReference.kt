@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.model.shared
+package no.iktdev.streamit.service.model.shared.consumer
 
 data class ImportReference(
     val catalogId: Long? = null,

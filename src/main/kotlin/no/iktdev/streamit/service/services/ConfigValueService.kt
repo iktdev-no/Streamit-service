@@ -6,7 +6,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import mu.KotlinLogging
 import no.iktdev.streamit.service.Env
-import no.iktdev.streamit.service.model.shared.Server
+import no.iktdev.streamit.service.model.shared.consumer.Server
 import org.springframework.stereotype.Service
 import java.awt.image.BufferedImage
 import java.util.UUID

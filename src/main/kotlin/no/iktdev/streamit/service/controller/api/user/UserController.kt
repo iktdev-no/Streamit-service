@@ -6,7 +6,7 @@ import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.model.internal.user.UserData
 import no.iktdev.streamit.service.model.internal.user.asUserList
-import no.iktdev.streamit.service.model.shared.User
+import no.iktdev.streamit.service.model.shared.consumer.User
 import no.iktdev.streamit.service.stores.user.IUserStore
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

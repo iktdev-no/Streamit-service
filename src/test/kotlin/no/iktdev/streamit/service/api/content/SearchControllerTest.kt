@@ -4,7 +4,7 @@ import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.assertHttpOk
 import no.iktdev.streamit.service.assertJson
-import no.iktdev.streamit.service.model.shared.content.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.Catalog
 import no.iktdev.streamit.service.simpleGet
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

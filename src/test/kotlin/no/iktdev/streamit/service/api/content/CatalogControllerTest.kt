@@ -4,7 +4,7 @@ import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.assertHttpOk
 import no.iktdev.streamit.service.assertJson
-import no.iktdev.streamit.service.model.shared.content.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.Catalog
 import no.iktdev.streamit.service.simpleGet
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -41,7 +41,7 @@ class CatalogControllerTest : TestBaseWithDatabase() {
 
     @Test
     fun `Genre endpoint filters through catalog genre relation`() {
-        val genres = restTemplate.simpleGet("/open/api/v1/genre", object : ParameterizedTypeReference<List<no.iktdev.streamit.service.model.shared.content.Genre>>() {})
+        val genres = restTemplate.simpleGet("/open/api/v1/genre", object : ParameterizedTypeReference<List<no.iktdev.streamit.service.model.shared.consumer.Genre>>() {})
         assertHttpOk(genres)
         val response = restTemplate.simpleGet("/open/api/v1/catalog/genre?genreId=${genres.body.single { it.genre == "Test" }.id}", object : ParameterizedTypeReference<List<Catalog>>() {})
         assertHttpOk(response)

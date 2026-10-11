@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.model.shared
+package no.iktdev.streamit.service.model.shared.consumer
 
 import no.iktdev.streamit.service.db.tables.info.DataAudioTable
 import no.iktdev.streamit.service.db.tables.info.DataVideoTable

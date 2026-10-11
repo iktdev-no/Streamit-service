@@ -2,9 +2,16 @@ package no.iktdev.streamit.service.api.import
 
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.db.tables.content.v2.*
-import no.iktdev.streamit.service.model.shared.ImportReference
-import no.iktdev.streamit.service.model.shared.content.ContentType
-import no.iktdev.streamit.service.model.shared.contentImport.*
+import no.iktdev.streamit.service.model.shared.consumer.ImportReference
+import no.iktdev.streamit.service.model.shared.ContentType
+import no.iktdev.streamit.service.model.shared.importing.CatalogMetadata
+import no.iktdev.streamit.service.model.shared.importing.EpisodeInfo
+import no.iktdev.streamit.service.model.shared.importing.Media
+import no.iktdev.streamit.service.model.shared.importing.MediaContent
+import no.iktdev.streamit.service.model.shared.importing.MediaImportV2
+import no.iktdev.streamit.service.model.shared.importing.MediaType
+import no.iktdev.streamit.service.model.shared.importing.SubtitleImport
+import no.iktdev.streamit.service.model.shared.importing.Summary
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach

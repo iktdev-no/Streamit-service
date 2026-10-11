@@ -1,7 +1,7 @@
-package no.iktdev.streamit.service.model.shared.contentImport
+package no.iktdev.streamit.service.model.shared.importing
 
-import no.iktdev.streamit.service.model.shared.ImportReference
-import no.iktdev.streamit.service.model.shared.content.ContentType
+import no.iktdev.streamit.service.model.shared.consumer.ImportReference
+import no.iktdev.streamit.service.model.shared.ContentType
 
 data class MediaImportV2(
     val reference: ImportReference? = null,

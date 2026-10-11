@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.model.internal.user
 
-import no.iktdev.streamit.service.model.shared.User as SharedUser
+import no.iktdev.streamit.service.model.shared.consumer.User as SharedUser
 
 data class User(val id: Long, val uid: String, val name: String, val image: String) {
     fun asShared(): SharedUser = SharedUser(uid, name, image)

@@ -6,8 +6,8 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.services.ConfigValueService
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.model.shared.CapabilitiesObject
-import no.iktdev.streamit.service.model.shared.RegisterDeviceData
+import no.iktdev.streamit.service.model.shared.consumer.CapabilitiesObject
+import no.iktdev.streamit.service.model.shared.consumer.RegisterDeviceData
 import no.iktdev.streamit.service.stores.device.IDeviceRegistrationStore
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

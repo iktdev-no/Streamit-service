@@ -4,7 +4,7 @@ import no.iktdev.streamit.service.db.tables.content.v2.ProgressTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.UserTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.VideoTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.content.Progress
+import no.iktdev.streamit.service.model.shared.consumer.Progress
 import no.iktdev.streamit.service.stores.user.IUserStore
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and

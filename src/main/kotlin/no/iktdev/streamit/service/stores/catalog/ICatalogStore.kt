@@ -1,9 +1,9 @@
 package no.iktdev.streamit.service.stores.catalog
 
-import no.iktdev.streamit.service.model.shared.content.Catalog
-import no.iktdev.streamit.service.model.shared.content.ContentType
-import no.iktdev.streamit.service.model.shared.content.Movie
-import no.iktdev.streamit.service.model.shared.content.Serie
+import no.iktdev.streamit.service.model.shared.consumer.Catalog
+import no.iktdev.streamit.service.model.shared.ContentType
+import no.iktdev.streamit.service.model.shared.consumer.Movie
+import no.iktdev.streamit.service.model.shared.consumer.Serie
 import java.util.UUID
 
 interface ICatalogStore {

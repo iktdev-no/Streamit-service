@@ -1,10 +1,9 @@
 package no.iktdev.streamit.service.services
 
-import no.iktdev.streamit.service.model.shared.contentImport.CatalogMetadata
-import no.iktdev.streamit.service.model.shared.contentImport.Media
-import no.iktdev.streamit.service.model.shared.contentImport.MediaContent
-import no.iktdev.streamit.service.model.shared.contentImport.MediaType
-import no.iktdev.streamit.service.model.shared.contentImport.MediaImportV2
+import no.iktdev.streamit.service.model.shared.importing.CatalogMetadata
+import no.iktdev.streamit.service.model.shared.importing.Media
+import no.iktdev.streamit.service.model.shared.importing.MediaType
+import no.iktdev.streamit.service.model.shared.importing.MediaImportV2
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import no.iktdev.streamit.service.stores.genre.IGenreStore
 import no.iktdev.streamit.service.stores.movie.IMovieStore

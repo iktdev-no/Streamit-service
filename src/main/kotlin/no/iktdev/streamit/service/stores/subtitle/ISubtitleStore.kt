@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.stores.subtitle
 
-import no.iktdev.streamit.service.model.shared.content.Subtitle
+import no.iktdev.streamit.service.model.shared.consumer.Subtitle
 
 interface ISubtitleStore {
     fun insert(videoId: Long, language: String, format: String, file: String): Subtitle

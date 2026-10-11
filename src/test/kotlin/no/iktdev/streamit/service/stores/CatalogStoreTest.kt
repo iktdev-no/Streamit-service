@@ -3,7 +3,7 @@ package no.iktdev.streamit.service.stores
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.content.ContentType
+import no.iktdev.streamit.service.model.shared.ContentType
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import no.iktdev.streamit.service.stores.subtitle.ISubtitleStore
 import org.junit.jupiter.api.Assertions.assertEquals

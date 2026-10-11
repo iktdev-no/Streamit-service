@@ -5,7 +5,7 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
-import no.iktdev.streamit.service.model.shared.CastError
+import no.iktdev.streamit.service.model.shared.consumer.CastError
 import no.iktdev.streamit.service.db.queries.executeInsert
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

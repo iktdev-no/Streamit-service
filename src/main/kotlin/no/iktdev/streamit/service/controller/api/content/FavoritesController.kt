@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.model.shared.content.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.Catalog
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import no.iktdev.streamit.service.stores.favorite.IFavoriteStore
 import org.springframework.web.bind.annotation.DeleteMapping

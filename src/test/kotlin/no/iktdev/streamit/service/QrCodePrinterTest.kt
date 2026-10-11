@@ -2,7 +2,7 @@ package no.iktdev.streamit.service
 
 import com.google.gson.Gson
 import no.iktdev.streamit.service.services.ConfigValueService
-import no.iktdev.streamit.service.model.shared.Server
+import no.iktdev.streamit.service.model.shared.consumer.Server
 import org.junit.jupiter.api.Test
 
 class QrCodePrinterTest {

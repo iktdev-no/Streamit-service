@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.model.shared.content
+package no.iktdev.streamit.service.model.shared.consumer
 
 data class Genre(val id: Int, val genre: String)
 {

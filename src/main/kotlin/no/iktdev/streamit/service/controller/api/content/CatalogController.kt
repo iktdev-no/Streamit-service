@@ -6,10 +6,8 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.model.shared.content.Catalog
-import no.iktdev.streamit.service.model.shared.content.GenreCatalog
-import no.iktdev.streamit.service.model.shared.content.Movie
-import no.iktdev.streamit.service.model.shared.content.Serie
+import no.iktdev.streamit.service.model.shared.consumer.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.Serie
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

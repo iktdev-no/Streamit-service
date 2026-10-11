@@ -2,9 +2,7 @@ package no.iktdev.streamit.service.stores.movie
 
 import no.iktdev.streamit.service.db.tables.content.v2.MovieTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.content.Movie
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.insertAndGetId
 import org.springframework.stereotype.Component
 
 @Component

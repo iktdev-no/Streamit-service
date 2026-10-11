@@ -1,7 +1,7 @@
 package no.iktdev.streamit.service.stores.title
 
 import no.iktdev.streamit.service.model.shared.CollectionReference
-import no.iktdev.streamit.service.model.shared.content.Title
+import no.iktdev.streamit.service.model.shared.consumer.Title
 
 interface ITitleStore {
     fun get(id: Long): Title?
