@@ -51,6 +51,7 @@ jobs:
           DATABASE_NAME: openapi
           DATABASE_USERNAME: sa
           DATABASE_PASSWORD: ""
+          CONFIG_LAN_ADDRESS: http://127.0.0.1:8080
           CONFIG_FOLDER: /tmp/streamit-config
           AVAHI_SERVICE_FOLDER: /tmp/streamit-avahi-disabled
           ASSETS_FOLDER: /tmp/streamit-assets
