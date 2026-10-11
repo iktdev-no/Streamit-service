@@ -29,7 +29,9 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         val secureResponse = restTemplate.getForEntity("/secure/swagger-ui.html", String::class.java)
 
         assertThat(indexResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(indexResponse.body).contains("/open/swagger-ui.html", "/secure/swagger-ui.html")
+        assertThat(indexResponse.body)
+            .contains("Open route", "/v3/api-docs/open", "Secure route", "/v3/api-docs/secure")
+            .doesNotContain("Consumer contract", "Importing contract")
         assertThat(openResponse.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(openResponse.body).contains("/v3/api-docs/open")
         assertThat(secureResponse.statusCode).isEqualTo(HttpStatus.OK)
@@ -43,8 +45,10 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
 
         assertThat(openSpec.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(openSpec.body).contains("\"url\":\"/open\"")
+        assertThat(openSpec.body).contains("media/import/import", "metadata/catalog/search")
         assertThat(secureSpec.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(secureSpec.body).contains("\"url\":\"/secure\"")
+        assertThat(secureSpec.body).contains("media/import/import", "metadata/catalog/search")
     }
 
 
