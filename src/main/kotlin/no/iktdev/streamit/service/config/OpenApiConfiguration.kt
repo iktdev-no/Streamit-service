@@ -8,9 +8,29 @@ import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.core.converter.ModelConverters
 import org.springdoc.core.models.GroupedOpenApi
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
+import no.iktdev.streamit.service.controller.api.GeneralController
+import no.iktdev.streamit.service.controller.api.authentication.AuthenticationController
+import no.iktdev.streamit.service.controller.api.content.AssetsApiController
+import no.iktdev.streamit.service.controller.api.content.CatalogController
+import no.iktdev.streamit.service.controller.api.content.FavoritesController
+import no.iktdev.streamit.service.controller.api.content.GenreController
+import no.iktdev.streamit.service.controller.api.content.SearchController
+import no.iktdev.streamit.service.controller.api.content.SummaryController
+import no.iktdev.streamit.service.controller.api.content.VideoProgressController
+import no.iktdev.streamit.service.controller.api.import.MediaImportController
+import no.iktdev.streamit.service.controller.api.meta.CastErrorController
+import no.iktdev.streamit.service.controller.api.meta.DeviceRegistrationController
+import no.iktdev.streamit.service.controller.api.meta.MetadataController
+import no.iktdev.streamit.service.controller.api.meta.RemoteController
+import no.iktdev.streamit.service.controller.api.user.UserController
+import no.iktdev.streamit.service.controller.assets.AssetsController
+import no.iktdev.streamit.service.controller.content.ContentController
+import no.iktdev.streamit.service.model.shared.CollectionReference
+import no.iktdev.streamit.service.model.shared.ContentType
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -50,17 +70,45 @@ class OpenApiConfiguration {
     @Bean
     fun secureRouteApiDocs(): GroupedOpenApi = routeApiGroup("secure", "/secure")
 
+    @Bean
+    fun consumerApiDocs(): GroupedOpenApi = contractApiGroup("consumer", consumerControllers)
+
+    @Bean
+    fun importingApiDocs(): GroupedOpenApi = contractApiGroup("importing", importingControllers)
+
     private fun routeApiGroup(group: String, serverPath: String): GroupedOpenApi =
         GroupedOpenApi.builder()
             .group(group)
+            .addOpenApiMethodFilter { method -> method.declaringClass in routeControllers }
             .addOpenApiCustomizer { api ->
                 api.servers(
                     listOf(
                         Server().url(serverPath).description("Streamit $group route")
                     )
                 )
+                addSharedContractSchemas(api)
             }
             .build()
+
+    private fun contractApiGroup(group: String, controllers: Set<Class<*>>): GroupedOpenApi =
+        GroupedOpenApi.builder()
+            .group(group)
+            .addOpenApiMethodFilter { method -> method.declaringClass in controllers }
+            .addOpenApiCustomizer { api ->
+                api.info(api.info.title("Streamit ${group.replaceFirstChar { it.uppercase() }} API"))
+                api.servers(listOf(Server().url("/secure").description("Public API via reverse proxy")))
+                addSharedContractSchemas(api)
+            }
+            .build()
+
+    private fun addSharedContractSchemas(api: OpenAPI) {
+        val components = api.components ?: Components().also { api.components = it }
+        listOf(ContentType::class.java, CollectionReference::class.java).forEach { type ->
+            ModelConverters.getInstance().readAll(type).forEach { (name, schema) ->
+                components.addSchemas(name, schema)
+            }
+        }
+    }
 
     @Bean
     fun streamitOperationCustomizer(): OperationCustomizer = OperationCustomizer { operation, handlerMethod ->
@@ -89,5 +137,30 @@ class OpenApiConfiguration {
 
     private companion object {
         const val DEVICE_BEARER_SCHEME = "deviceBearer"
+
+        val importingControllers = setOf(
+            MediaImportController::class.java,
+            MetadataController::class.java
+        )
+
+        val consumerControllers = setOf(
+            GeneralController::class.java,
+            AuthenticationController::class.java,
+            AssetsApiController::class.java,
+            CatalogController::class.java,
+            FavoritesController::class.java,
+            GenreController::class.java,
+            SearchController::class.java,
+            SummaryController::class.java,
+            VideoProgressController::class.java,
+            CastErrorController::class.java,
+            DeviceRegistrationController::class.java,
+            RemoteController::class.java,
+            UserController::class.java,
+            AssetsController::class.java,
+            ContentController::class.java
+        )
+
+        val routeControllers = consumerControllers + importingControllers
     }
 }
