@@ -7,7 +7,7 @@ build/
 
 .idea/workspace.xml
 
-assets/
+/assets/
 tmp/
 conf/
 .run/
