@@ -1,6 +1,5 @@
 package no.iktdev.streamit.service.model.shared.contentImport
 
-import no.iktdev.streamit.service.model.shared.CollectionReference
 import no.iktdev.streamit.service.model.shared.ImportReference
 import no.iktdev.streamit.service.model.shared.content.ContentType
 

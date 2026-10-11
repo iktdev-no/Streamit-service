@@ -71,9 +71,8 @@ class CatalogStore(
     override fun getByIds(ids: List<Long>): List<Catalog> {
         return getCatalogs(
             predicate = {
-                CatalogTableV2.id inList ids.map {
-                    EntityID(it, CatalogTableV2)
-                }
+                (CatalogTableV2.id inList ids.map { EntityID(it, CatalogTableV2) }) and
+                        (CatalogTitleTableV2.preferred eq true)
             }
         )
     }
@@ -219,29 +218,41 @@ class CatalogStore(
         orderBy: Pair<Expression<*>, SortOrder> = CatalogTableV2.id to SortOrder.ASC,
         predicate: SqlExpressionBuilder.() -> Op<Boolean>,
     ): List<Catalog> = withTransaction {
+        // Multiple preferred titles are allowed. Select the first matching title row by ID
+        // while keeping the catalog query to one row per catalog.
+        val selectedTitleId = CatalogTitleTableV2.id.min()
         val query = CatalogTableV2
             .innerJoin(CatalogTitleTableV2)
-            .selectAll()
+            .select(CatalogTableV2.columns + selectedTitleId)
             .where(predicate)
+            .groupBy(*CatalogTableV2.columns.toTypedArray())
             .orderBy(orderBy)
 
         limit?.let { query.limit(it) }
         offset?.let { query.offset(it) }
 
-        val catalogs = query.map { row ->
+        val rows = query.toList()
+        if (rows.isEmpty()) {
+            return@withTransaction emptyList()
+        }
+
+        val selectedTitleIds = rows.map { it[selectedTitleId]!! }
+        val titleRows = CatalogTitleTableV2
+            .selectAll()
+            .where { CatalogTitleTableV2.id inList selectedTitleIds }
+            .associateBy { it[CatalogTitleTableV2.id] }
+
+        val catalogs = rows.map { row ->
+            val titleId = row[selectedTitleId]!!
             Catalog(
                 id = row[CatalogTableV2.id].value,
-                title = row[CatalogTitleTableV2.title],
+                title = titleRows[titleId]!![CatalogTitleTableV2.title],
                 cover = row[CatalogTableV2.cover],
                 type = row[CatalogTableV2.type],
                 collection = row[CatalogTableV2.store],
                 recent = row[CatalogTableV2.updatedAt]
                     .isAfter(LocalDateTime.now().minusDays(Env.frshness))
             )
-        }
-
-        if (catalogs.isEmpty()) {
-            return@withTransaction emptyList()
         }
 
         val catalogIds = catalogs.map {
@@ -299,7 +310,10 @@ class CatalogStore(
             .where {
                 (CatalogTitleTableV2.preferred eq true) and predicate()
             }
-            .singleOrNull()
+            .orderBy(
+                CatalogTitleTableV2.id to SortOrder.ASC
+            )
+            .firstOrNull()
             ?: return null
 
         val catalogId = row[CatalogTableV2.id]
@@ -338,9 +352,20 @@ class CatalogStore(
         userId: Long? = null,
         predicate: SqlExpressionBuilder.() -> Op<Boolean>
     ): Serie? {
-        val query = CatalogTableV2
+        // Resolve the catalog and its first preferred title separately so multiple preferred
+        // titles cannot multiply the episode rows.
+        val catalogRow = CatalogTableV2
             .innerJoin(CatalogTitleTableV2)
-            .innerJoin(SerieTableV2)
+            .selectAll()
+            .where {
+                (CatalogTitleTableV2.preferred eq true) and predicate()
+            }
+            .orderBy(CatalogTitleTableV2.id to SortOrder.ASC)
+            .firstOrNull()
+            ?: return null
+
+        val catalogId = catalogRow[CatalogTableV2.id]
+        val episodeQuery = SerieTableV2
             .innerJoin(VideoTableV2)
             .let {
                 if (userId != null) {
@@ -356,50 +381,54 @@ class CatalogStore(
                 }
             }
 
-        val row = query
+        val episodeRows = episodeQuery
             .selectAll()
-            .where {
-                (CatalogTitleTableV2.preferred eq true) and predicate()
-            }
-            .singleOrNull()
-            ?: return null
+            .where { SerieTableV2.catalogId eq catalogId }
+            .orderBy(
+                SerieTableV2.season to SortOrder.ASC,
+                SerieTableV2.episode to SortOrder.ASC
+            )
+            .toList()
+        if (episodeRows.isEmpty()) return null
 
-        val catalogId = row[CatalogTableV2.id]
-        val videoId = row[VideoTableV2.id]
-
-        val progress = if (userId != null) {
-            row.getOrNull(ProgressTableV2.position)?.let {
-                Progress(
-                    position = it,
-                    played = row[ProgressTableV2.played].toProgressInstant()
-                )
+        val videoIds = episodeRows.map { it[VideoTableV2.id] }
+        val subtitles = getSubtitles(videoIds)
+        val episodes = episodeRows.map { episodeRow ->
+            val videoId = episodeRow[VideoTableV2.id]
+            val progress = if (userId != null) {
+                episodeRow.getOrNull(ProgressTableV2.position)?.let {
+                    Progress(
+                        position = it,
+                        played = episodeRow[ProgressTableV2.played].toProgressInstant()
+                    )
+                }
+            } else {
+                null
             }
-        } else {
-            null
+
+            Episode(
+                season = episodeRow[SerieTableV2.season],
+                episode = episodeRow[SerieTableV2.episode],
+                title = episodeRow[SerieTableV2.title],
+                video = Video(
+                    id = videoId.value,
+                    videoFileName = episodeRow[VideoTableV2.file],
+                    duration = episodeRow[VideoTableV2.duration] ?: 0
+                ),
+                subtitles = subtitles[videoId.value].orEmpty(),
+                progress = progress
+            )
         }
-
-        val episode = Episode(
-            season = row[SerieTableV2.season],
-            episode = row[SerieTableV2.episode],
-            title = row[SerieTableV2.title],
-            video = Video(
-                id = videoId.value,
-                videoFileName = row[VideoTableV2.file],
-                duration = row[VideoTableV2.duration] ?: 0
-            ),
-            subtitles = getSubtitles(listOf(videoId))[videoId.value].orEmpty(),
-            progress = progress
-        )
 
         return Serie(
             id = catalogId.value,
-            title = row[CatalogTitleTableV2.title],
-            cover = row[CatalogTableV2.cover],
-            collection = row[CatalogTableV2.store],
+            title = catalogRow[CatalogTitleTableV2.title],
+            cover = catalogRow[CatalogTableV2.cover],
+            collection = catalogRow[CatalogTableV2.store],
             genres = getGenres(listOf(catalogId))[catalogId.value].orEmpty(),
-            recent = row[CatalogTableV2.updatedAt]
+            recent = catalogRow[CatalogTableV2.updatedAt]
                 .isAfter(LocalDateTime.now().minusDays(Env.frshness)),
-            episodes = listOf(episode)
+            episodes = episodes
         )
     }
 

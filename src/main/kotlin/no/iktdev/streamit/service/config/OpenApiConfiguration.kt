@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.security.SecurityRequirement
+import org.springdoc.core.models.GroupedOpenApi
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import org.springdoc.core.customizers.OperationCustomizer
@@ -42,6 +43,24 @@ class OpenApiConfiguration {
                     )
             )
         )
+
+    @Bean
+    fun openRouteApiDocs(): GroupedOpenApi = routeApiGroup("open", "/open")
+
+    @Bean
+    fun secureRouteApiDocs(): GroupedOpenApi = routeApiGroup("secure", "/secure")
+
+    private fun routeApiGroup(group: String, serverPath: String): GroupedOpenApi =
+        GroupedOpenApi.builder()
+            .group(group)
+            .addOpenApiCustomizer { api ->
+                api.servers(
+                    listOf(
+                        Server().url(serverPath).description("Streamit $group route")
+                    )
+                )
+            }
+            .build()
 
     @Bean
     fun streamitOperationCustomizer(): OperationCustomizer = OperationCustomizer { operation, handlerMethod ->

@@ -22,6 +22,31 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         assertThat(response.body).contains("openapi:")
     }
 
+    @Test
+    fun `Swagger UI is available without device authentication`() {
+        val indexResponse = restTemplate.getForEntity("/swagger", String::class.java)
+        val openResponse = restTemplate.getForEntity("/open/swagger-ui.html", String::class.java)
+        val secureResponse = restTemplate.getForEntity("/secure/swagger-ui.html", String::class.java)
+
+        assertThat(indexResponse.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(indexResponse.body).contains("/open/swagger-ui.html", "/secure/swagger-ui.html")
+        assertThat(openResponse.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(openResponse.body).contains("/v3/api-docs/open")
+        assertThat(secureResponse.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(secureResponse.body).contains("/v3/api-docs/secure")
+    }
+
+    @Test
+    fun `Open and secure OpenAPI groups use matching server prefixes`() {
+        val openSpec = restTemplate.getForEntity("/v3/api-docs/open", String::class.java)
+        val secureSpec = restTemplate.getForEntity("/v3/api-docs/secure", String::class.java)
+
+        assertThat(openSpec.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(openSpec.body).contains("\"url\":\"/open\"")
+        assertThat(secureSpec.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(secureSpec.body).contains("\"url\":\"/secure\"")
+    }
+
 
     // 2. Sikkert endepunkt med gyldig JWT
     @Test

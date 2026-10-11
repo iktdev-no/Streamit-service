@@ -57,6 +57,10 @@ object Env {
     val lanAddress: String? = System.getenv("CONFIG_LAN_ADDRESS")
     val wanAddress: String? = System.getenv("CONFIG_WAN_ADDRESS")
 
+    fun requireLanAddress(): String = lanAddress
+        ?.takeIf(String::isNotBlank)
+        ?: error("CONFIG_LAN_ADDRESS is required. Set it to the server's LAN URL, for example http://192.168.1.10:8080.")
+
     var frshness: Long = System.getenv("CONTENT_FRESH_DAYS")?.toLong() ?: 5
     var serieAgeCap: String = System.getenv("SERIE_AGE") ?: "30d"
     var continueWatch: Int = System.getenv("CONTENT_CONTINUE")?.toInt() ?: 10

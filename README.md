@@ -65,7 +65,7 @@ MODE: "prod" # default
 ## Automatic Discovery
 While you can manually input the lan address, the server can automatically discover it. This is useful for local networks where the server is accessed via a LAN address.
 AN avahi service file is automatically generated and placed in the assets folder, which can be used to discover the server on the local network.
-It will require `CONFIG_LAN_ADDRESS` to be set, otherwise it will not work.
+`CONFIG_LAN_ADDRESS` is required. The service exits immediately with a clear error if it is missing or blank, rather than starting without a usable LAN address.
 If you are using Docker, you can set the `AVAHI_SERVICE_FOLDER` to `/etc/avahi/services` to make it available on the local network.
 
 # Setup
@@ -223,4 +223,3 @@ server {
 }
 ```
 ![Docker Pulls](https://img.shields.io/docker/pulls/bskjon/streamit-service?style=flat-square&logo=docker&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fbskjon%2Fstreamit-service)
-

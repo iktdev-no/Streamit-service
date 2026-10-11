@@ -36,6 +36,7 @@ class Application {
 
 var context: ApplicationContext? = null
 fun main(args: Array<String>) {
+    Env.requireLanAddress()
     context = runApplication<Application>(*args)
 }
 
@@ -64,8 +65,12 @@ class InterceptorConfiguration(
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                     "/stream/**",
+                    "/swagger",
                     "/open/swagger-ui",
+                    "/open/swagger-ui.html",
                     "/open/swagger-ui/**",
+                    "/secure/swagger-ui.html",
+                    "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/v3/api-docs",
                     "/v3/api-docs/**",
