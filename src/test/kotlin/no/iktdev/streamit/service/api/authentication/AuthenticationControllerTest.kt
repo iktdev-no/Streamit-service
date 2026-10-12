@@ -23,6 +23,18 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
     }
 
     @Test
+    fun `Grouped OpenAPI yaml endpoints are available without device authentication`() {
+        listOf("consumer", "importing").forEach { group ->
+            val response = restTemplate.getForEntity("/v3/api-docs.yaml/$group", String::class.java)
+
+            assertThat(response.statusCode)
+                .withFailMessage("OpenAPI YAML export for '$group' failed with ${response.statusCode}: ${response.body}")
+                .isEqualTo(HttpStatus.OK)
+            assertThat(response.body).contains("openapi:")
+        }
+    }
+
+    @Test
     fun `Swagger UI is available without device authentication`() {
         val indexResponse = restTemplate.getForEntity("/swagger", String::class.java)
         val openResponse = restTemplate.getForEntity("/open/swagger-ui.html", String::class.java)
