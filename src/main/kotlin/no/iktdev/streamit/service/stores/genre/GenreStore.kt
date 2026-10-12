@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.stores.genre
 
 import no.iktdev.streamit.service.db.tables.content.v2.GenreTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.consumer.Genre
+import no.iktdev.streamit.service.model.shared.consumer.content.Genre
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.insertAndGetId

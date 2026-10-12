@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.stores.progress
 
-import no.iktdev.streamit.service.model.shared.consumer.Progress
+import no.iktdev.streamit.service.model.shared.consumer.content.Progress
 import java.time.Instant
 import java.util.UUID
 

@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.stores.video
 
-import no.iktdev.streamit.service.model.shared.consumer.Video
+import no.iktdev.streamit.service.model.shared.consumer.content.Video
 
 interface IVideoStore {
     fun getByFile(file: String): Video?

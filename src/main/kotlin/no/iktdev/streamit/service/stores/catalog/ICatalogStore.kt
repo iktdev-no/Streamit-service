@@ -1,9 +1,9 @@
 package no.iktdev.streamit.service.stores.catalog
 
-import no.iktdev.streamit.service.model.shared.consumer.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.content.Catalog
 import no.iktdev.streamit.service.model.shared.ContentType
-import no.iktdev.streamit.service.model.shared.consumer.Movie
-import no.iktdev.streamit.service.model.shared.consumer.Serie
+import no.iktdev.streamit.service.model.shared.consumer.content.Movie
+import no.iktdev.streamit.service.model.shared.consumer.content.Serie
 import java.util.UUID
 
 interface ICatalogStore {
@@ -34,7 +34,6 @@ interface ICatalogStore {
     fun getRecentlyAdded(freshness: Long): List<Catalog>
     fun getRecentlyUpdatedSeries(): List<Catalog>
 
-    fun getContinueOrResumeSerie(userId: UUID): List<Serie>
 
     fun search(keyword: String): List<Catalog>
     fun searchMovies(keyword: String): List<Catalog>

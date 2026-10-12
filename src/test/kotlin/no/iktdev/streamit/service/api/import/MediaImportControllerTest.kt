@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.api.import
 
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.db.tables.content.v2.*
-import no.iktdev.streamit.service.model.shared.consumer.ImportReference
+import no.iktdev.streamit.service.model.shared.importing.ImportReference
 import no.iktdev.streamit.service.model.shared.ContentType
 import no.iktdev.streamit.service.model.shared.importing.CatalogMetadata
 import no.iktdev.streamit.service.model.shared.importing.EpisodeInfo

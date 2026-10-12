@@ -12,15 +12,15 @@ import no.iktdev.streamit.service.db.tables.content.v2.SubtitleTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.UserTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.VideoTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.consumer.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.content.Catalog
 import no.iktdev.streamit.service.model.shared.ContentType
-import no.iktdev.streamit.service.model.shared.consumer.Episode
-import no.iktdev.streamit.service.model.shared.consumer.Genre
-import no.iktdev.streamit.service.model.shared.consumer.Movie
-import no.iktdev.streamit.service.model.shared.consumer.Progress
-import no.iktdev.streamit.service.model.shared.consumer.Serie
-import no.iktdev.streamit.service.model.shared.consumer.Subtitle
-import no.iktdev.streamit.service.model.shared.consumer.Video
+import no.iktdev.streamit.service.model.shared.consumer.content.Episode
+import no.iktdev.streamit.service.model.shared.consumer.content.Genre
+import no.iktdev.streamit.service.model.shared.consumer.content.Movie
+import no.iktdev.streamit.service.model.shared.consumer.content.Progress
+import no.iktdev.streamit.service.model.shared.consumer.content.Serie
+import no.iktdev.streamit.service.model.shared.consumer.content.Subtitle
+import no.iktdev.streamit.service.model.shared.consumer.content.Video
 import no.iktdev.streamit.service.stores.user.IUserStore
 import no.iktdev.streamit.service.stores.progress.toProgressInstant
 import org.jetbrains.exposed.dao.id.EntityID
@@ -156,10 +156,6 @@ class CatalogStore(
                     (CatalogTitleTableV2.preferred eq true) and
                     (CatalogTableV2.updatedAt greaterEq Env.getSerieCutoff())
         }
-
-    override fun getContinueOrResumeSerie(userId: UUID): List<Serie> {
-        TODO("Not yet implemented")
-    }
 
     override fun search(
         keyword: String

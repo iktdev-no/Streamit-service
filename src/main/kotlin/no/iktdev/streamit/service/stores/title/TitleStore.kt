@@ -4,7 +4,7 @@ import no.iktdev.streamit.service.db.tables.content.v2.CatalogTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.CatalogTitleTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.model.shared.CollectionReference
-import no.iktdev.streamit.service.model.shared.consumer.Title
+import no.iktdev.streamit.service.model.shared.consumer.content.Title
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder

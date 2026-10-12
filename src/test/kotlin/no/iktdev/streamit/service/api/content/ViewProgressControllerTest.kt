@@ -3,7 +3,7 @@ package no.iktdev.streamit.service.api.content
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.model.internal.user.UserData
-import no.iktdev.streamit.service.model.shared.consumer.Progress
+import no.iktdev.streamit.service.model.shared.consumer.content.Progress
 import no.iktdev.streamit.service.stores.user.IUserStore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

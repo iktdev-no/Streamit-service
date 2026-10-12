@@ -1,7 +1,7 @@
 package no.iktdev.streamit.service.stores.summary
 
 import no.iktdev.streamit.service.db.tables.content.v2.SummaryTableV2
-import no.iktdev.streamit.service.model.shared.consumer.Summary
+import no.iktdev.streamit.service.model.shared.consumer.content.Summary
 import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder

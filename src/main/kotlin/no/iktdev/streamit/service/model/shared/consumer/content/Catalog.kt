@@ -1,4 +1,4 @@
-package no.iktdev.streamit.service.model.shared.consumer
+package no.iktdev.streamit.service.model.shared.consumer.content
 
 import no.iktdev.streamit.service.model.shared.ContentType
 

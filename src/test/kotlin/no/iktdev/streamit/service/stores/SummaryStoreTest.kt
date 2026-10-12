@@ -3,7 +3,7 @@ package no.iktdev.streamit.service.stores
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import no.iktdev.streamit.service.TestContentData
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.consumer.Summary
+import no.iktdev.streamit.service.model.shared.consumer.content.Summary
 import no.iktdev.streamit.service.stores.summary.ISummaryStore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

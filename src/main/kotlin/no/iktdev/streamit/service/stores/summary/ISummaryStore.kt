@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.stores.summary
 
-import no.iktdev.streamit.service.model.shared.consumer.Summary
+import no.iktdev.streamit.service.model.shared.consumer.content.Summary
 
 interface ISummaryStore {
     fun get(summaryId: Long): Summary?

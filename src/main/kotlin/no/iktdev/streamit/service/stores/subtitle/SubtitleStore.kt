@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.stores.subtitle
 
 import no.iktdev.streamit.service.db.tables.content.v2.SubtitleTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.consumer.Subtitle
+import no.iktdev.streamit.service.model.shared.consumer.content.Subtitle
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
