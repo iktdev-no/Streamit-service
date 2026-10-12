@@ -145,6 +145,7 @@ tasks.register("printVersion") {
 }
 
 tsGenerator {
-    packageName.set("no.iktdev.streamit.service.model.shared")
+    packageName.set("no.iktdev.streamit.service.model.shared.consumer")
+    includeClasses = setOf("no.iktdev.streamit.service.model.shared.CollectionReference", "no.iktdev.streamit.service.model.shared.ContentType")
     outputFile.set(layout.buildDirectory.file("release-assets/types.d.ts").get().asFile)
 }
