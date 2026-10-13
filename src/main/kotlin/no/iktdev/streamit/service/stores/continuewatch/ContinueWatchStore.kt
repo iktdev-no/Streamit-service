@@ -34,7 +34,7 @@ class ContinueWatchStore(
         if (maxItems == 0) return emptyList()
 
         return withTransaction {
-            val rows = ContinueWatchTableV2
+            val entryIds = ContinueWatchTableV2
                 .selectAll()
                 .where {
                     (ContinueWatchTableV2.userId eq user.id) and
@@ -42,66 +42,63 @@ class ContinueWatchStore(
                 }
                 .orderBy(ContinueWatchTableV2.lastPlayed to SortOrder.DESC)
                 .limit(maxItems)
-                .toList()
+                .map { it[ContinueWatchTableV2.id] }
 
-            if (rows.isEmpty()) return@withTransaction emptyList()
+            if (entryIds.isEmpty()) return@withTransaction emptyList()
 
-            val catalogIds = rows.map { it[ContinueWatchTableV2.catalogId].value }.distinct()
-            val videoIds = rows.map { it[ContinueWatchTableV2.videoId].value }.distinct()
-            val catalogs = CatalogTableV2.selectAll()
-                .where { CatalogTableV2.id inList catalogIds.map { id -> EntityID(id, CatalogTableV2) } }
-                .associateBy { it[CatalogTableV2.id].value }
-            val videos = VideoTableV2.selectAll()
-                .where { VideoTableV2.id inList videoIds.map { id -> EntityID(id, VideoTableV2) } }
-                .associateBy { it[VideoTableV2.id].value }
-            val titles = CatalogTitleTableV2.selectAll()
+            val rows = ContinueWatchTableV2
+                .innerJoin(CatalogTableV2)
+                .innerJoin(CatalogTitleTableV2)
+                .innerJoin(VideoTableV2)
+                .leftJoin(
+                    ProgressTableV2,
+                    additionalConstraint = {
+                        (ProgressTableV2.videoId eq VideoTableV2.id) and
+                            (ProgressTableV2.userId eq EntityID(user.id, UserTableV2))
+                    }
+                )
+                .leftJoin(
+                    SerieTableV2,
+                    additionalConstraint = { SerieTableV2.videoId eq VideoTableV2.id }
+                )
+                .selectAll()
                 .where {
-                    (CatalogTitleTableV2.catalogId inList catalogIds.map { id -> EntityID(id, CatalogTableV2) }) and
+                    (ContinueWatchTableV2.id inList entryIds) and
                         (CatalogTitleTableV2.preferred eq true)
                 }
-                .orderBy(CatalogTitleTableV2.id to SortOrder.ASC)
+                .orderBy(
+                    ContinueWatchTableV2.lastPlayed to SortOrder.DESC,
+                    CatalogTitleTableV2.id to SortOrder.ASC
+                )
                 .toList()
-                .distinctBy { it[CatalogTitleTableV2.catalogId].value }
-                .associate { it[CatalogTitleTableV2.catalogId].value to it[CatalogTitleTableV2.title] }
-            val series = SerieTableV2.selectAll()
-                .where { SerieTableV2.videoId inList videoIds.map { id -> EntityID(id, VideoTableV2) } }
-                .associateBy { it[SerieTableV2.videoId].value }
-            val progressByVideo = ProgressTableV2.selectAll()
-                .where {
-                    (ProgressTableV2.userId eq user.id) and
-                        (ProgressTableV2.videoId inList videoIds.map { id -> EntityID(id, VideoTableV2) })
-                }
-                .associate { row ->
-                    row[ProgressTableV2.videoId].value to Progress(
-                        position = row[ProgressTableV2.position],
-                        played = row[ProgressTableV2.played].toProgressInstant()
-                    )
-                }
+                // Multiple titles can be preferred; choose the first one by title ID.
+                .distinctBy { it[ContinueWatchTableV2.id].value }
 
-            rows.mapNotNull { row ->
+            rows.map { row ->
                 val catalogId = row[ContinueWatchTableV2.catalogId].value
                 val videoId = row[ContinueWatchTableV2.videoId].value
-                val catalog = catalogs[catalogId] ?: return@mapNotNull null
-                val title = titles[catalogId] ?: return@mapNotNull null
-                val videoRow = videos[videoId] ?: return@mapNotNull null
-                val seriesRow = series[videoId]
 
                 ContinueToWatch(
                     catalogId = catalogId,
-                    title = title,
-                    cover = catalog[CatalogTableV2.cover],
-                    type = catalog[CatalogTableV2.type],
+                    title = row[CatalogTitleTableV2.title],
+                    cover = row[CatalogTableV2.cover],
+                    type = row[CatalogTableV2.type],
                     video = Video(
                         id = videoId,
-                        videoFileName = videoRow[VideoTableV2.file],
-                        duration = videoRow[VideoTableV2.duration] ?: 0L
+                        videoFileName = row[VideoTableV2.file],
+                        duration = row[VideoTableV2.duration] ?: 0L
                     ),
-                    progress = progressByVideo[videoId],
-                    episode = seriesRow?.let {
+                    progress = row.getOrNull(ProgressTableV2.position)?.let { position ->
+                        Progress(
+                            position = position,
+                            played = row[ProgressTableV2.played].toProgressInstant()
+                        )
+                    },
+                    episode = row.getOrNull(SerieTableV2.season)?.let { season ->
                         ContinueWatchingEpisode(
-                            season = it[SerieTableV2.season],
-                            number = it[SerieTableV2.episode],
-                            title = it[SerieTableV2.title]
+                            season = season,
+                            number = row[SerieTableV2.episode],
+                            title = row[SerieTableV2.title]
                         )
                     }
                 )
@@ -124,43 +121,54 @@ class ContinueWatchStore(
     }
 
     override fun syncFromProgress(userId: Long, videoId: Long, progress: Progress) {
-        val video = VideoTableV2.selectAll()
+        val state = VideoTableV2
+            .leftJoin(
+                MovieTableV2,
+                additionalConstraint = { MovieTableV2.videoId eq VideoTableV2.id }
+            )
+            .leftJoin(
+                SerieTableV2,
+                additionalConstraint = { SerieTableV2.videoId eq VideoTableV2.id }
+            )
+            .leftJoin(
+                ContinueWatchTableV2,
+                additionalConstraint = {
+                    (ContinueWatchTableV2.userId eq EntityID(userId, UserTableV2)) and
+                        ((ContinueWatchTableV2.catalogId eq MovieTableV2.catalogId) or
+                            (ContinueWatchTableV2.catalogId eq SerieTableV2.catalogId))
+                }
+            )
+            .selectAll()
             .where { VideoTableV2.id eq videoId }
             .singleOrNull()
             ?: return
-        val duration = video[VideoTableV2.duration]
+
+        val duration = state[VideoTableV2.duration]
         val isFinished = duration != null && duration > 0 &&
             duration - progress.position <= FINISHED_REMAINING_MILLIS
         val played = progress.played.toProgressDateTime()
+        val existingLastPlayed = state.getOrNull(ContinueWatchTableV2.lastPlayed)
+        if (existingLastPlayed?.isAfter(played) == true) return
 
-        val movie = MovieTableV2.selectAll()
-            .where { MovieTableV2.videoId eq videoId }
-            .singleOrNull()
-        if (movie != null) {
-            val catalogId = movie[MovieTableV2.catalogId].value
-            if (isStaleUpdate(userId, catalogId, played)) return
+        val movieCatalogId = state.getOrNull(MovieTableV2.catalogId)?.value
+        if (movieCatalogId != null) {
             if (isFinished) {
-                deleteEntry(userId, catalogId)
+                deleteEntry(userId, movieCatalogId)
             } else {
-                upsertEntry(userId, catalogId, videoId, played)
+                upsertEntry(userId, movieCatalogId, videoId, played)
             }
             return
         }
 
-        val episode = SerieTableV2.selectAll()
-            .where { SerieTableV2.videoId eq videoId }
-            .singleOrNull()
-            ?: return
-        val catalogId = episode[SerieTableV2.catalogId].value
-        if (isStaleUpdate(userId, catalogId, played)) return
+        val catalogId = state.getOrNull(SerieTableV2.catalogId)?.value ?: return
 
         if (!isFinished) {
             upsertEntry(userId, catalogId, videoId, played)
             return
         }
 
-        val season = episode[SerieTableV2.season]
-        val number = episode[SerieTableV2.episode]
+        val season = state[SerieTableV2.season]
+        val number = state[SerieTableV2.episode]
         val nextEpisode = SerieTableV2.selectAll()
             .where {
                 (SerieTableV2.catalogId eq catalogId) and
@@ -176,16 +184,6 @@ class ContinueWatchStore(
             upsertEntry(userId, catalogId, nextEpisode[SerieTableV2.videoId].value, played)
         }
     }
-
-    private fun isStaleUpdate(userId: Long, catalogId: Long, played: java.time.LocalDateTime): Boolean =
-        ContinueWatchTableV2.selectAll()
-            .where {
-                (ContinueWatchTableV2.userId eq userId) and
-                    (ContinueWatchTableV2.catalogId eq catalogId)
-            }
-            .singleOrNull()
-            ?.get(ContinueWatchTableV2.lastPlayed)
-            ?.isAfter(played) == true
 
     private fun upsertEntry(userId: Long, catalogId: Long, videoId: Long, played: java.time.LocalDateTime) {
         ContinueWatchTableV2.upsert {

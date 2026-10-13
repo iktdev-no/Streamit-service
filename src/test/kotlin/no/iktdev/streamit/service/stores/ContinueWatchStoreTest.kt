@@ -57,6 +57,14 @@ class ContinueWatchStoreTest : TestBaseWithDatabase() {
         val catalogId = createMovie("Continue movie", duration = 2_700_000L)
         val videoId = videoFor(catalogId)
         val played = Instant.parse("2026-01-01T12:00:00Z")
+        withTransaction {
+            CatalogTitleTableV2.insert {
+                it[CatalogTitleTableV2.catalogId] = catalogId
+                it[CatalogTitleTableV2.title] = "Later preferred title"
+                it[CatalogTitleTableV2.language] = "nob"
+                it[CatalogTitleTableV2.preferred] = true
+            }
+        }
 
         assertTrue(progressStore.upsert(userId, videoId, Progress(played, 450_000L)))
 
