@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.7" // Oppdatert til å matche Boot 3.4
+    id("no.iktdev.ts-gen")
 }
 
 group = "no.iktdev.streamit"
@@ -24,6 +25,7 @@ repositories {
 }
 
 val exposedVersion = "0.61.0"
+val tsGenVersion: String by project
 
 dependencies {
     implementation(kotlin("script-runtime"))
@@ -34,7 +36,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
 
     // Oppdatert til v2.x som er påkrevd for Spring Boot 3.x / Jakarta EE
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -43,8 +45,6 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0") // Oppdatert til moderne versjon
     implementation("com.google.code.gson:gson:2.11.0") // Matcher nyere JVM-er bedre
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-
     // Database stuff
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
@@ -67,6 +67,9 @@ dependencies {
 
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.sksamuel.aedile:aedile-core:3.0.0")
+
+    implementation("no.iktdev:ts-gen:$tsGenVersion")
+
 
     // --- TESTING ---
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
@@ -109,7 +112,7 @@ fun findLatestTag(): String {
 
 fun isSnapshotBuild(): Boolean {
     val ref = System.getenv("GITHUB_REF") ?: ""
-    return ref.endsWith("/master") || ref.endsWith("/main")
+    return ref.startsWith("refs/heads/")
 }
 
 fun getCommitsSinceTag(tag: String): Int {
@@ -139,4 +142,10 @@ tasks.register("printVersion") {
     doLast {
         println(project.version)
     }
+}
+
+tsGenerator {
+    packageName.set("no.iktdev.streamit.service.model.shared.consumer")
+    includeClasses = setOf("no.iktdev.streamit.service.model.shared.CollectionReference", "no.iktdev.streamit.service.model.shared.ContentType")
+    outputFile.set(layout.buildDirectory.file("release-assets/types.d.ts").get().asFile)
 }

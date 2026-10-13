@@ -10,8 +10,8 @@ import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.asZoned
 import no.iktdev.streamit.service.db.tables.pfns.PersistentTokenTable
 import no.iktdev.streamit.service.db.tables.pfns.TokenTable
-import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
-import no.iktdev.streamit.service.dto.auth.RequestDeviceInfo
+import no.iktdev.streamit.service.model.internal.auth.MediaScopedAuthRequest
+import no.iktdev.streamit.service.model.internal.auth.RequestDeviceInfo
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset

@@ -1,19 +1,11 @@
 package no.iktdev.streamit.service.db.tables.util
 
 import org.jetbrains.exposed.sql.ResultRow
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.Instant
 
-
-fun timestampToLocalDateTime(timestamp: Int): LocalDateTime {
-    return Instant.ofEpochSecond(timestamp.toLong()).atZone(ZoneId.systemDefault()).toLocalDateTime()
-}
-
-fun LocalDateTime.toEpochSeconds(): Long {
-    return this.toEpochSecond(ZoneOffset.ofTotalSeconds(ZoneOffset.systemDefault().rules.getOffset(LocalDateTime.now()).totalSeconds))
-}
+fun LocalDateTime.toUtcInstant(): Instant = toInstant(ZoneOffset.UTC)
 
 fun ResultRow?.exists(): Boolean {
     return this != null

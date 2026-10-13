@@ -7,9 +7,10 @@ build/
 
 .idea/workspace.xml
 
-assets/
+/assets/
 tmp/
 conf/
+.run/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

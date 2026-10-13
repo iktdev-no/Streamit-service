@@ -1,140 +1,73 @@
 package no.iktdev.streamit.service.api.content
 
 import no.iktdev.streamit.service.TestBaseWithDatabase
-import no.iktdev.streamit.service.asList
-import no.iktdev.streamit.service.assertJson
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.ProgressTable
-import no.iktdev.streamit.service.simpleGet
-import no.iktdev.streamit.service.dto.Catalog
-import no.iktdev.streamit.service.dto.Serie
-import org.jetbrains.exposed.sql.deleteAll
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.DisplayName
+import no.iktdev.streamit.service.TestContentData
+import no.iktdev.streamit.service.model.internal.user.UserData
+import no.iktdev.streamit.service.model.shared.consumer.content.Progress
+import no.iktdev.streamit.service.stores.user.IUserStore
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.core.ParameterizedTypeReference
-import java.time.LocalDateTime
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class ViewProgressControllerTest(): TestBaseWithDatabase() {
+class ViewProgressControllerTest : TestBaseWithDatabase() {
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
-    @BeforeAll
-    fun insertGeneralData() {
-        transaction {
-            CatalogTable.insertMovie(
-                title = "Interruption",
-                collection = "interruption",
-                cover = "interruption.jpg",
-                genres = "Psychological, Comedy",
-                videoFile = "interruption_final.mp4"
-            )
+    @Autowired
+    lateinit var userStore: IUserStore
 
-            // Sett inn serier
-            CatalogTable.insertSerie(
-                title = "Baking Bread",
-                collection = "baking_bread",
-                cover = "baking_bread.jpg",
-                genres = "Crumbs, Drama",
-                videoFile = "bb_baguette01.mp4",
-                episode = 1,
-                season = 1
-            )
+    private lateinit var userId: UUID
+    private var videoId: Long = 0
 
-            CatalogTable.insertSerie(
-                title = "Baking Bread",
-                collection = "baking_bread",
-                cover = "baking_bread.jpg",
-                genres = "Crumbs, Drama",
-                videoFile = "bb_doughdisaster02.mp4",
-                episode = 2,
-                season = 1
-            )
-
-            CatalogTable.insertSerie(
-                title = "Baking Bread",
-                collection = "baking_bread",
-                cover = "baking_bread.jpg",
-                genres = "Crumbs, Drama",
-                videoFile = "bb_risingtension03.mp4",
-                episode = 3,
-                season = 1
-            )
-        }
+    @BeforeEach
+    fun createUserAndVideo() {
+        userId = UUID.fromString(userStore.insert(UserData("Progress user-${UUID.randomUUID()}", "Default-0.png")).uid)
+        videoId = requireNotNull(TestContentData.movie("Progress movie").videoId)
     }
 
-    @AfterEach
-    fun clearProgress() {
-        transaction {
-            ProgressTable.deleteAll()
-        }
-    }
-
-    @Disabled
     @Test
-    @DisplayName("""
-        Given a normal viewing pattern,
-        There should be no episode returned,
-        When the last episode is fully viewed and there is no next episode
-    """)
-    fun scenario1() {
-        val userId = UUID.randomUUID().toString()
-        transaction {
-            ProgressTable.insert {
-                it[guid] = userId
-                it[type] = "serie"
-                it[title] = "Baking Bread"
-                it[collection] = "baking_bread"
-                it[episode] = 1
-                it[season] = 1
-                it[video] = "bb_baguette01.mp4"
-                it[progress] = 5  // Nettopp startet
-                it[duration] = 50
-                it[played] = LocalDateTime.now()
-            }
-
-            ProgressTable.insert {
-                it[guid] = userId
-                it[type] = "serie"
-                it[title] = "Baking Bread"
-                it[collection] = "baking_bread"
-                it[episode] = 2
-                it[season] = 1
-                it[video] = "bb_doughdisaster02.mp4"
-                it[progress] = 45  // Nesten ferdig
-                it[duration] = 50
-                it[played] = LocalDateTime.now()
-            }
-
-            ProgressTable.insert {
-                it[guid] = userId
-                it[type] = "serie"
-                it[title] = "Baking Bread"
-                it[collection] = "baking_bread"
-                it[episode] = 3
-                it[season] = 1
-                it[video] = "bb_risingtension03.mp4"
-                it[progress] = 50  // Ferdig sett
-                it[duration] = 50
-                it[played] = LocalDateTime.now()
-            }
-        }
-        val response = restTemplate.simpleGet("/open/api/progress/$userId/continue/serie",
-            object : ParameterizedTypeReference<List<Serie>>() {}
+    fun `progress upsert replaces the existing user and video entry`() {
+        val firstPlayed = Instant.now().truncatedTo(ChronoUnit.MICROS)
+        val first = Progress(played = firstPlayed, position = 120L)
+        val firstResponse = restTemplate.postForEntity(
+            "/open/api/v1/video/progress/$userId/video/$videoId",
+            HttpEntity(first, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
+            Boolean::class.java
         )
-        assertJson(
-            //language=json
-            """
-                []
-        """.trimIndent(), response.body.first().asList())
-    }
+        assertEquals(true, firstResponse.body)
 
+        val updated = Progress(played = firstPlayed.plusSeconds(10), position = 300L)
+        val updateResponse = restTemplate.postForEntity(
+            "/open/api/v1/video/progress/$userId/video/$videoId",
+            HttpEntity(updated, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
+            Boolean::class.java
+        )
+        assertEquals(true, updateResponse.body)
+
+        val byVideo = restTemplate.getForObject(
+            "/open/api/v1/video/progress/$userId/video/$videoId",
+            Progress::class.java
+        )
+        assertEquals(updated, byVideo)
+
+        val all = restTemplate.getForObject(
+            "/open/api/v1/video/progress/$userId",
+            Array<Progress>::class.java
+        )
+        assertEquals(listOf(updated), all?.toList())
+
+        val after = restTemplate.getForObject(
+            "/open/api/v1/video/progress/$userId/after/${firstPlayed}",
+            Array<Progress>::class.java
+        )
+        assertEquals(listOf(updated), after?.toList())
+    }
 }

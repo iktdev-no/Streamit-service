@@ -1,14 +1,13 @@
 package no.iktdev.streamit.service.db.tables.info
 
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.insertIgnoreAndGetId
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
-import javax.print.attribute.standard.PrinterMoreInfoManufacturer
 
-object CastErrorTable : IntIdTable(name = "CAST_ERROR") {
+object CastErrorTable : LongIdTable(name = "CAST_ERROR") {
     val file: Column<String> = varchar("SOURCE", 200)
     val deviceModel: Column<String> = varchar("DEVICE_MODEL", 50)
     val deviceManufacturer: Column<String> = varchar("DEVICE_MANUFACTURER", 50)
@@ -20,7 +19,7 @@ object CastErrorTable : IntIdTable(name = "CAST_ERROR") {
     val timestamp = datetime("REPORTED_AT").clientDefault { LocalDateTime.now() }
 
 
-    fun insert(deviceOsVersion: String, castDeviceName: String, appVersion: String, file: String, deviceBrand: String, deviceModel: String, deviceManufacturer: String, error: String): EntityID<Int>? {
+    fun insert(deviceOsVersion: String, castDeviceName: String, appVersion: String, file: String, deviceBrand: String, deviceModel: String, deviceManufacturer: String, error: String): EntityID<Long>? {
         return CastErrorTable.insertIgnoreAndGetId {
             it[CastErrorTable.file] = file
             it[CastErrorTable.deviceModel] = deviceModel

@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import no.iktdev.streamit.service.getAuthorization
-import no.iktdev.streamit.service.dto.auth.MediaScopedAuthRequest
+import no.iktdev.streamit.service.model.internal.auth.MediaScopedAuthRequest
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import java.net.URLDecoder

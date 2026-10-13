@@ -1,11 +1,10 @@
 package no.iktdev.streamit.service.db.tables.user
 
 import no.iktdev.streamit.service.db.tables.util.UpsertResult
-import no.iktdev.streamit.service.dto.User
 import org.jetbrains.exposed.sql.*
 
 object UserTable : Table(name = "USERS") {
-    val guid: Column<String> = varchar("USER_ID", 50)
+    val guid: Column<String> = varchar("USER_ID", 36)
     val name: Column<String> = varchar("NAME", 50).uniqueIndex()
     val image: Column<String> = varchar("IMAGE", 200)
 

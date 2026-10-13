@@ -39,9 +39,9 @@ enum class ScopeKey {
 fun impliedScopes(scope: Scope): List<Scope> = when (scope) {
     Scope.MediaWrite -> listOf(Scope.MediaRead)
     Scope.ProgressWrite -> listOf(Scope.ProgressRead)
-    Scope.CatalogWrite -> listOf(Scope.CatalogRead)
-    Scope.UserWrite -> listOf(Scope.UserRead)
-    else -> emptyList()
+        Scope.CatalogWrite -> listOf(Scope.CatalogRead)
+        Scope.UserWrite -> listOf(Scope.UserRead)
+        else -> emptyList()
 }
 
 fun userDefaultScope(): Map<String,List<String>> {
@@ -62,7 +62,8 @@ fun userDefaultScope(): Map<String,List<String>> {
         ScopeKey.Authorization to listOf(
             Scope.AuthorizationCreate,
             Scope.AuthorizationPermit
-        )
+        ),
+        ScopeKey.DeviceRegistry to listOf(Scope.DeviceRegistryRead)
     ).toClaims()
 }
 

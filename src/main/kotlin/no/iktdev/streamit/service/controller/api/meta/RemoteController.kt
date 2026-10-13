@@ -1,0 +1,40 @@
+package no.iktdev.streamit.service.controller.api.meta
+
+import io.swagger.v3.oas.annotations.tags.Tag
+import mu.KotlinLogging
+import no.iktdev.streamit.service.ApiRestController
+import no.iktdev.streamit.service.services.ConfigValueService
+import no.iktdev.streamit.service.services.PfnsClientService
+import no.iktdev.streamit.service.model.internal.pfns.ServerConfigPushObject
+import no.iktdev.streamit.service.model.internal.pfns.PfnsRemoteServerObject
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+
+@ApiRestController
+@Tag(name = "Remote configuration", description = "Remote server configuration management")
+@RequestMapping("/remote")
+class RemoteController(
+    private val  service: PfnsClientService,
+    private val config: ConfigValueService
+    ) {
+    val log = KotlinLogging.logger {}
+
+
+    @PostMapping("/push/configure/server")
+    open fun sendConfigurationForServer(@RequestBody data: ServerConfigPushObject) {
+        val serverId = config.serverId
+        if (serverId.isBlank()) {
+            log.error { "Server ID is not set. Cannot send configuration." }
+            return
+        }
+        val pfnsServer = PfnsRemoteServerObject(
+            serverId = serverId,
+            pfnsReceiverId = data.receiverId,
+            server = data.server
+        )
+
+        service.sendServerConfiguration(pfnsServer)
+    }
+
+}

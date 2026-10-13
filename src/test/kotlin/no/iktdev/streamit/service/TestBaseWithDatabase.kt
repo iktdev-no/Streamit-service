@@ -6,16 +6,18 @@ import no.iktdev.streamit.service.db.Access
 import no.iktdev.streamit.service.db.DatabaseTypes
 import no.iktdev.streamit.service.db.tables.auth.DelegatedAuthenticationTable
 import no.iktdev.streamit.service.db.tables.auth.RegisteredDevicesTable
-import no.iktdev.streamit.service.db.tables.content.CatalogTable
-import no.iktdev.streamit.service.db.tables.content.ContinueWatchTable
-import no.iktdev.streamit.service.db.tables.content.FavoriteTable
-import no.iktdev.streamit.service.db.tables.content.GenreTable
-import no.iktdev.streamit.service.db.tables.content.MovieTable
-import no.iktdev.streamit.service.db.tables.content.ProgressTable
-import no.iktdev.streamit.service.db.tables.content.SerieTable
-import no.iktdev.streamit.service.db.tables.content.SubtitleTable
-import no.iktdev.streamit.service.db.tables.content.SummaryTable
-import no.iktdev.streamit.service.db.tables.content.TitleTable
+import no.iktdev.streamit.service.db.tables.content.v2.CatalogTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.CatalogTitleTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.CatalogGenreTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.ContinueWatchTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.FavoritesTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.GenreTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.MovieTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.ProgressTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.SerieTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.SubtitleTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.SummaryTableV2
+import no.iktdev.streamit.service.db.tables.content.v2.VideoTableV2
 import no.iktdev.streamit.service.db.tables.info.CastErrorTable
 import no.iktdev.streamit.service.db.tables.info.DataAudioTable
 import no.iktdev.streamit.service.db.tables.info.DataVideoTable
@@ -24,7 +26,6 @@ import no.iktdev.streamit.service.db.tables.pfns.TokenTable
 import no.iktdev.streamit.service.db.tables.user.ProfileImageTable
 import no.iktdev.streamit.service.db.tables.user.UserTable
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.dto.CastError
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.deleteAll
@@ -91,6 +92,8 @@ abstract class TestBaseWithDatabase: TestBase() {
                 "DELEGATED_AUTHENTICATION",
                 "REGISTERED_DEVICES",
                 "CATALOG",
+                "CATALOG_TITLE",
+                "CATALOG_GENRE",
                 "CONTINUE_WATCH",
                 "FAVORITES",
                 "GENRE",
@@ -99,7 +102,7 @@ abstract class TestBaseWithDatabase: TestBase() {
                 "SERIE",
                 "SUBTITLE",
                 "SUMMARY",
-                "TITLES",
+                "VIDEO",
                 "CAST_ERROR",
                 "USERS",
                 "PROFILE_IMAGE",
@@ -129,16 +132,18 @@ abstract class TestBaseWithDatabase: TestBase() {
         TokenTable.deleteAll()
         DelegatedAuthenticationTable.deleteAll()
         RegisteredDevicesTable.deleteAll()
-        CatalogTable.deleteAll()
-        ContinueWatchTable.deleteAll()
-        FavoriteTable.deleteAll()
-        GenreTable.deleteAll()
-        MovieTable.deleteAll()
-        ProgressTable.deleteAll()
-        SerieTable.deleteAll()
-        SubtitleTable.deleteAll()
-        SummaryTable.deleteAll()
-        TitleTable.deleteAll()
+        ContinueWatchTableV2.deleteAll()
+        FavoritesTableV2.deleteAll()
+        ProgressTableV2.deleteAll()
+        SerieTableV2.deleteAll()
+        SubtitleTableV2.deleteAll()
+        SummaryTableV2.deleteAll()
+        MovieTableV2.deleteAll()
+        CatalogTitleTableV2.deleteAll()
+        CatalogGenreTableV2.deleteAll()
+        CatalogTableV2.deleteAll()
+        GenreTableV2.deleteAll()
+        VideoTableV2.deleteAll()
         CastErrorTable.deleteAll()
         UserTable.deleteAll()
         ProfileImageTable.deleteAll()
