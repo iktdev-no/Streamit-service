@@ -6,6 +6,7 @@ import java.util.UUID
 
 interface IContinueWatchStore {
     fun getForUser(userId: UUID): List<ContinueToWatch>
+    fun hide(userId: UUID, catalogId: Long): Boolean
 
     /**
      * Reconciles a progress update with the continue-watching pointer.

@@ -4,7 +4,8 @@ import no.iktdev.streamit.service.db.tables.content.v2.ProgressTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.UserTableV2
 import no.iktdev.streamit.service.db.tables.content.v2.VideoTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import no.iktdev.streamit.service.model.shared.consumer.Progress
+import no.iktdev.streamit.service.model.shared.consumer.content.Progress
+import no.iktdev.streamit.service.stores.continuewatch.IContinueWatchStore
 import no.iktdev.streamit.service.stores.user.IUserStore
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
@@ -15,7 +16,8 @@ import java.util.UUID
 
 @Component
 class ProgressStore(
-    private val userStore: IUserStore
+    private val userStore: IUserStore,
+    private val continueWatchStore: IContinueWatchStore
 ) : IProgressStore {
     override fun get(
         userId: UUID,
@@ -107,6 +109,8 @@ class ProgressStore(
                     progress.played.toProgressDateTime()
 
             }
+
+            continueWatchStore.syncFromProgress(user.id, videoId, progress)
 
             true
         }.isSuccess

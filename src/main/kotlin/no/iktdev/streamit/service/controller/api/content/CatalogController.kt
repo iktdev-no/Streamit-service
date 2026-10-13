@@ -6,12 +6,14 @@ import no.iktdev.streamit.service.ApiRestController
 import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
-import no.iktdev.streamit.service.model.shared.consumer.Catalog
-import no.iktdev.streamit.service.model.shared.consumer.Serie
+import no.iktdev.streamit.service.model.shared.consumer.content.Catalog
+import no.iktdev.streamit.service.model.shared.consumer.content.ContinueToWatch
+import no.iktdev.streamit.service.stores.continuewatch.IContinueWatchStore
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -21,7 +23,8 @@ import java.util.UUID
 @Tag(name = "Catalog", description = "Browse movies, series, episodes, and catalog changes")
 @RequestMapping("/v1/catalog")
 class CatalogController(
-    private val catalog: ICatalogStore
+    private val catalog: ICatalogStore,
+    private val continueWatchStore: IContinueWatchStore
 ) {
     val log = KotlinLogging.logger {}
 
@@ -110,11 +113,23 @@ class CatalogController(
         )
     }
 
-    @GetMapping("/{userId}/continue/serie")
+    @GetMapping("/{userId}/continue")
     @RequiresAuthentication(Scope.CatalogRead)
-    fun getContinueOrResumeSerie(@PathVariable userId: UUID): List<Serie> {
-        return catalog.getContinueOrResumeSerie(userId)
+    fun getContinueToWatch(@PathVariable userId: UUID): List<ContinueToWatch> {
+        return continueWatchStore.getForUser(userId)
     }
+
+    @DeleteMapping("/{userId}/continue/{catalogId}")
+    @RequiresAuthentication(Scope.UserWrite)
+    fun hideContinueToWatch(
+        @PathVariable userId: UUID,
+        @PathVariable catalogId: Long
+    ): ResponseEntity<Void> =
+        if (continueWatchStore.hide(userId, catalogId)) {
+            ResponseEntity.noContent().build()
+        } else {
+            ResponseEntity.notFound().build()
+        }
 
     private fun <T : Any> contentOrNotFound(content: T?, type: String, lookup: String): ResponseEntity<Any> =
         content?.let { ResponseEntity.ok(it) }
