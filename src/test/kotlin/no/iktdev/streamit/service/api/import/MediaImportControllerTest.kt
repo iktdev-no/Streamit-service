@@ -131,7 +131,7 @@ class MediaImportControllerTest : TestBaseWithDatabase() {
 
     private fun postImport(payload: MediaImportV2, secure: Boolean = false) =
         restTemplate.postForEntity(
-            "/${if (secure) "secure" else "open"}/api/media/import/import",
+            "/${if (secure) "secure" else "open"}/api/v1/media/importer/import",
             HttpEntity(payload, HttpHeaders().apply { contentType = HttpMediaType.APPLICATION_JSON }),
             Void::class.java
         )

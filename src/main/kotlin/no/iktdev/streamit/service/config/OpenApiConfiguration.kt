@@ -105,7 +105,9 @@ class OpenApiConfiguration {
         val components = api.components ?: Components().also { api.components = it }
         listOf(ContentType::class.java, CollectionReference::class.java).forEach { type ->
             ModelConverters.getInstance().readAll(type).forEach { (name, schema) ->
-                components.addSchemas(name, schema)
+                if (components.schemas?.containsKey(name) != true) {
+                    components.addSchemas(name, schema)
+                }
             }
         }
     }

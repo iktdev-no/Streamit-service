@@ -23,6 +23,18 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
     }
 
     @Test
+    fun `Importing OpenAPI contract marks CollectionReference fields as required`() {
+        val response = restTemplate.getForEntity("/v3/api-docs/importing", String::class.java)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val spec = com.fasterxml.jackson.databind.ObjectMapper().readTree(response.body)
+        val required = spec["components"]["schemas"]["CollectionReference"]["required"]
+            .map { it.asText() }
+
+        assertThat(required).containsExactly("catalogId", "store")
+    }
+
+    @Test
     fun `Grouped OpenAPI yaml endpoints are available without device authentication`() {
         listOf("consumer", "importing").forEach { group ->
             val response = restTemplate.getForEntity("/v3/api-docs.yaml/$group", String::class.java)
@@ -57,10 +69,10 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
 
         assertThat(openSpec.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(openSpec.body).contains("\"url\":\"/open\"")
-        assertThat(openSpec.body).contains("media/import/import", "metadata/catalog/search")
+        assertThat(openSpec.body).contains("media/importer/import", "metadata/catalog/search")
         assertThat(secureSpec.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(secureSpec.body).contains("\"url\":\"/secure\"")
-        assertThat(secureSpec.body).contains("media/import/import", "metadata/catalog/search")
+        assertThat(secureSpec.body).contains("media/importer/import", "metadata/catalog/search")
     }
 
 
