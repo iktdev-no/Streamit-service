@@ -64,9 +64,7 @@ open class DatabaseConfiguration {
             when (access.dbType) {
                 DatabaseTypes.MySQL -> connection.createStatement().use { statement ->
                     val name = access.databaseName.replace("`", "``")
-                    val user = access.username.replace("'", "''")
                     statement.execute("CREATE DATABASE IF NOT EXISTS `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-                    statement.execute("GRANT ALL PRIVILEGES ON `$name`.* TO '$user'@'%'")
                 }
                 DatabaseTypes.PostgreSQL -> {
                     val exists = connection.prepareStatement("SELECT 1 FROM pg_database WHERE datname = ?").use { statement ->
