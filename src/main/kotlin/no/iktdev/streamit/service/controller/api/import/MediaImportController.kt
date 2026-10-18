@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
 @Tag(name = "Media import", description = "Import and upsert media catalog information")
-@RequestMapping("/media/import")
+@RequestMapping("/v1/media/importer")
 class MediaImportController(
     private val importContentService: ImportContentService
 ) {

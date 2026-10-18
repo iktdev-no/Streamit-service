@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
 @Tag(name = "Metadata", description = "Search metadata providers for catalog matches")
-@RequestMapping("/api/metadata")
+@RequestMapping("/v1/metadata")
 class MetadataController(
     private val titleStore: ITitleStore,
 ) {
