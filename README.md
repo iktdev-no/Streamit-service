@@ -70,10 +70,10 @@ If you are using Docker, you can set the `AVAHI_SERVICE_FOLDER` to `/etc/avahi/s
 
 # Setup
 ## Database Setup
-If you are not usign a root user, you need to create a database and a user with the necessary permissions.
-```sql
-START TRANSACTION;
+Streamit creates the configured database on startup when it is missing, then Flyway creates the tables. The configured database user must be allowed to create databases (for PostgreSQL, it needs the `CREATEDB` attribute). If you do not want to grant that permission, create the database manually before starting Streamit.
 
+For MySQL, a database and restricted application user can be prepared like this:
+```sql
 CREATE DATABASE streamit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE USER 'streamit'@'%' IDENTIFIED BY 'your_password_here';
@@ -81,8 +81,6 @@ CREATE USER 'streamit'@'%' IDENTIFIED BY 'your_password_here';
 GRANT ALL PRIVILEGES ON streamit.* TO 'streamit'@'%';
 
 FLUSH PRIVILEGES;
-
-COMMIT;
 ```
 
 ## Docker-compose Setup
