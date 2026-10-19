@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.stores.movie
 
 import no.iktdev.streamit.service.db.tables.content.v2.MovieTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -10,6 +10,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class MovieStore: IMovieStore {
+
+    override fun getVideoId(catalogId: Long): Long? = withTransaction {
+        MovieTableV2
+            .selectAll()
+            .where { MovieTableV2.catalogId eq catalogId }
+            .orderBy(MovieTableV2.id to SortOrder.ASC)
+            .firstOrNull()
+            ?.get(MovieTableV2.videoId)
+            ?.value
+    }.getOrNull()
 
     override fun insert(
         catalogId: Long,

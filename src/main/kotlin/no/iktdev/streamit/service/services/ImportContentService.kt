@@ -1,5 +1,8 @@
 package no.iktdev.streamit.service.services
 
+import mu.KotlinLogging
+import no.iktdev.files.IFile
+import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.model.shared.importing.CatalogMetadata
 import no.iktdev.streamit.service.model.shared.importing.Media
 import no.iktdev.streamit.service.model.shared.importing.MediaType
@@ -25,6 +28,7 @@ class ImportContentService(
     private val serieStore: ISerieStore,
     private val subtitleStore: ISubtitleStore,
 ) {
+    private val log = KotlinLogging.logger {}
 
     fun import(input: MediaImportV2): Boolean {
         input.validate()
@@ -104,8 +108,22 @@ class ImportContentService(
         val content = media.content
 
         if (content != null) {
-            val video = videoStore.getByFile(content.videoFile)
-                ?: videoStore.insert(content.videoFile)
+            val linkedVideoId = when (content.mediaType) {
+                MediaType.Movie -> movieStore.getVideoId(catalogId)
+                MediaType.Episode -> {
+                    val episodeInfo = requireNotNull(content.episodeInfo)
+                    serieStore.getVideoId(catalogId, episodeInfo.season, episodeInfo.episode)
+                }
+            }
+
+            val linkedVideo = linkedVideoId?.let(videoStore::getById)
+            val video = when {
+                linkedVideo != null && linkedVideo.videoFileName != content.videoFile ->
+                    videoStore.update(content.videoFile, linkedVideo)
+                linkedVideo != null -> linkedVideo
+                else -> videoStore.getByFile(content.videoFile)
+                    ?: videoStore.insert(content.videoFile)
+            }
 
             when (content.mediaType) {
                 MediaType.Movie -> {

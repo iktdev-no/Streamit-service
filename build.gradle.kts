@@ -69,7 +69,7 @@ dependencies {
     implementation("com.sksamuel.aedile:aedile-core:3.0.0")
 
     implementation("no.iktdev:ts-gen:$tsGenVersion")
-
+    implementation("no.iktdev:file:1.0-rc3")
 
     // --- TESTING ---
     testImplementation(platform("org.junit:junit-bom:5.11.4"))

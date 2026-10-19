@@ -1,6 +1,7 @@
 package no.iktdev.streamit.service
 
 import java.io.File
+import no.iktdev.files.IFile
 import java.time.LocalDateTime
 
 object Env {
@@ -8,9 +9,9 @@ object Env {
     val mode: String = System.getenv("MODE") ?: "prod"
     var database: String = System.getenv("DATABASE_USE") ?: "streamit"
 
-    fun getContentFolder(): File? {
+    fun getContentFolder(): IFile? {
         return if (!System.getenv("CONTENT_FOLDER").isNullOrEmpty()) {
-            File(System.getenv("CONTENT_FOLDER"))
+            IFile(System.getenv("CONTENT_FOLDER"))
         } else {
             null
         }
