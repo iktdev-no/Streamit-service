@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockkObject
 import no.iktdev.streamit.service.auth.Authentication.Companion.issuer
+import no.iktdev.files.FakeFile
+import no.iktdev.files.IFile
 import no.iktdev.streamit.service.Env
 import org.assertj.core.api.Assertions.assertThat
 import org.skyscreamer.jsonassert.JSONAssert
@@ -60,7 +62,24 @@ fun generateInvalidJwt(): String {
 
 fun mockFolders() {
     mockkObject(Env)
+    FakeFile.wipe()
+    IFile.factory = { path ->
+        FakeFile.fileRegistry[path] ?: FakeFile(path, exists = false)
+    }
     every { Env.getConfigFolder() } returns File(System.getProperty("java.io.tmpdir"))
     every { Env.getAvahiServiceFolder() } returns File(System.getProperty("java.io.tmpdir"))
     every { Env.getAssetsFolder() } returns File(System.getProperty("java.io.tmpdir"))
+
+    val contentFolder = FakeFile.getOrCreate("/streamit-test-content").apply { setDirectory() }
+    every { Env.getContentFolder() } returns contentFolder
+    listOf(
+        "movies/matrix.jpg",
+        "movies/matrix.mkv",
+        "movies/sub/eng/matrix.en.srt",
+        "series/breakingbad.s01e01.mkv",
+        "series/sub/eng/bb.en.srt"
+    ).forEach { path ->
+        contentFolder.using(*path.split("/").toTypedArray()).writeBytes(byteArrayOf(1))
+    }
+    FakeFile.getOrCreate("/streamit-test-content/testCollection/testVideo.mp4").changeExist(false)
 }

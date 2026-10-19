@@ -32,6 +32,7 @@ class ImportContentService(
 
     fun import(input: MediaImportV2): Boolean {
         input.validate()
+        if (!validateFiles(input)) return false
 
         val catalogId = resolveCatalog(input)
 
@@ -41,6 +42,59 @@ class ImportContentService(
 
         input.media?.let {
             importMedia(catalogId, it)
+        }
+
+        return true
+    }
+
+    /** Validate every referenced media file before writing any import data. */
+    private fun validateFiles(input: MediaImportV2): Boolean {
+        val media = input.media
+        val hasFiles = input.metadata?.cover != null ||
+            media?.content != null ||
+            !media?.subtitles.isNullOrEmpty()
+        if (!hasFiles) return true
+
+        val contentFolder = Env.getContentFolder()
+        if (contentFolder == null || !contentFolder.isDirectory()) {
+            log.warn { "Rejecting media import: CONTENT_FOLDER is not configured or is not a directory" }
+            return false
+        }
+
+        val collection = input.reference?.store?.takeIf { it.isNotBlank() }
+        if (collection == null) {
+            log.warn { "Rejecting media import: collection is required to validate media paths" }
+            return false
+        }
+
+        val root = contentFolder.toPath().toAbsolutePath().normalize()
+        if (!contentFolder.exists()) {
+            log.warn { "Rejecting media import: cannot access CONTENT_FOLDER '${contentFolder.path}'" }
+            return false
+        }
+
+        val referencedFiles = buildList {
+            input.metadata?.cover?.let { add(listOf(collection, it)) }
+            media?.content?.let { add(listOf(collection, it.videoFile)) }
+            media?.subtitles.orEmpty().forEach { add(listOf(collection, "sub", it.language, it.subtitleFile)) }
+        }
+
+        for (segments in referencedFiles) {
+            if (segments.any { it.isBlank() || it == "." || it == ".." || '/' in it || '\\' in it }) {
+                log.warn { "Rejecting media import: invalid media path segments ${segments.joinToString("/")}" }
+                return false
+            }
+
+            val path = segments.fold(root) { current, segment -> current.resolve(segment) }.normalize()
+            if (!path.startsWith(root)) {
+                log.warn { "Rejecting media import: file resolves outside CONTENT_FOLDER: '$path'" }
+                return false
+            }
+            val file: IFile = IFile(path.toString())
+            if (!file.exists() || !file.isFile()) {
+                log.warn { "Rejecting media import: file does not exist or is not a regular file: '$path'" }
+                return false
+            }
         }
 
         return true

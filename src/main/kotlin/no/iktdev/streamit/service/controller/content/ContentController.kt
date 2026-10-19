@@ -8,8 +8,8 @@ import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.isDebug
 import no.iktdev.streamit.service.supporting.WebUtil
-import no.iktdev.streamit.service.with
-import org.springframework.core.io.FileSystemResource
+import no.iktdev.files.IFile
+import org.springframework.core.io.AbstractResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.util.UrlPathHelper
 import java.nio.file.Files
+import java.io.InputStream
+
+private fun IFile.asResource(): Resource = object : AbstractResource() {
+    override fun getInputStream(): InputStream = this@asResource.openInputStream()
+    override fun getFilename(): String = this@asResource.name
+    override fun getDescription(): String = "IFile resource [$absolutePath]"
+}
 
 @ContentRestController
 @RequestMapping(path = ["/media/"])
@@ -43,10 +50,10 @@ open class ContentController {
     open fun provideVideoFile(@PathVariable collection: String, @PathVariable video: String): ResponseEntity<Resource> {
         log.info("REACHED provideVideoFile with collection=$collection, video=$video")
 
-        val file = Env.getContentFolder()?.with(collection, video)
+        val file = Env.getContentFolder()?.using(collection, video)
 
         if (file?.exists() == true) {
-            val fileResource: Resource = FileSystemResource(file)
+            val fileResource = file.asResource()
             return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(
@@ -62,10 +69,10 @@ open class ContentController {
     @RequiresAuthentication(Scope.MediaRead)
     @GetMapping("image/{collection}/{image}")
     open fun provideImageFile(@PathVariable collection: String, @PathVariable image: String): ResponseEntity<ByteArray> {
-        val file = Env.getContentFolder()?.with(collection, image)
+        val file = Env.getContentFolder()?.using(collection, image)
 
         if (file?.exists() == true) {
-            val contentType = when (file.extension.lowercase()) {
+            val contentType = when (file.extension().lowercase()) {
                 "jpg", "jpeg" -> MediaType.IMAGE_JPEG
                 "png" -> MediaType.IMAGE_PNG
                 "bmp" -> MediaType.parseMediaType("image/bmp")
@@ -78,7 +85,7 @@ open class ContentController {
                     HttpHeaders.CONTENT_DISPOSITION,
                     ("attachment; filename=\"" + file.name) + "\""
                 )
-                .body(Files.readAllBytes(file.toPath()))
+                .body(file.openInputStream().use { it.readBytes() })
         }
         return ResponseEntity.notFound().build()
 
@@ -87,9 +94,9 @@ open class ContentController {
     @RequiresAuthentication(Scope.MediaRead)
     @GetMapping("subtitle/{collection}/{language}/{subtitle}")
     open fun provideSubtitle(@PathVariable collection: String, @PathVariable language: String, @PathVariable subtitle: String): ResponseEntity<ByteArray> {
-        val file = Env.getContentFolder()?.with(collection, "sub", language, subtitle)
+        val file = Env.getContentFolder()?.using(collection, "sub", language, subtitle)
         if (file?.exists() == true) {
-            val contentType = when (file.extension.lowercase()) {
+            val contentType = when (file.extension().lowercase()) {
                 "srt" -> MediaType.parseMediaType("application/x-subrip")
                 "vtt" -> MediaType.parseMediaType("text/vtt")
                 "ass", "ssa" -> MediaType.parseMediaType("text/x-ssa")
@@ -99,7 +106,7 @@ open class ContentController {
 
             return ResponseEntity.ok()
                 .contentType(contentType)
-                .body(Files.readAllBytes(file.toPath()))
+                .body(file.openInputStream().use { it.readBytes() })
         }
         return ResponseEntity.notFound().build()
     }
