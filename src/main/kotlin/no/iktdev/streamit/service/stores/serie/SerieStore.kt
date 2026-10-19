@@ -2,7 +2,7 @@ package no.iktdev.streamit.service.stores.serie
 
 import no.iktdev.streamit.service.db.tables.content.v2.SerieTableV2
 import no.iktdev.streamit.service.db.tables.util.withTransaction
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertIgnore
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,7 +15,7 @@ class SerieStore: ISerieStore {
         episode: Int,
         title: String?
     ): Boolean = withTransaction {
-        SerieTableV2.insert {
+        SerieTableV2.insertIgnore {
             it[SerieTableV2.catalogId] = catalogId
             it[SerieTableV2.videoId] = videoId
             it[SerieTableV2.season] = season

@@ -5,8 +5,9 @@ import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.model.shared.consumer.content.Subtitle
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Component
@@ -21,19 +22,23 @@ class SubtitleStore : ISubtitleStore {
         file: String
     ): Subtitle =
         withTransaction {
-            val id = SubtitleTableV2.insert {
+            SubtitleTableV2.insertIgnore {
                 it[SubtitleTableV2.videoId] = videoId
                 it[SubtitleTableV2.language] = language
                 it[SubtitleTableV2.format] = format
                 it[SubtitleTableV2.file] = file
-            } get SubtitleTableV2.id
 
-            Subtitle(
-                id = id.value.toInt(),
-                language = language,
-                format = format,
-                file = file
-            )
+            }
+
+            SubtitleTableV2
+                .selectAll()
+                .where {
+                    (SubtitleTableV2.videoId eq videoId) and
+                        (SubtitleTableV2.language eq language) and
+                        (SubtitleTableV2.format eq format)
+                }
+                .single()
+                .toSubtitle()
         }.getOrThrow()
 
     override fun update(

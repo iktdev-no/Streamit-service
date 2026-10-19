@@ -5,7 +5,7 @@ import no.iktdev.streamit.service.db.tables.util.withTransaction
 import no.iktdev.streamit.service.model.shared.consumer.content.Genre
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.springframework.stereotype.Component
 
@@ -36,19 +36,15 @@ class GenreStore : IGenreStore {
     }.getOrElse { emptyList() }
 
     override fun getOrInsert(name: String): Genre = withTransaction {
+        GenreTableV2.insertIgnore {
+            it[genre] = name
+        }
+
         GenreTableV2
             .selectAll()
             .where { GenreTableV2.genre eq name }
-            .singleOrNull()
-            ?.toGenre()
-            ?: GenreTableV2.insertAndGetId {
-                it[genre] = name
-            }.let { id ->
-                Genre(
-                    id = id.value.toInt(),
-                    genre = name
-                )
-            }
+            .single()
+            .toGenre()
     }.getOrThrow()
 
     private fun ResultRow.toGenre(): Genre =

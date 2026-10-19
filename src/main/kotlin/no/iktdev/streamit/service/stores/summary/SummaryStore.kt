@@ -6,8 +6,9 @@ import no.iktdev.streamit.service.db.tables.util.withTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Component
@@ -45,18 +46,20 @@ class SummaryStore : ISummaryStore {
         language: String
     ): Summary =
         withTransaction {
-            val id = SummaryTableV2.insert {
+            SummaryTableV2.insertIgnore {
                 it[SummaryTableV2.catalogId] = catalogId
                 it[SummaryTableV2.description] = description
                 it[SummaryTableV2.language] = language
-            } get SummaryTableV2.id
+            }
 
-            Summary(
-                id = id.value.toInt(),
-                description = description,
-                language = language,
-                catalogId = catalogId.toInt()
-            )
+            SummaryTableV2
+                .selectAll()
+                .where {
+                    (SummaryTableV2.catalogId eq catalogId) and
+                        (SummaryTableV2.language eq language)
+                }
+                .single()
+                .toSummary()
         }.getOrThrow()
 
     override fun update(
