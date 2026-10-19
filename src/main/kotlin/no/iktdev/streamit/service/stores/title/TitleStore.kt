@@ -8,7 +8,9 @@ import no.iktdev.streamit.service.model.shared.consumer.content.Title
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Component
@@ -31,19 +33,23 @@ class TitleStore : ITitleStore {
         language: String,
         preferred: Boolean
     ): Title = withTransaction {
-        val id = CatalogTitleTableV2.insertAndGetId {
+        CatalogTitleTableV2.insertIgnore {
             it[CatalogTitleTableV2.catalogId] = EntityID(catalogId, CatalogTableV2)
             it[CatalogTitleTableV2.title] = title
             it[CatalogTitleTableV2.language] = language
             it[CatalogTitleTableV2.preferred] = preferred
         }
 
-        Title(
-            id = id.value.toInt(),
-            title = title,
-            language = language,
-            preferred = preferred
-        )
+        val existing = CatalogTitleTableV2
+            .selectAll()
+            .where {
+                (CatalogTitleTableV2.catalogId eq catalogId) and
+                    (CatalogTitleTableV2.title eq title) and
+                    (CatalogTitleTableV2.language eq language)
+            }
+            .single()
+
+        existing.toTitle()
     }.getOrThrow()
 
     override fun update(
