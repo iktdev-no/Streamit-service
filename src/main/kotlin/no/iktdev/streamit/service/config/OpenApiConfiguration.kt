@@ -31,6 +31,8 @@ import no.iktdev.streamit.service.controller.assets.AssetsController
 import no.iktdev.streamit.service.controller.content.ContentController
 import no.iktdev.streamit.service.model.shared.CollectionReference
 import no.iktdev.streamit.service.model.shared.ContentType
+import no.iktdev.streamit.service.model.shared.consumer.content.Movie
+import no.iktdev.streamit.service.model.shared.consumer.content.Serie
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -103,7 +105,12 @@ class OpenApiConfiguration {
 
     private fun addSharedContractSchemas(api: OpenAPI) {
         val components = api.components ?: Components().also { api.components = it }
-        listOf(ContentType::class.java, CollectionReference::class.java).forEach { type ->
+        listOf(
+            ContentType::class.java,
+            CollectionReference::class.java,
+            Movie::class.java,
+            Serie::class.java
+        ).forEach { type ->
             ModelConverters.getInstance().readAll(type).forEach { (name, schema) ->
                 if (components.schemas?.containsKey(name) != true) {
                     components.addSchemas(name, schema)
