@@ -1,6 +1,9 @@
 package no.iktdev.streamit.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import no.iktdev.streamit.service.controller.api.content.ContentNotFoundError
+import no.iktdev.streamit.service.controller.api.content.ContentNotFoundException
+import org.springframework.http.HttpStatus
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -21,6 +24,11 @@ import jakarta.servlet.http.HttpServletResponse
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(ContentNotFoundException::class)
+    fun handleContentNotFound(ex: ContentNotFoundException): ResponseEntity<ContentNotFoundError> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ContentNotFoundError(error = "content_not_found", message = ex.message ?: "Content not found"))
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleJsonParseError(

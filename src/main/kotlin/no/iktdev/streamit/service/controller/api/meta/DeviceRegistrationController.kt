@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
 @Tag(name = "Device registration", description = "Register and manage trusted client devices")
-@RequestMapping("/device/registration")
+@RequestMapping("/v1/device/registration")
 class DeviceRegistrationController(
     private val config: ConfigValueService,
     private val deviceRegistrationStore: IDeviceRegistrationStore

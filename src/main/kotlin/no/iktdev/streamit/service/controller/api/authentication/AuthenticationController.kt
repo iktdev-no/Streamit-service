@@ -31,7 +31,7 @@ import no.iktdev.streamit.service.model.internal.auth.RequestDeviceInfo
 
 @ApiRestController
 @Tag(name = "Authentication", description = "Device token issuance, validation, and PIN/QR authorization flows")
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 class AuthenticationController(
     private val delegatedAuthenticationStore: IDelegatedAuthenticationStore
 ) {

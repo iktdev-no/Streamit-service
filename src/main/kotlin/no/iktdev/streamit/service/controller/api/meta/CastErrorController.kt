@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 @ApiRestController
 @Tag(name = "Cast diagnostics", description = "Submit casting diagnostic reports")
-@RequestMapping("/cast")
+@RequestMapping("/v1/cast")
 class CastErrorController {
 
     @PostMapping("/error")

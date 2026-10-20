@@ -25,7 +25,7 @@ class GeneralController(
 ) {
 
     @RequiresAuthentication(Scope.None)
-    @GetMapping("/heartbeat")
+    @GetMapping("/v1/heartbeat")
     fun heartbeatPath(): Heartbeat {
         return Heartbeat(true, System.currentTimeMillis() / 1000L)
     }
@@ -36,13 +36,13 @@ class GeneralController(
         return ResponseEntity.ok().body(null)
     }
 
-    @GetMapping("/capabilities")
+    @GetMapping("/v1/capabilities")
     @RequiresAuthentication(Scope.None)
     fun capabilities(): ResponseEntity<CapabilitiesObject> {
         return ResponseEntity.ok().body(CapabilitiesObject)
     }
 
-    @GetMapping("/info/id")
+    @GetMapping("/v1/info/id")
     @RequiresAuthentication(Scope.None)
     fun serverId(): ResponseEntity<String> {
         val serverId = config.serverId
@@ -53,14 +53,14 @@ class GeneralController(
         }
     }
 
-    @GetMapping("/info/server")
+    @GetMapping("/v1/info/server")
     @RequiresAuthentication(Scope.None)
     fun serverInfo(): ResponseEntity<Server?> {
         val server = config.server ?: return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
         return ResponseEntity.ok(server)
     }
 
-    @GetMapping("/info/serverqr")
+    @GetMapping("/v1/info/serverqr")
     @RequiresAuthentication(Scope.None)
     fun serverQR(): ResponseEntity<ByteArray> {
 

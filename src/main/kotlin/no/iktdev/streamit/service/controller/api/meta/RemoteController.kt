@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @ApiRestController
 @Tag(name = "Remote configuration", description = "Remote server configuration management")
-@RequestMapping("/remote")
+@RequestMapping("/v1/remote")
 class RemoteController(
     private val  service: PfnsClientService,
     private val config: ConfigValueService

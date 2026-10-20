@@ -14,7 +14,7 @@ import java.util.UUID
 
 @ApiRestController
 @Tag(name = "Users", description = "User profiles and identity lookup")
-@RequestMapping("/user")
+@RequestMapping("/v1/user")
 class UserController(
     private val users: IUserStore
 ) {

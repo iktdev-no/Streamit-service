@@ -8,9 +8,10 @@ import no.iktdev.streamit.service.auth.RequiresAuthentication
 import no.iktdev.streamit.service.auth.Scope
 import no.iktdev.streamit.service.model.shared.consumer.content.Catalog
 import no.iktdev.streamit.service.model.shared.consumer.content.ContinueToWatch
+import no.iktdev.streamit.service.model.shared.consumer.content.Movie
+import no.iktdev.streamit.service.model.shared.consumer.content.Serie
 import no.iktdev.streamit.service.stores.continuewatch.IContinueWatchStore
 import no.iktdev.streamit.service.stores.catalog.ICatalogStore
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -57,16 +58,18 @@ class CatalogController(
 
     @GetMapping("/movie/{id}")
     @RequiresAuthentication(Scope.CatalogRead)
-    fun movies(@PathVariable id: Long): ResponseEntity<Any> =
-        contentOrNotFound(catalog.getMovieById(id), "movie", "id=$id")
+    fun movies(@PathVariable id: Long): ResponseEntity<Movie> =
+        ResponseEntity.ok(catalog.getMovieById(id)
+            ?: throw ContentNotFoundException("No movie found for id=$id"))
 
     @GetMapping("/movie/{id}/for/{userId}")
     @RequiresAuthentication(Scope.CatalogRead)
     fun movieWithProgress(
         @PathVariable id: Long,
         @PathVariable userId: UUID
-    ): ResponseEntity<Any> =
-        contentOrNotFound(catalog.getMovieByIdWithProgress(id, userId), "movie", "id=$id, userId=$userId")
+    ): ResponseEntity<Movie> =
+        ResponseEntity.ok(catalog.getMovieByIdWithProgress(id, userId)
+            ?: throw ContentNotFoundException("No movie found for id=$id and userId=$userId"))
 
     @GetMapping("/serie")
     @RequiresAuthentication(Scope.CatalogRead)
@@ -76,21 +79,24 @@ class CatalogController(
 
     @GetMapping("/serie/{id}")
     @RequiresAuthentication(Scope.CatalogRead)
-    fun series(@PathVariable id: Long): ResponseEntity<Any> =
-        contentOrNotFound(catalog.getSerieById(id), "series", "id=$id")
+    fun series(@PathVariable id: Long): ResponseEntity<Serie> =
+        ResponseEntity.ok(catalog.getSerieById(id)
+            ?: throw ContentNotFoundException("No series found for id=$id"))
 
     @GetMapping("/serie/{id}/for/{userId}")
     @RequiresAuthentication(Scope.CatalogRead)
     fun seriesWithProgress(
         @PathVariable id: Long,
         @PathVariable userId: UUID
-    ): ResponseEntity<Any> =
-        contentOrNotFound(catalog.getSerieByIdWithProgress(id, userId), "series", "id=$id, userId=$userId")
+    ): ResponseEntity<Serie> =
+        ResponseEntity.ok(catalog.getSerieByIdWithProgress(id, userId)
+            ?: throw ContentNotFoundException("No series found for id=$id and userId=$userId"))
 
     @GetMapping("/serie/by-store/{store}")
     @RequiresAuthentication(Scope.CatalogRead)
-    fun serieByStore(@PathVariable store: String): ResponseEntity<Any> =
-        contentOrNotFound(catalog.getSerieByStore(store), "series", "store=$store")
+    fun serieByStore(@PathVariable store: String): ResponseEntity<Serie> =
+        ResponseEntity.ok(catalog.getSerieByStore(store)
+            ?: throw ContentNotFoundException("No series found for store=$store"))
 
     @GetMapping("/updated")
     @RequiresAuthentication(Scope.CatalogRead)
@@ -130,16 +136,9 @@ class CatalogController(
         } else {
             ResponseEntity.notFound().build()
         }
-
-    private fun <T : Any> contentOrNotFound(content: T?, type: String, lookup: String): ResponseEntity<Any> =
-        content?.let { ResponseEntity.ok(it) }
-            ?: ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ContentNotFoundError(
-                    error = "content_not_found",
-                    message = "No $type found for $lookup"
-                )
-            )
 }
+
+class ContentNotFoundException(message: String) : RuntimeException(message)
 
 data class ContentNotFoundError(
     val error: String,
