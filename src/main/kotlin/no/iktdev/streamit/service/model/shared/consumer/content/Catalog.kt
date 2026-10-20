@@ -1,13 +1,23 @@
 package no.iktdev.streamit.service.model.shared.consumer.content
 
 import no.iktdev.streamit.service.model.shared.ContentType
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
+import io.swagger.v3.oas.annotations.media.Schema as OpenApiSchema
 
 
+@OpenApiSchema(
+    oneOf = [Movie::class, Serie::class],
+    discriminatorProperty = "type",
+    discriminatorMapping = [
+        DiscriminatorMapping(value = "Movie", schema = Movie::class),
+        DiscriminatorMapping(value = "Serie", schema = Serie::class)
+    ]
+)
 open class Catalog(
     val id: Long,
     val title: String,
     val cover: String?,
-    val type: ContentType,
+    open val type: ContentType,
     val collection: String,
     var genres: List<Genre> = emptyList(),
     val recent: Boolean
@@ -15,6 +25,7 @@ open class Catalog(
 
 }
 
+@OpenApiSchema(allOf = [Catalog::class])
 class Movie(
     id: Long, // id will be catalog id
     title: String,
@@ -34,9 +45,12 @@ class Movie(
     genres = genres,
     recent = recent
 ) {
+    @get:OpenApiSchema(allowableValues = ["Movie"])
+    override val type: ContentType = ContentType.Movie
 }
 
 
+@OpenApiSchema(allOf = [Catalog::class])
 class Serie(
     id: Long,
     title: String,
@@ -54,6 +68,8 @@ class Serie(
     genres = genres,
     recent = recent
 ) {
+    @get:OpenApiSchema(allowableValues = ["Serie"])
+    override val type: ContentType = ContentType.Serie
 
     fun after(currentSeason: Int, currentEpisode: Int): Episode? {
         return episodes.filter { s -> s.season >= currentSeason }.firstOrNull { e -> e.episode >= currentEpisode }
