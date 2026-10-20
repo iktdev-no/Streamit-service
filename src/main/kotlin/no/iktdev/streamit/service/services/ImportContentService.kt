@@ -34,7 +34,7 @@ class ImportContentService(
         input.validate()
         if (!validateFiles(input)) return false
 
-        val catalogId = resolveCatalog(input)
+        val catalogId = resolveCatalog(input) ?: return false
 
         input.metadata?.let {
             importMetadata(catalogId, it)
@@ -100,19 +100,31 @@ class ImportContentService(
         return true
     }
 
-    private fun resolveCatalog(input: MediaImportV2): Long {
+    private fun resolveCatalog(input: MediaImportV2): Long? {
         input.reference?.catalogId?.let {
             return it
         }
 
-        val metadata = requireNotNull(input.metadata) {
-            "Metadata is required when creating a new catalog"
+        val metadata = input.metadata
+        val titles = listOfNotNull(metadata?.title) + metadata?.alternativeTitles.orEmpty()
+        val matches = titleStore.findCollectionsByTitles(titles)
+        if (matches.size == 1) {
+            val matchedCollection = matches.single()
+            log.info { "Reusing catalog ${matchedCollection.catalogId} matched by imported title" }
+            return matchedCollection.catalogId
+        }
+        if (matches.size > 1) {
+            log.error { "Import titles match multiple catalogs ${matches.map { it.catalogId }}; refusing to create another catalog" }
+            return null
         }
 
+        val newMetadata = metadata ?: return null
+        val store = input.reference?.store ?: return null
+
         return catalogStore.insert(
-            store = requireNotNull(input.reference).store,
-            type = metadata.type,
-            cover = metadata.cover
+            store = store,
+            type = newMetadata.type,
+            cover = newMetadata.cover
         )
     }
 

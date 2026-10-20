@@ -10,4 +10,5 @@ interface ITitleStore {
     fun setPreferred(id: Long, preferred: Boolean)
     fun getAll(catalogId: Long): List<Title>
     fun findCollectionByTitles(titles: List<String>): CollectionReference?
+    fun findCollectionsByTitles(titles: List<String>): List<CollectionReference>
 }

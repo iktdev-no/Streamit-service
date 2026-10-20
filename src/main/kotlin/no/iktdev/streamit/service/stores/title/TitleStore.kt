@@ -9,6 +9,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
@@ -108,15 +109,20 @@ class TitleStore : ITitleStore {
 
     override fun findCollectionByTitles(
         titles: List<String>
-    ): CollectionReference? = withTransaction {
+    ): CollectionReference? = runCatching {
+        findCollectionsByTitles(titles).singleOrNull()
+    }.getOrNull()
 
+    override fun findCollectionsByTitles(
+        titles: List<String>
+    ): List<CollectionReference> = withTransaction {
         val normalizedTitles = titles
             .filter { it.isNotBlank() }
             .map { it.normalize() }
             .toSet()
 
         if (normalizedTitles.isEmpty()) {
-            return@withTransaction null
+            return@withTransaction emptyList()
         }
 
         val catalogIds = CatalogTitleTableV2
@@ -129,23 +135,20 @@ class TitleStore : ITitleStore {
             }
             .distinct()
 
-        if (catalogIds.size != 1) {
-            return@withTransaction null
+        if (catalogIds.isEmpty()) {
+            return@withTransaction emptyList()
         }
-
-        val catalogId = catalogIds.single()
 
         CatalogTableV2
             .selectAll()
-            .where { CatalogTableV2.id eq catalogId }
-            .singleOrNull()
-            ?.let {
+            .where { CatalogTableV2.id inList catalogIds.map { EntityID(it, CatalogTableV2) } }
+            .map {
                 CollectionReference(
-                    catalogId = catalogId,
+                    catalogId = it[CatalogTableV2.id].value,
                     store = it[CatalogTableV2.store]
                 )
             }
-    }.getOrNull()
+    }.getOrThrow()
 
     private fun String.normalize(): String {
         val normalized = Normalizer.normalize(this, Normalizer.Form.NFKD)
