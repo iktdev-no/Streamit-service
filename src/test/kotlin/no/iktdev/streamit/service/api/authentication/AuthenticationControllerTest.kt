@@ -84,7 +84,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         })
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/validate", // 👈 bare path
+            "/secure/api/v1/auth/validate", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -97,7 +97,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         val request = HttpEntity<Void>(HttpHeaders())
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/validate?token=$validToken", // 👈 bare path
+            "/secure/api/v1/auth/validate?token=$validToken", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -113,7 +113,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         val request = HttpEntity<Void>(headers)
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/validate", // 👈 bare path
+            "/secure/api/v1/auth/validate", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -128,7 +128,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         })
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/validate", // 👈 bare path
+            "/secure/api/v1/auth/validate", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java
@@ -141,7 +141,7 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
         val request = HttpEntity<Void>(HttpHeaders())
 
         val response = restTemplate.exchange(
-            "/secure/api/auth/validate?token=potetmos", // 👈 bare path
+            "/secure/api/v1/auth/validate?token=potetmos", // 👈 bare path
             HttpMethod.GET,
             request,
             String::class.java

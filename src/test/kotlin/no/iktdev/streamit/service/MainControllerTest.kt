@@ -37,7 +37,7 @@ class MainControllerTest: TestBase() {
         val request = HttpEntity<Void>(headers)
 
         val response = restTemplate.exchange(
-            "/open/api/heartbeat", // 👈 bare path
+            "/open/api/v1/heartbeat", // 👈 bare path
             HttpMethod.GET,
             request,
             Heartbeat::class.java
