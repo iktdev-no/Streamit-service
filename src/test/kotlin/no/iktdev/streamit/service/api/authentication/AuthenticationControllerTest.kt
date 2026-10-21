@@ -39,25 +39,33 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
 
     @Test
     @Tag("fabrikt-openapi")
-    fun `Consumer OpenAPI schema exposes Catalog variants for Fabrikt generation`() {
+    fun `Consumer OpenAPI contract has an inheritable Catalog hierarchy for Fabrikt`() {
         val response = restTemplate.getForEntity("/v3/api-docs/consumer", String::class.java)
+        val output = Path.of("build/generated/openapi/openapi-consumer.json")
+        Files.createDirectories(output.parent)
+        Files.writeString(output, response.body)
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         val spec = com.fasterxml.jackson.databind.ObjectMapper().readTree(response.body)
         val schemas = spec["components"]["schemas"]
         val catalog = schemas["Catalog"]
 
-        assertThat(catalog["oneOf"].map { it["\$ref"].asText() })
-            .containsExactlyInAnyOrder("#/components/schemas/Movie", "#/components/schemas/Serie")
-        assertThat(schemas["CatalogBase"]["properties"]).isNotNull
+        assertThat(catalog["properties"]).isNotNull
+        assertThat(catalog["oneOf"]).isNull()
         assertThat(schemas["Movie"]["allOf"].map { it["\$ref"]?.asText() })
-            .contains("#/components/schemas/CatalogBase")
+            .contains("#/components/schemas/Catalog")
         assertThat(schemas["Serie"]["allOf"].map { it["\$ref"]?.asText() })
-            .contains("#/components/schemas/CatalogBase")
+            .contains("#/components/schemas/Catalog")
 
-        val output = Path.of("build/generated/openapi/openapi-consumer.json")
-        Files.createDirectories(output.parent)
-        Files.writeString(output, response.body)
+        val catalogPath = spec["paths"].fields().asSequence()
+            .first { it.key.endsWith("/v1/catalog") }
+            .value
+        val responseContent = catalogPath["get"]["responses"]["200"]["content"].fields().asSequence()
+            .first().value
+        val movieList = responseContent["schema"]["items"]
+        assertThat(movieList["oneOf"].map { it["\$ref"].asText() })
+            .containsExactlyInAnyOrder("#/components/schemas/Movie", "#/components/schemas/Serie")
+
     }
 
     @Test

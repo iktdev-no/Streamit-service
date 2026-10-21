@@ -119,47 +119,40 @@ class OpenApiConfiguration {
                 }
             }
         }
-        normalizeCatalogPolymorphism(components)
+        exposeCatalogVariants(api, components)
     }
 
-    /**
-     * Keep Catalog as the public Movie/Serie union while moving its shared fields
-     * into a separate base schema. This avoids the invalid and circular shape
-     * produced when Catalog has both properties + oneOf and subtypes allOf Catalog.
-     */
-    private fun normalizeCatalogPolymorphism(components: Components) {
-        val schemas = components.schemas ?: return
-        val catalog = schemas["Catalog"] ?: return
-        val properties = catalog.properties ?: return
-
-        val catalogBase = Schema<Any>().apply {
-            type = "object"
-            this.properties = properties
-            required = catalog.required
-            description = catalog.description
-        }
-        schemas["CatalogBase"] = catalogBase
-
-        val catalogUnion = Schema<Any>().apply {
-            oneOf = listOf(
-                Schema<Any>().apply { `$ref` = "#/components/schemas/Movie" },
-                Schema<Any>().apply { `$ref` = "#/components/schemas/Serie" }
+    /** Put the Movie/Serie union on arrays of Catalog while keeping Catalog a plain base schema. */
+    private fun exposeCatalogVariants(api: OpenAPI, components: Components) {
+        val catalogRef = "#/components/schemas/Catalog"
+        val unionSchema = Schema<Any>().oneOf(
+            listOf(
+                Schema<Any>().`$ref`("#/components/schemas/Movie"),
+                Schema<Any>().`$ref`("#/components/schemas/Serie")
             )
-            discriminator = Discriminator().apply {
-                propertyName = "type"
-                mapping = mapOf(
-                    "Movie" to "#/components/schemas/Movie",
-                    "Serie" to "#/components/schemas/Serie"
-                )
+        )
+
+        components.schemas?.forEach { (name, component) ->
+            if (name == "Movie" || name == "Serie") {
+                val required = component.required
+                component.allOf?.firstOrNull { it.properties != null }?.required = required
+            }
+            component.properties?.values?.forEach { property ->
+                if (property.type == "array" && property.items?.`$ref` == catalogRef) {
+                    property.items = unionSchema
+                }
             }
         }
-        schemas["Catalog"] = catalogUnion
 
-        listOf("Movie", "Serie").forEach { subtypeName ->
-            val subtype = schemas[subtypeName] ?: return@forEach
-            subtype.allOf?.forEach { parent ->
-                if (parent.`$ref` == "#/components/schemas/Catalog") {
-                    parent.`$ref` = "#/components/schemas/CatalogBase"
+        api.paths?.values?.forEach { pathItem ->
+            pathItem.readOperations()?.forEach { operation ->
+                operation.responses?.values?.forEach { response ->
+                    response.content?.values?.forEach { mediaType ->
+                        val schema = mediaType.schema
+                        if (schema?.type == "array" && schema.items?.`$ref` == catalogRef) {
+                            schema.items = unionSchema
+                        }
+                    }
                 }
             }
         }

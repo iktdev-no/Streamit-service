@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema as OpenApiSchema
 
 
 @OpenApiSchema(
-    oneOf = [Movie::class, Serie::class],
     discriminatorProperty = "type",
     discriminatorMapping = [
         DiscriminatorMapping(value = "Movie", schema = Movie::class),

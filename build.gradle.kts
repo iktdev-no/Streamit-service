@@ -90,8 +90,8 @@ dependencies {
 val consumerOpenApiTestFile = layout.buildDirectory.file("generated/openapi/openapi-consumer.json")
 val testSourceSet = sourceSets.named("test")
 
-val consumerOpenApiSpecTest = tasks.register<Test>("consumerOpenApiSpecTest") {
-    description = "Exports the consumer OpenAPI contract for Fabrikt verification."
+tasks.register<Test>("consumerOpenApiSpecTest") {
+    description = "Exports the consumer OpenAPI contract for Fabrikt validation."
     group = "verification"
     testClassesDirs = testSourceSet.get().output.classesDirs
     classpath = testSourceSet.get().runtimeClasspath
@@ -103,11 +103,11 @@ val consumerOpenApiSpecTest = tasks.register<Test>("consumerOpenApiSpecTest") {
 
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(":fabrikt-validation:fabriktGenerate")
+    finalizedBy(":fabrikt-validation:verifyFabriktModels")
 }
 
 tasks.named("check") {
-    dependsOn(":fabrikt-validation:fabriktGenerate")
+    dependsOn(":fabrikt-validation:verifyFabriktModels")
 }
 
 tasks.bootJar {
