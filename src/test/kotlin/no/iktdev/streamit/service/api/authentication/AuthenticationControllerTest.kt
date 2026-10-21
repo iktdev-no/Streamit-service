@@ -3,12 +3,15 @@ package no.iktdev.streamit.service.api.authentication
 import no.iktdev.streamit.service.TestBaseWithDatabase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import java.nio.file.Files
+import java.nio.file.Path
 
 class AuthenticationControllerTest: TestBaseWithDatabase() {
     @Autowired
@@ -32,6 +35,29 @@ class AuthenticationControllerTest: TestBaseWithDatabase() {
             .map { it.asText() }
 
         assertThat(required).containsExactly("catalogId", "store")
+    }
+
+    @Test
+    @Tag("fabrikt-openapi")
+    fun `Consumer OpenAPI schema exposes Catalog variants for Fabrikt generation`() {
+        val response = restTemplate.getForEntity("/v3/api-docs/consumer", String::class.java)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val spec = com.fasterxml.jackson.databind.ObjectMapper().readTree(response.body)
+        val schemas = spec["components"]["schemas"]
+        val catalog = schemas["Catalog"]
+
+        assertThat(catalog["oneOf"].map { it["\$ref"].asText() })
+            .containsExactlyInAnyOrder("#/components/schemas/Movie", "#/components/schemas/Serie")
+        assertThat(schemas["CatalogBase"]["properties"]).isNotNull
+        assertThat(schemas["Movie"]["allOf"].map { it["\$ref"]?.asText() })
+            .contains("#/components/schemas/CatalogBase")
+        assertThat(schemas["Serie"]["allOf"].map { it["\$ref"]?.asText() })
+            .contains("#/components/schemas/CatalogBase")
+
+        val output = Path.of("build/generated/openapi/openapi-consumer.json")
+        Files.createDirectories(output.parent)
+        Files.writeString(output, response.body)
     }
 
     @Test

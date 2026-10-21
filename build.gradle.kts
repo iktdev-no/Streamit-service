@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream
+import org.gradle.api.tasks.testing.Test
 
 plugins {
     id("java")
@@ -86,8 +87,27 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 }
 
+val consumerOpenApiTestFile = layout.buildDirectory.file("generated/openapi/openapi-consumer.json")
+val testSourceSet = sourceSets.named("test")
+
+val consumerOpenApiSpecTest = tasks.register<Test>("consumerOpenApiSpecTest") {
+    description = "Exports the consumer OpenAPI contract for Fabrikt verification."
+    group = "verification"
+    testClassesDirs = testSourceSet.get().output.classesDirs
+    classpath = testSourceSet.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("fabrikt-openapi")
+    }
+    outputs.file(consumerOpenApiTestFile)
+}
+
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(":fabrikt-validation:fabriktGenerate")
+}
+
+tasks.named("check") {
+    dependsOn(":fabrikt-validation:fabriktGenerate")
 }
 
 tasks.bootJar {

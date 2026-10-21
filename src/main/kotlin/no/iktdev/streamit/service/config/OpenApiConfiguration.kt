@@ -7,6 +7,8 @@ import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import io.swagger.v3.oas.models.responses.ApiResponse
+import io.swagger.v3.oas.models.media.Discriminator
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.core.converter.ModelConverters
 import org.springdoc.core.models.GroupedOpenApi
@@ -114,6 +116,50 @@ class OpenApiConfiguration {
             ModelConverters.getInstance().readAll(type).forEach { (name, schema) ->
                 if (components.schemas?.containsKey(name) != true) {
                     components.addSchemas(name, schema)
+                }
+            }
+        }
+        normalizeCatalogPolymorphism(components)
+    }
+
+    /**
+     * Keep Catalog as the public Movie/Serie union while moving its shared fields
+     * into a separate base schema. This avoids the invalid and circular shape
+     * produced when Catalog has both properties + oneOf and subtypes allOf Catalog.
+     */
+    private fun normalizeCatalogPolymorphism(components: Components) {
+        val schemas = components.schemas ?: return
+        val catalog = schemas["Catalog"] ?: return
+        val properties = catalog.properties ?: return
+
+        val catalogBase = Schema<Any>().apply {
+            type = "object"
+            this.properties = properties
+            required = catalog.required
+            description = catalog.description
+        }
+        schemas["CatalogBase"] = catalogBase
+
+        val catalogUnion = Schema<Any>().apply {
+            oneOf = listOf(
+                Schema<Any>().apply { `$ref` = "#/components/schemas/Movie" },
+                Schema<Any>().apply { `$ref` = "#/components/schemas/Serie" }
+            )
+            discriminator = Discriminator().apply {
+                propertyName = "type"
+                mapping = mapOf(
+                    "Movie" to "#/components/schemas/Movie",
+                    "Serie" to "#/components/schemas/Serie"
+                )
+            }
+        }
+        schemas["Catalog"] = catalogUnion
+
+        listOf("Movie", "Serie").forEach { subtypeName ->
+            val subtype = schemas[subtypeName] ?: return@forEach
+            subtype.allOf?.forEach { parent ->
+                if (parent.`$ref` == "#/components/schemas/Catalog") {
+                    parent.`$ref` = "#/components/schemas/CatalogBase"
                 }
             }
         }
