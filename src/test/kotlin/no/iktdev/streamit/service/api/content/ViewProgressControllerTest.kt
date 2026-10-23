@@ -38,7 +38,7 @@ class ViewProgressControllerTest : TestBaseWithDatabase() {
         val firstPlayed = Instant.now().truncatedTo(ChronoUnit.MICROS)
         val first = Progress(played = firstPlayed, position = 120L)
         val firstResponse = restTemplate.postForEntity(
-            "/open/api/v1/video/progress/$userId/video/$videoId",
+            "/open/api/v1/progress/$userId/video/$videoId",
             HttpEntity(first, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
             Boolean::class.java
         )
@@ -46,26 +46,26 @@ class ViewProgressControllerTest : TestBaseWithDatabase() {
 
         val updated = Progress(played = firstPlayed.plusSeconds(10), position = 300L)
         val updateResponse = restTemplate.postForEntity(
-            "/open/api/v1/video/progress/$userId/video/$videoId",
+            "/open/api/v1/progress/$userId/video/$videoId",
             HttpEntity(updated, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }),
             Boolean::class.java
         )
         assertEquals(true, updateResponse.body)
 
         val byVideo = restTemplate.getForObject(
-            "/open/api/v1/video/progress/$userId/video/$videoId",
+            "/open/api/v1/progress/$userId/video/$videoId",
             Progress::class.java
         )
         assertEquals(updated, byVideo)
 
         val all = restTemplate.getForObject(
-            "/open/api/v1/video/progress/$userId",
+            "/open/api/v1/progress/$userId",
             Array<Progress>::class.java
         )
         assertEquals(listOf(updated), all?.toList())
 
         val after = restTemplate.getForObject(
-            "/open/api/v1/video/progress/$userId/after/${firstPlayed}",
+            "/open/api/v1/progress/$userId/after/${firstPlayed}",
             Array<Progress>::class.java
         )
         assertEquals(listOf(updated), after?.toList())

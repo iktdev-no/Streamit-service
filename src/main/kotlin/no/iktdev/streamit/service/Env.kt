@@ -57,6 +57,7 @@ object Env {
     val isSelfSignedUsed: Boolean = System.getenv("CONFIG_IS_SELF_SIGNED")?.toBoolean() ?: true
     val lanAddress: String? = System.getenv("CONFIG_LAN_ADDRESS")
     val wanAddress: String? = System.getenv("CONFIG_WAN_ADDRESS")
+    val wanCertificateSha256: String? = System.getenv("CONFIG_WAN_CERTIFICATE_SHA256")
 
     fun requireLanAddress(): String = lanAddress
         ?.takeIf(String::isNotBlank)

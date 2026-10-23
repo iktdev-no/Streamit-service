@@ -119,13 +119,13 @@ class CatalogController(
         )
     }
 
-    @GetMapping("/{userId}/continue")
+    @GetMapping("/continue/{userId}")
     @RequiresAuthentication(Scope.CatalogRead)
     fun getContinueToWatch(@PathVariable userId: UUID): List<ContinueToWatch> {
         return continueWatchStore.getForUser(userId)
     }
 
-    @DeleteMapping("/{userId}/continue/{catalogId}")
+    @DeleteMapping("/continue/{userId}/{catalogId}")
     @RequiresAuthentication(Scope.UserWrite)
     fun hideContinueToWatch(
         @PathVariable userId: UUID,

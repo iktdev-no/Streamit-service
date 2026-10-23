@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import jakarta.servlet.http.HttpServletRequest
 
 @ApiRestController
 @Tag(name = "Server", description = "Server status, metadata, and client capabilities")
@@ -28,12 +27,6 @@ class GeneralController(
     @GetMapping("/v1/heartbeat")
     fun heartbeatPath(): Heartbeat {
         return Heartbeat(true, System.currentTimeMillis() / 1000L)
-    }
-
-    @RequiresAuthentication(Scope.AuthorizedRead)
-    @GetMapping()
-    fun main(request: HttpServletRequest? = null): ResponseEntity<String> {
-        return ResponseEntity.ok().body(null)
     }
 
     @GetMapping("/v1/capabilities")

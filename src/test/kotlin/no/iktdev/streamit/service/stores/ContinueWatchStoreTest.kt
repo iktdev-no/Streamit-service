@@ -161,7 +161,7 @@ class ContinueWatchStoreTest : TestBaseWithDatabase() {
         progressStore.upsert(userId, videoId, Progress(Instant.parse("2026-01-01T12:00:00Z"), 500_000L))
 
         val response = restTemplate.exchange(
-            "/open/api/v1/catalog/$userId/continue/$catalogId",
+            "/open/api/v1/catalog/continue/$userId/$catalogId",
             HttpMethod.DELETE,
             HttpEntity.EMPTY,
             Void::class.java

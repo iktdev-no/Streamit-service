@@ -16,7 +16,7 @@ import java.util.UUID
 
 @ApiRestController
 @Tag(name = "Progress", description = "Read and update per-device viewing progress")
-@RequestMapping(value = ["/v1/video/progress"])
+@RequestMapping(value = ["/v1/progress"])
 class VideoProgressController(
     private val progressStore: IProgressStore
 ) {

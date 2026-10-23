@@ -47,7 +47,8 @@ CONTENT_CONTINUE: 10 # Default, Number of series to show in the "Continue Watchi
 SERVER_PORT: 8080 # Default port for the server
 CONFIG_IS_SELF_SIGNED: true # Set to true if you are using a self-signed certificate
 CONFIG_LAN_ADDRESS: # Set to where the server is accessible, e.g., http://localhost:8080
-CONFIG_WAN_ADDRESS: # Set to where the server is accessible from outside, e.g., http://example.com
+CONFIG_WAN_ADDRESS: # Set to the external URL, e.g., https://streamit.example.com
+CONFIG_WAN_CERTIFICATE_SHA256: # Optional 64-character SHA-256 fingerprint (hex, no separators) for a self-signed WAN certificate
 AVAHI_SERVICE_FOLDER: /etc/avahi/services # Default, Path to where the avahi service file is stored, if it does not exist it will fall back to using `CONFIG_FOLDER` under "avahi" subfolder
 
 # Security
@@ -66,6 +67,7 @@ MODE: "prod" # default
 While you can manually input the lan address, the server can automatically discover it. This is useful for local networks where the server is accessed via a LAN address.
 AN avahi service file is automatically generated and placed in the assets folder, which can be used to discover the server on the local network.
 `CONFIG_LAN_ADDRESS` is required. The service exits immediately with a clear error if it is missing or blank, rather than starting without a usable LAN address.
+`/api/v1/info/server` advertises the configured LAN and WAN sources. LAN URLs default to HTTP; WAN URLs default to HTTPS. If `CONFIG_IS_SELF_SIGNED=true`, a configured `CONFIG_WAN_CERTIFICATE_SHA256` is included for client-side certificate pinning. Leave it unset when clients should establish trust through their own first-use approval flow.
 If you are using Docker, you can set the `AVAHI_SERVICE_FOLDER` to `/etc/avahi/services` to make it available on the local network.
 
 # Setup

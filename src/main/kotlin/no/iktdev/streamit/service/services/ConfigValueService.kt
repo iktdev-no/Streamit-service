@@ -7,6 +7,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 import mu.KotlinLogging
 import no.iktdev.streamit.service.Env
 import no.iktdev.streamit.service.model.shared.consumer.Server
+import no.iktdev.streamit.service.model.shared.consumer.ServerSource
+import no.iktdev.streamit.service.model.shared.consumer.SourceKind
+import no.iktdev.streamit.service.model.shared.consumer.SourceTls
+import no.iktdev.streamit.service.model.shared.consumer.TlsMode
 import org.springframework.stereotype.Service
 import java.awt.image.BufferedImage
 import java.util.UUID
@@ -64,14 +68,53 @@ class ConfigValueService {
             return
         }
 
+        val sources = buildList {
+            add(
+                ServerSource(
+                    id = "lan",
+                    url = normalizeSourceUrl(Env.lanAddress!!, defaultScheme = "http"),
+                    kind = SourceKind.Lan,
+                    priority = 0
+                )
+            )
+            Env.wanAddress?.takeIf(String::isNotBlank)?.let { address ->
+                val url = normalizeSourceUrl(address, defaultScheme = "https")
+                val tls = if (url.startsWith("https://", ignoreCase = true)) {
+                    if (Env.isSelfSignedUsed) {
+                        SourceTls(TlsMode.PinnedCertificate, Env.wanCertificateSha256)
+                    } else {
+                        SourceTls(TlsMode.DefaultTrust)
+                    }
+                } else {
+                    null
+                }
+                add(
+                    ServerSource(
+                        id = "remote",
+                        url = url,
+                        kind = SourceKind.Remote,
+                        priority = 100,
+                        tls = tls
+                    )
+                )
+            }
+        }
+
         server = Server(
             id = serverId,
             name = "Streamit Server",
-            lan = Env.lanAddress!!,
-            remote = Env.wanAddress,
-            remoteSecure = !Env.isSelfSignedUsed
+            sources = sources
         )
         printQRCodeToConsole(Gson().toJson(server))
+    }
+
+    private fun normalizeSourceUrl(address: String, defaultScheme: String): String {
+        val trimmed = address.trim().trimEnd('/')
+        return if (trimmed.matches(Regex("^[A-Za-z][A-Za-z0-9+.-]*://.*"))) {
+            trimmed
+        } else {
+            "$defaultScheme://$trimmed"
+        }
     }
 
     fun printQRCodeToConsole(content: String) {
@@ -107,38 +150,17 @@ class ConfigValueService {
         return image
     }
 
-    fun generateAvahi(): String {
-        val lan = Env.lanAddress?.let {
-            if (it.startsWith("http")) {
-                it
-            } else {
-                "http://$it"
-            }
-        }
-
-        val wan = Env.wanAddress?.let {
-            if (it.startsWith("http")) {
-                it
-            } else {
-                "https://$it"
-            }
-        }
-
-        return """
-            <?xml version="1.0" standalone='no'?>
-            <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-            <service-group>
-                <name replace-wildcards="yes">${Env.avahiServiceName}</name>
-                <service>
-                    <type>_streamit._tcp</type>
-                    <txt-record>id=${serverId}</txt-record>
-                    <txt-record>lan=${lan}</txt-record>
-                    <txt-record>remote=${wan}</txt-record>
-                    <txt-record>remoteSecure=${!Env.isSelfSignedUsed}</txt-record>
-                </service>
-            </service-group>
-        """.trimIndent()
-    }
+    fun generateAvahi(): String = """
+        <?xml version="1.0" standalone='no'?>
+        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+        <service-group>
+            <name replace-wildcards="yes">${Env.avahiServiceName}</name>
+            <service>
+                <type>_streamit._tcp</type>
+                <txt-record>id=${serverId}</txt-record>
+            </service>
+        </service-group>
+    """.trimIndent()
 
 
 }
