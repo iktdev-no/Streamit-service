@@ -100,9 +100,9 @@ class SummaryStore : ISummaryStore {
 
     private fun ResultRow.toSummary(): Summary =
         Summary(
-            id = this[SummaryTableV2.id].value.toInt(),
+            id = this[SummaryTableV2.id].value,
             description = this[SummaryTableV2.description],
             language = this[SummaryTableV2.language],
-            catalogId = this[SummaryTableV2.catalogId].value.toInt()
+            catalogId = this[SummaryTableV2.catalogId].value
         )
 }

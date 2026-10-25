@@ -101,7 +101,7 @@ class TitleStore : ITitleStore {
 
     private fun ResultRow.toTitle(): Title =
         Title(
-            id = this[CatalogTitleTableV2.id].value.toInt(),
+            id = this[CatalogTitleTableV2.id].value,
             title = this[CatalogTitleTableV2.title],
             language = this[CatalogTitleTableV2.language],
             preferred = this[CatalogTitleTableV2.preferred]

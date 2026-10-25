@@ -1,7 +1,7 @@
 package no.iktdev.streamit.service.model.shared.consumer.content
 
 data class Title(
-    val id: Int,
+    val id: Long,
     val title: String,
     val language: String,
     val preferred: Boolean = false,

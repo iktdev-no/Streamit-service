@@ -1,6 +1,6 @@
 package no.iktdev.streamit.service.model.shared.consumer.content
 
-data class Genre(val id: Int, val genre: String)
+data class Genre(val id: Long, val genre: String)
 {
 }
 

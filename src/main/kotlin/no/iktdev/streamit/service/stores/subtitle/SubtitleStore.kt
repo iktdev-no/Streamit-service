@@ -81,7 +81,7 @@ class SubtitleStore : ISubtitleStore {
 
     private fun ResultRow.toSubtitle(): Subtitle =
         Subtitle(
-            id = this[SubtitleTableV2.id].value.toInt(),
+            id = this[SubtitleTableV2.id].value,
             language = this[SubtitleTableV2.language],
             format = this[SubtitleTableV2.format],
             file = this[SubtitleTableV2.file]

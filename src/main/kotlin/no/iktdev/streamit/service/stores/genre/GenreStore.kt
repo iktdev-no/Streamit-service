@@ -49,7 +49,7 @@ class GenreStore : IGenreStore {
 
     private fun ResultRow.toGenre(): Genre =
         Genre(
-            id = this[GenreTableV2.id].value.toInt(),
+            id = this[GenreTableV2.id].value,
             genre = this[GenreTableV2.genre]
         )
 }

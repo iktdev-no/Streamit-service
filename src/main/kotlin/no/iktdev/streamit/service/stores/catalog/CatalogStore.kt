@@ -269,7 +269,7 @@ class CatalogStore(
             catalog.genres = genreRows[catalog.id]
                 ?.map {
                     Genre(
-                        id = it[GenreTableV2.id].value.toInt(),
+                        id = it[GenreTableV2.id].value,
                         genre = it[GenreTableV2.genre]
                     )
                 }
@@ -445,7 +445,7 @@ class CatalogStore(
             .mapValues { (_, rows) ->
                 rows.map {
                     Genre(
-                        id = it[GenreTableV2.id].value.toInt(),
+                        id = it[GenreTableV2.id].value,
                         genre = it[GenreTableV2.genre]
                     )
                 }
@@ -468,7 +468,7 @@ class CatalogStore(
             .mapValues { (_, rows) ->
                 rows.map {
                     Subtitle(
-                        id = it[SubtitleTableV2.id].value.toInt(),
+                        id = it[SubtitleTableV2.id].value,
                         language = it[SubtitleTableV2.language],
                         format = it[SubtitleTableV2.format],
                         file = it[SubtitleTableV2.file]
