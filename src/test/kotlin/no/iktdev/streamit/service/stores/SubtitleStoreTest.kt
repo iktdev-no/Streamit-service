@@ -27,12 +27,12 @@ class SubtitleStoreTest : TestBaseWithDatabase() {
     @Test
     fun `insert returns subtitle data and update persists changes`() {
         val inserted = subtitleStore.insert(videoId, "eng", "srt", "movie.en.srt")
-        assertEquals("movie.en.srt", inserted.file)
+        assertEquals("movie.en.srt", inserted.fileName)
 
         val updated = subtitleStore.update(inserted.id.toLong(), "nob", "vtt", "movie.no.vtt")
         assertEquals("nob", updated?.language)
         assertEquals("vtt", updated?.format)
-        assertEquals("movie.no.vtt", updated?.file)
+        assertEquals("movie.no.vtt", updated?.fileName)
 
         val row = withTransaction {
             SubtitleTableV2.selectAll().single()

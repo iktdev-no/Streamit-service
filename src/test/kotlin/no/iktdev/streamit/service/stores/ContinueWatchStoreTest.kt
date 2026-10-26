@@ -74,7 +74,7 @@ class ContinueWatchStoreTest : TestBaseWithDatabase() {
         assertEquals(ContentType.Movie, item.type)
         assertEquals("Continue movie.jpg", item.cover)
         assertEquals(videoId, item.video.id)
-        assertEquals("Continue movie.mp4", item.video.videoFileName)
+        assertEquals("Continue movie.mp4", item.video.fileName)
         assertEquals(2_700_000L, item.video.duration)
         assertEquals(Progress(played, 450_000L), item.progress)
         assertEquals(null, item.episode)

@@ -184,7 +184,7 @@ class ImportContentService(
 
             val linkedVideo = linkedVideoId?.let(videoStore::getById)
             val video = when {
-                linkedVideo != null && linkedVideo.videoFileName != content.videoFile ->
+                linkedVideo != null && linkedVideo.fileName != content.videoFile ->
                     videoStore.update(content.videoFile, linkedVideo)
                 linkedVideo != null -> linkedVideo
                 else -> videoStore.getByFile(content.videoFile)

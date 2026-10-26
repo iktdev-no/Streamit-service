@@ -84,6 +84,6 @@ class SubtitleStore : ISubtitleStore {
             id = this[SubtitleTableV2.id].value,
             language = this[SubtitleTableV2.language],
             format = this[SubtitleTableV2.format],
-            file = this[SubtitleTableV2.file]
+            fileName = this[SubtitleTableV2.file]
         )
 }

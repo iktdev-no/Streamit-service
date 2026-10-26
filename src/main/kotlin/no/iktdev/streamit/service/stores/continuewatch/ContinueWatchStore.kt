@@ -85,7 +85,7 @@ class ContinueWatchStore(
                     type = row[CatalogTableV2.type],
                     video = Video(
                         id = videoId,
-                        videoFileName = row[VideoTableV2.file],
+                        fileName = row[VideoTableV2.file],
                         duration = row[VideoTableV2.duration] ?: 0L
                     ),
                     progress = row.getOrNull(ProgressTableV2.position)?.let { position ->

@@ -36,9 +36,9 @@ class CatalogStoreTest : TestBaseWithDatabase() {
         assertNotNull(movie)
         assertEquals("Test movie", movie?.title)
         assertEquals("movies", movie?.collection)
-        assertEquals("test.mkv", movie?.video?.videoFileName)
+        assertEquals("test.mkv", movie?.video?.fileName)
         assertEquals(listOf("Drama"), movie?.genres?.map { it.genre })
-        assertEquals(listOf("test.en.srt"), movie?.subtitles?.map { it.file })
+        assertEquals(listOf("test.en.srt"), movie?.subtitles?.map { it.fileName })
     }
 
     @Test
@@ -58,7 +58,7 @@ class CatalogStoreTest : TestBaseWithDatabase() {
         assertEquals(ContentType.Serie, serie?.type)
         assertEquals(1, serie?.episodes?.single()?.season)
         assertEquals(1, serie?.episodes?.single()?.episode)
-        assertEquals("s01e01.mkv", serie?.episodes?.single()?.video?.videoFileName)
+        assertEquals("s01e01.mkv", serie?.episodes?.single()?.video?.fileName)
     }
 
     @Test

@@ -335,7 +335,7 @@ class CatalogStore(
                 .isAfter(LocalDateTime.now().minusDays(Env.frshness)),
             video = Video(
                 id = videoId.value,
-                videoFileName = row[VideoTableV2.file],
+                fileName = row[VideoTableV2.file],
                 duration = row[VideoTableV2.duration] ?: 0
             ),
             genres = getGenres(listOf(catalogId))[catalogId.value].orEmpty(),
@@ -408,7 +408,7 @@ class CatalogStore(
                 title = episodeRow[SerieTableV2.title],
                 video = Video(
                     id = videoId.value,
-                    videoFileName = episodeRow[VideoTableV2.file],
+                    fileName = episodeRow[VideoTableV2.file],
                     duration = episodeRow[VideoTableV2.duration] ?: 0
                 ),
                 subtitles = subtitles[videoId.value].orEmpty(),
@@ -471,7 +471,7 @@ class CatalogStore(
                         id = it[SubtitleTableV2.id].value,
                         language = it[SubtitleTableV2.language],
                         format = it[SubtitleTableV2.format],
-                        file = it[SubtitleTableV2.file]
+                        fileName = it[SubtitleTableV2.file]
                     )
                 }
             }
