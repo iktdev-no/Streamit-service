@@ -4,7 +4,8 @@ import java.io.Serializable
 
 enum class TlsMode {
     DefaultTrust,
-    PinnedCertificate
+    PinnedCertificate,
+    AnyTrust
 }
 
 data class SourceTls(
